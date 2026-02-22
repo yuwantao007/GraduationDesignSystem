@@ -2,11 +2,13 @@ package com.yuwan.completebackend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuwan.completebackend.exception.BusinessException;
+import com.yuwan.completebackend.mapper.PermissionMapper;
 import com.yuwan.completebackend.mapper.RoleMapper;
 import com.yuwan.completebackend.mapper.UserMapper;
 import com.yuwan.completebackend.mapper.UserRoleMapper;
 import com.yuwan.completebackend.model.dto.LoginDTO;
 import com.yuwan.completebackend.model.dto.RegisterDTO;
+import com.yuwan.completebackend.model.entity.Permission;
 import com.yuwan.completebackend.model.entity.Role;
 import com.yuwan.completebackend.model.entity.User;
 import com.yuwan.completebackend.model.entity.UserRole;
@@ -54,6 +56,7 @@ public class AuthServiceImpl implements IAuthService {
     private final UserMapper userMapper;
     private final RoleMapper roleMapper;
     private final UserRoleMapper userRoleMapper;
+    private final PermissionMapper permissionMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final RedisUtil redisUtil;
@@ -61,19 +64,22 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public LoginVO login(LoginDTO loginDTO, String loginIp) {
         // 通过Spring Security AuthenticationManager进行认证
+        // identifier 为学号或工号，传入 AuthenticationManager 触发 loadUserByUsername
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginDTO.getUsername(), loginDTO.getPassword()));
+                            loginDTO.getIdentifier(), loginDTO.getPassword()));
         } catch (AuthenticationException e) {
-            log.warn("用户登录失败: username={}, reason={}", loginDTO.getUsername(), e.getMessage());
-            throw new BusinessException("用户名或密码错误");
+            log.warn("用户登录失败: identifier={}, reason={}", loginDTO.getIdentifier(), e.getMessage());
+            throw new BusinessException("学号/工号或密码错误");
         }
 
-        // 认证成功，查询用户信息
+        // 认证成功，按学号或工号查询用户信息
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
-                .eq(User::getUsername, loginDTO.getUsername()));
+                .eq(User::getStudentNo, loginDTO.getIdentifier())
+                .or()
+                .eq(User::getEmployeeNo, loginDTO.getIdentifier()));
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
@@ -118,13 +124,6 @@ public class AuthServiceImpl implements IAuthService {
             throw new BusinessException("两次输入的密码不一致");
         }
 
-        // 检查用户名是否已存在
-        User existUser = userMapper.selectOne(new LambdaQueryWrapper<User>()
-                .eq(User::getUsername, registerDTO.getUsername()));
-        if (existUser != null) {
-            throw new BusinessException("登录账号已存在");
-        }
-
         // 验证角色编码是否合法
         Role role = roleMapper.selectOne(new LambdaQueryWrapper<Role>()
                 .eq(Role::getRoleCode, registerDTO.getRoleCode()));
@@ -132,13 +131,42 @@ public class AuthServiceImpl implements IAuthService {
             throw new BusinessException("角色编码不合法");
         }
 
+        // 根据角色校验学号/工号
+        String identifier;
+        String roleCode = registerDTO.getRoleCode();
+        if ("STUDENT".equals(roleCode)) {
+            if (registerDTO.getStudentNo() == null || registerDTO.getStudentNo().isBlank()) {
+                throw new BusinessException("学生角色必须填写学号");
+            }
+            // 检查学号是否已存在
+            User existUser = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                    .eq(User::getStudentNo, registerDTO.getStudentNo()));
+            if (existUser != null) {
+                throw new BusinessException("该学号已被注册");
+            }
+            identifier = registerDTO.getStudentNo();
+        } else {
+            if (registerDTO.getEmployeeNo() == null || registerDTO.getEmployeeNo().isBlank()) {
+                throw new BusinessException("教师角色必须填写工号");
+            }
+            // 检查工号是否已存在
+            User existUser = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                    .eq(User::getEmployeeNo, registerDTO.getEmployeeNo()));
+            if (existUser != null) {
+                throw new BusinessException("该工号已被注册");
+            }
+            identifier = registerDTO.getEmployeeNo();
+        }
+
         // 创建用户
         User user = new User();
-        user.setUsername(registerDTO.getUsername());
+        user.setUsername(identifier);
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
         user.setRealName(registerDTO.getRealName());
         user.setUserEmail(registerDTO.getUserEmail());
         user.setUserPhone(registerDTO.getUserPhone());
+        user.setStudentNo(registerDTO.getStudentNo());
+        user.setEmployeeNo(registerDTO.getEmployeeNo());
         user.setUserStatus(1);
         userMapper.insert(user);
 
@@ -148,7 +176,7 @@ public class AuthServiceImpl implements IAuthService {
         userRole.setRoleId(role.getRoleId());
         userRoleMapper.insert(userRole);
 
-        log.info("用户注册成功: username={}, role={}", user.getUsername(), registerDTO.getRoleCode());
+        log.info("用户注册成功: identifier={}, role={}", identifier, registerDTO.getRoleCode());
         return buildUserVO(user);
     }
 
@@ -231,11 +259,12 @@ public class AuthServiceImpl implements IAuthService {
         }).collect(Collectors.toList());
         userVO.setRoles(roleVOList);
 
-        // 设置角色对应的权限编码
-        List<String> roleCodes = roles.stream()
-                .map(Role::getRoleCode)
+        // 查询用户的真实权限编码（通过 role_permission 关联查询）
+        List<Permission> permissions = permissionMapper.selectPermissionsByUserId(user.getUserId());
+        List<String> permissionCodes = permissions.stream()
+                .map(Permission::getPermissionCode)
                 .collect(Collectors.toList());
-        userVO.setPermissions(roleCodes);
+        userVO.setPermissions(permissionCodes);
 
         return userVO;
     }

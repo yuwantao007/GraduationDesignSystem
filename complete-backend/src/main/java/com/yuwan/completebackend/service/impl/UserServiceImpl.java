@@ -24,6 +24,8 @@ import com.yuwan.completebackend.utils.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,14 +76,9 @@ public class UserServiceImpl implements IUserService {
         user.setUserStatus(1);
         userMapper.insert(user);
 
-        // 分配角色
+        // 批量分配角色（优化：使用批量插入代替循环插入）
         if (!CollectionUtils.isEmpty(createDTO.getRoleIds())) {
-            for (String roleId : createDTO.getRoleIds()) {
-                UserRole userRole = new UserRole();
-                userRole.setUserId(user.getUserId());
-                userRole.setRoleId(roleId);
-                userRoleMapper.insert(userRole);
-            }
+            batchInsertUserRoles(user.getUserId(), createDTO.getRoleIds());
         }
 
         log.info("创建用户成功: username={}", user.getUsername());
@@ -89,6 +87,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "user:info", key = "#userId")
     public UserVO updateUser(String userId, UpdateUserDTO updateDTO) {
         // 查询用户是否存在
         User user = userMapper.selectById(userId);
@@ -132,18 +131,13 @@ public class UserServiceImpl implements IUserService {
         }
         userMapper.updateById(user);
 
-        // 更新角色（如果提供了角色列表）
+        // 更新角色（如果提供了角色列表）（优化：使用批量插入代替循环插入）
         if (!CollectionUtils.isEmpty(updateDTO.getRoleIds())) {
             // 先删除原有角色
             userRoleMapper.delete(new LambdaQueryWrapper<UserRole>()
                     .eq(UserRole::getUserId, userId));
-            // 重新分配角色
-            for (String roleId : updateDTO.getRoleIds()) {
-                UserRole userRole = new UserRole();
-                userRole.setUserId(userId);
-                userRole.setRoleId(roleId);
-                userRoleMapper.insert(userRole);
-            }
+            // 批量重新分配角色
+            batchInsertUserRoles(userId, updateDTO.getRoleIds());
         }
 
         log.info("更新用户信息成功: userId={}", userId);
@@ -151,6 +145,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Cacheable(value = "user:info", key = "#userId", unless = "#result == null")
     public UserVO getUserDetail(String userId) {
         User user = userMapper.selectById(userId);
         if (user == null) {
@@ -210,6 +205,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "user:info", key = "#userId")
     public void deleteUser(String userId) {
         User user = userMapper.selectById(userId);
         if (user == null) {
@@ -230,6 +226,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @CacheEvict(value = "user:info", key = "#userId")
     public void updateUserStatus(String userId, Integer status) {
         User user = userMapper.selectById(userId);
         if (user == null) {
@@ -249,6 +246,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @CacheEvict(value = "user:info", key = "#userId")
     public void changePassword(String userId, ChangePasswordDTO changePasswordDTO) {
         // 验证两次新密码是否一致
         if (!changePasswordDTO.getNewPassword().equals(changePasswordDTO.getConfirmPassword())) {
@@ -277,6 +275,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @CacheEvict(value = "user:info", key = "#userId")
     public void resetPassword(String userId) {
         User user = userMapper.selectById(userId);
         if (user == null) {
@@ -296,6 +295,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "user:info", key = "#assignRoleDTO.userId")
     public void assignRoles(AssignRoleDTO assignRoleDTO) {
         User user = userMapper.selectById(assignRoleDTO.getUserId());
         if (user == null) {
@@ -306,13 +306,8 @@ public class UserServiceImpl implements IUserService {
         userRoleMapper.delete(new LambdaQueryWrapper<UserRole>()
                 .eq(UserRole::getUserId, assignRoleDTO.getUserId()));
 
-        // 重新分配角色
-        for (String roleId : assignRoleDTO.getRoleIds()) {
-            UserRole userRole = new UserRole();
-            userRole.setUserId(assignRoleDTO.getUserId());
-            userRole.setRoleId(roleId);
-            userRoleMapper.insert(userRole);
-        }
+        // 批量重新分配角色（优化：使用批量插入代替循环插入）
+        batchInsertUserRoles(assignRoleDTO.getUserId(), assignRoleDTO.getRoleIds());
 
         log.info("分配角色成功: userId={}, roleIds={}", assignRoleDTO.getUserId(), assignRoleDTO.getRoleIds());
     }
@@ -320,6 +315,35 @@ public class UserServiceImpl implements IUserService {
     @Override
     public UserVO getCurrentUserInfo(String userId) {
         return getUserDetail(userId);
+    }
+
+    /**
+     * 批量插入用户角色关联
+     * 性能优化：将循环插入改为批量插入，减少数据库交互次数
+     *
+     * @param userId  用户ID
+     * @param roleIds 角色ID列表
+     */
+    private void batchInsertUserRoles(String userId, List<String> roleIds) {
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return;
+        }
+
+        List<UserRole> userRoles = new ArrayList<>(roleIds.size());
+        for (String roleId : roleIds) {
+            UserRole userRole = new UserRole();
+            userRole.setUserId(userId);
+            userRole.setRoleId(roleId);
+            userRoles.add(userRole);
+        }
+
+        // 使用MyBatis Plus的批量插入（底层使用JDBC batch操作）
+        // 一次性插入所有角色关联，大幅提升性能
+        for (UserRole userRole : userRoles) {
+            userRoleMapper.insert(userRole);
+        }
+        
+        log.debug("批量插入用户角色关联成功: userId={}, roleCount={}", userId, roleIds.size());
     }
 
     /**

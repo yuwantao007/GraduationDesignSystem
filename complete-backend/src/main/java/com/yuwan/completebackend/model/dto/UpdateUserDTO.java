@@ -39,7 +39,7 @@ public class UpdateUserDTO implements Serializable {
     @Schema(description = "头像地址")
     private String avatar;
 
-    @Schema(description = "性别（0-未知 1-男 2-女）")
+    @Schema(description = "性别（0-女 1-男）")
     private Integer gender;
 
     @Schema(description = "所属院系/企业")

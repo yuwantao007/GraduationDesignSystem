@@ -24,10 +24,13 @@ public class RegisterDTO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @NotBlank(message = "登录账号不能为空")
-    @Size(min = 4, max = 30, message = "登录账号长度必须在4-30个字符之间")
-    @Schema(description = "登录账号", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String username;
+    @Size(max = 30, message = "学号长度不能超过30个字符")
+    @Schema(description = "学号（学生角色必填）")
+    private String studentNo;
+
+    @Size(max = 30, message = "工号长度不能超过30个字符")
+    @Schema(description = "工号（教师角色必填）")
+    private String employeeNo;
 
     @NotBlank(message = "登录密码不能为空")
     @Size(min = 6, max = 20, message = "登录密码长度必须在6-20个字符之间")

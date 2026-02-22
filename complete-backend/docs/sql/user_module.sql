@@ -126,9 +126,49 @@ INSERT INTO role_info (role_id, role_name, role_code, role_desc, sort_order) VAL
 ('7', '学生', 'STUDENT', '完成毕业设计全流程操作执行', 7);
 
 -- 初始化系统管理员账号（密码: 123456，BCrypt加密）
-INSERT INTO user_info (user_id, username, password, real_name, user_email, user_status) VALUES
-('1', 'admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '系统管理员', 'admin@example.com', 1);
+-- 管理员账号可以使用 username='admin' 或 employeeNo='admin' 登录
+INSERT INTO user_info (user_id, username, password, real_name, user_email, employee_no, user_status) VALUES
+('1', 'admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '系统管理员', 'admin@example.com', 'admin', 1);
 
 -- 为管理员分配角色
 INSERT INTO user_role (id, user_id, role_id) VALUES
 ('1', '1', '1');
+
+-- ============================================
+-- 初始化权限数据（菜单权限）
+-- ============================================
+INSERT INTO permission_info (permission_id, parent_id, permission_name, permission_code, permission_type, path, icon, sort_order) VALUES
+-- 一级菜单
+('100', '0', '仪表盘', 'dashboard:view', 1, '/dashboard', 'DashboardOutlined', 1),
+('200', '0', '用户管理', 'user:manage', 1, '/user', 'UserOutlined', 2),
+('300', '0', '个人中心', 'profile:view', 1, '/profile', 'UserOutlined', 3),
+-- 用户管理子菜单
+('201', '200', '用户列表', 'user:view', 1, '/user', 'TeamOutlined', 1),
+('202', '200', '角色权限', 'role:view', 1, '/user/role', 'SafetyCertificateOutlined', 2),
+-- 用户管理按钮权限
+('2011', '201', '创建用户', 'user:create', 2, NULL, NULL, 1),
+('2012', '201', '编辑用户', 'user:edit', 2, NULL, NULL, 2),
+('2013', '201', '删除用户', 'user:delete', 2, NULL, NULL, 3),
+('2014', '201', '重置密码', 'user:reset-password', 2, NULL, NULL, 4),
+('2021', '202', '创建角色', 'role:create', 2, NULL, NULL, 1),
+('2022', '202', '编辑角色', 'role:edit', 2, NULL, NULL, 2),
+('2023', '202', '删除角色', 'role:delete', 2, NULL, NULL, 3),
+('2024', '202', '分配权限', 'role:assign-permission', 2, NULL, NULL, 4);
+
+-- ============================================
+-- 为系统管理员角色分配所有权限
+-- ============================================
+INSERT INTO role_permission (id, role_id, permission_id) VALUES
+('1', '1', '100'),
+('2', '1', '200'),
+('3', '1', '300'),
+('4', '1', '201'),
+('5', '1', '202'),
+('6', '1', '2011'),
+('7', '1', '2012'),
+('8', '1', '2013'),
+('9', '1', '2014'),
+('10', '1', '2021'),
+('11', '1', '2022'),
+('12', '1', '2023'),
+('13', '1', '2024');

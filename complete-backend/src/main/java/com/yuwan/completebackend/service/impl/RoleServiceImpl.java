@@ -8,6 +8,7 @@ import com.yuwan.completebackend.service.IRoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,12 +29,15 @@ public class RoleServiceImpl implements IRoleService {
     private final RoleMapper roleMapper;
 
     @Override
+    @Cacheable(value = "role:list", unless = "#result == null || #result.isEmpty()")
     public List<RoleVO> getAllRoles() {
         QueryWrapper<Role> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("role_status", 1);
         queryWrapper.orderByAsc("sort_order");
 
         List<Role> roles = roleMapper.selectList(queryWrapper);
+        log.debug("查询所有启用角色，数量: {}", roles.size());
+        
         return roles.stream().map(role -> {
             RoleVO roleVO = new RoleVO();
             BeanUtils.copyProperties(role, roleVO);
@@ -42,8 +46,11 @@ public class RoleServiceImpl implements IRoleService {
     }
 
     @Override
+    @Cacheable(value = "user:roles", key = "#userId", unless = "#result == null || #result.isEmpty()")
     public List<RoleVO> getRolesByUserId(String userId) {
         List<Role> roles = roleMapper.selectRolesByUserId(userId);
+        log.debug("查询用户角色，userId: {}, 角色数量: {}", userId, roles.size());
+        
         return roles.stream().map(role -> {
             RoleVO roleVO = new RoleVO();
             BeanUtils.copyProperties(role, roleVO);

@@ -24,7 +24,7 @@ public class CreateUserDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @NotBlank(message = "登录账号不能为空")
-    @Size(min = 4, max = 30, message = "登录账号长度必须在4-30个字符之间")
+    @Size(min = 3, max = 30, message = "登录账号长度必须在3-30个字符之间")
     @Schema(description = "登录账号", requiredMode = Schema.RequiredMode.REQUIRED)
     private String username;
 
@@ -46,7 +46,7 @@ public class CreateUserDTO implements Serializable {
     @Schema(description = "手机号码")
     private String userPhone;
 
-    @Schema(description = "性别（0-未知 1-男 2-女）")
+    @Schema(description = "性别（0-女 1-男）")
     private Integer gender;
 
     @Schema(description = "所属院系/企业")

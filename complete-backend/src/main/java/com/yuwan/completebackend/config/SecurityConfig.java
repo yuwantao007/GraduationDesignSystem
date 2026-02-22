@@ -44,6 +44,9 @@ public class SecurityConfig {
             "/auth/login",
             "/auth/register",
             "/auth/refresh-token",
+            // 角色查询（新建用户时需要）
+            "/role/all",
+            "/role/list",
             // 静态资源
             "/favicon.ico",
             // Swagger文档

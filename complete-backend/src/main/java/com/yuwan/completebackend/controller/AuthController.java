@@ -34,7 +34,7 @@ public class AuthController {
     private final IAuthService authService;
 
     @PostMapping("/login")
-    @Operation(summary = "用户登录", description = "通过用户名密码登录，返回JWT令牌")
+    @Operation(summary = "用户登录", description = "通过学号/工号和密码登录，返回JWT令牌")
     public Result<LoginVO> login(@RequestBody @Valid LoginDTO loginDTO,
                                  HttpServletRequest request) {
         String loginIp = getClientIp(request);

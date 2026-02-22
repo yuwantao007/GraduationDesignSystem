@@ -35,12 +35,16 @@ public class SecurityUserDetailsService implements UserDetailsService {
     private final PermissionMapper permissionMapper;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 查询用户信息
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        // 按学号、工号或用户名查询用户信息（兼容管理员等特殊账号）
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
-                .eq(User::getUsername, username));
+                .eq(User::getStudentNo, identifier)
+                .or()
+                .eq(User::getEmployeeNo, identifier)
+                .or()
+                .eq(User::getUsername, identifier));
         if (user == null) {
-            throw new UsernameNotFoundException("用户不存在: " + username);
+            throw new UsernameNotFoundException("用户不存在: " + identifier);
         }
 
         // 查询用户角色
@@ -55,8 +59,8 @@ public class SecurityUserDetailsService implements UserDetailsService {
                 .map(Permission::getPermissionCode)
                 .collect(Collectors.toList());
 
-        log.debug("加载用户认证信息: username={}, roles={}, permissions={}",
-                username, roleCodes, permissionCodes);
+        log.debug("加载用户认证信息: identifier={}, username={}, roles={}, permissions={}",
+                identifier, user.getUsername(), roleCodes, permissionCodes);
 
         return SecurityUserDetails.fromUser(user, roleCodes, permissionCodes);
     }
