@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuwan.completebackend.mapper.TopicMapper">
+
+    <!-- 分页查询课题列表（包含企业名称、创建人姓名） -->
+    <select id="selectTopicListPage" resultType="com.yuwan.completebackend.model.vo.TopicListVO">
+        SELECT 
+            t.topic_id AS topicId,
+            t.topic_title AS topicTitle,
+            t.topic_category AS topicCategory,
+            CASE t.topic_category
+                WHEN 1 THEN '高职升本'
+                WHEN 2 THEN '3+1'
+                WHEN 3 THEN '实验班'
+                ELSE '未知'
+            END AS topicCategoryDesc,
+            t.topic_type AS topicType,
+            CASE t.topic_type
+                WHEN 1 THEN '设计'
+                WHEN 2 THEN '论文'
+                ELSE '未知'
+            END AS topicTypeDesc,
+            t.topic_source AS topicSource,
+            CASE t.topic_source
+                WHEN 1 THEN '校内'
+                WHEN 2 THEN '校外(协同开发)'
+                ELSE '未知'
+            END AS topicSourceDesc,
+            e.enterprise_name AS enterpriseName,
+            t.guidance_direction AS guidanceDirection,
+            u.real_name AS creatorName,
+            t.review_status AS reviewStatus,
+            CASE t.review_status
+                WHEN 0 THEN '草稿'
+                WHEN 1 THEN '待预审'
+                WHEN 2 THEN '预审通过'
+                WHEN 3 THEN '预审需修改'
+                WHEN 4 THEN '初审通过'
+                WHEN 5 THEN '初审需修改'
+                WHEN 6 THEN '终审通过'
+                WHEN 7 THEN '终审不通过'
+                ELSE '未知'
+            END AS reviewStatusDesc,
+            t.is_submitted AS isSubmitted,
+            DATE_FORMAT(t.create_time, '%Y-%m-%d %H:%i:%s') AS createTime
+        FROM topic_info t
+        LEFT JOIN enterprise_info e ON t.enterprise_id = e.enterprise_id
+        LEFT JOIN user_info u ON t.creator_id = u.user_id
+        WHERE t.deleted = 0
+        <if test="query.topicTitle != null and query.topicTitle != ''">
+            AND t.topic_title LIKE CONCAT('%', #{query.topicTitle}, '%')
+        </if>
+        <if test="query.topicCategory != null">
+            AND t.topic_category = #{query.topicCategory}
+        </if>
+        <if test="query.topicType != null">
+            AND t.topic_type = #{query.topicType}
+        </if>
+        <if test="query.topicSource != null">
+            AND t.topic_source = #{query.topicSource}
+        </if>
+        <if test="query.enterpriseId != null and query.enterpriseId != ''">
+            AND t.enterprise_id = #{query.enterpriseId}
+        </if>
+        <if test="query.guidanceDirection != null and query.guidanceDirection != ''">
+            AND t.guidance_direction LIKE CONCAT('%', #{query.guidanceDirection}, '%')
+        </if>
+        <if test="query.creatorId != null and query.creatorId != ''">
+            AND t.creator_id = #{query.creatorId}
+        </if>
+        <if test="query.reviewStatus != null">
+            AND t.review_status = #{query.reviewStatus}
+        </if>
+        <if test="query.isSubmitted != null">
+            AND t.is_submitted = #{query.isSubmitted}
+        </if>
+        ORDER BY t.create_time DESC
+    </select>
+
+</mapper>
