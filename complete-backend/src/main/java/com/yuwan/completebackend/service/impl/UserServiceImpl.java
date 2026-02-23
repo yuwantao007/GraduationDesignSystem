@@ -117,12 +117,42 @@ public class UserServiceImpl implements IUserService {
         if (updateDTO.getMajor() != null) {
             user.setMajor(updateDTO.getMajor());
         }
-        if (updateDTO.getStudentNo() != null) {
-            user.setStudentNo(updateDTO.getStudentNo());
+
+        // 处理userCode字段（学号/工号统一字段）
+        // 优先使用userCode，如果userCode存在，则根据用户角色判断更新studentNo还是employeeNo
+        if (StringUtils.hasText(updateDTO.getUserCode())) {
+            // 获取用户角色信息
+            List<UserRole> userRoles = userRoleMapper.selectList(new LambdaQueryWrapper<UserRole>()
+                    .eq(UserRole::getUserId, userId));
+            
+            // 判断用户角色类型
+            boolean isStudent = false;
+            if (!CollectionUtils.isEmpty(userRoles)) {
+                for (UserRole userRole : userRoles) {
+                    Role role = roleMapper.selectById(userRole.getRoleId());
+                    if (role != null && "STUDENT".equals(role.getRoleCode())) {
+                        isStudent = true;
+                        break;
+                    }
+                }
+            }
+            
+            // 根据角色更新对应字段
+            if (isStudent) {
+                user.setStudentNo(updateDTO.getUserCode());
+            } else {
+                user.setEmployeeNo(updateDTO.getUserCode());
+            }
+        } else {
+            // 如果没有userCode，则使用原有的studentNo和employeeNo字段
+            if (updateDTO.getStudentNo() != null) {
+                user.setStudentNo(updateDTO.getStudentNo());
+            }
+            if (updateDTO.getEmployeeNo() != null) {
+                user.setEmployeeNo(updateDTO.getEmployeeNo());
+            }
         }
-        if (updateDTO.getEmployeeNo() != null) {
-            user.setEmployeeNo(updateDTO.getEmployeeNo());
-        }
+
         if (updateDTO.getTitle() != null) {
             user.setTitle(updateDTO.getTitle());
         }
@@ -372,6 +402,20 @@ public class UserServiceImpl implements IUserService {
             return roleVO;
         }).collect(Collectors.toList());
         userVO.setRoles(roleVOList);
+
+        // 设置userCode字段（合并studentNo和employeeNo，优先返回有值的字段）
+        // 如果用户是学生角色，使用studentNo；否则使用employeeNo
+        boolean isStudent = roles.stream()
+                .anyMatch(role -> "STUDENT".equals(role.getRoleCode()));
+        
+        if (isStudent && StringUtils.hasText(user.getStudentNo())) {
+            userVO.setUserCode(user.getStudentNo());
+        } else if (StringUtils.hasText(user.getEmployeeNo())) {
+            userVO.setUserCode(user.getEmployeeNo());
+        } else if (StringUtils.hasText(user.getStudentNo())) {
+            // 如果employeeNo为空但studentNo有值，也返回studentNo
+            userVO.setUserCode(user.getStudentNo());
+        }
 
         return userVO;
     }

@@ -29,7 +29,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/enterprise")
+@RequestMapping("/enterprise")
 @Tag(name = "企业管理", description = "企业信息CRUD接口")
 public class EnterpriseController {
 
@@ -75,6 +75,7 @@ public class EnterpriseController {
      * @return 企业信息
      */
     @GetMapping("/{enterpriseId}")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     @Operation(summary = "获取企业详情", description = "根据ID获取企业详细信息")
     public Result<EnterpriseVO> getEnterpriseDetail(
             @Parameter(description = "企业ID") @PathVariable String enterpriseId) {
@@ -90,6 +91,7 @@ public class EnterpriseController {
      * @return 分页企业列表
      */
     @GetMapping("/list")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     @Operation(summary = "分页查询企业列表", description = "根据条件分页查询企业列表")
     public Result<PageResult<EnterpriseVO>> getEnterpriseList(EnterpriseQueryVO queryVO) {
         log.info("分页查询企业列表，页码: {}, 页大小: {}", queryVO.getPageNum(), queryVO.getPageSize());
@@ -103,6 +105,7 @@ public class EnterpriseController {
      * @return 企业列表
      */
     @GetMapping("/all")
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'ENTERPRISE_TEACHER', 'ENTERPRISE_LEADER')")
     @Operation(summary = "获取全部启用企业", description = "获取全部启用状态的企业，用于下拉选择")
     public Result<List<EnterpriseVO>> getAllEnterprises() {
         log.info("获取全部启用企业");
