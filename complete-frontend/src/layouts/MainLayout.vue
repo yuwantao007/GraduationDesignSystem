@@ -34,6 +34,16 @@
           </a-menu-item>
         </a-sub-menu>
         
+        <a-menu-item v-if="userStore.hasPermission('enterprise:view')" key="/enterprise">
+          <template #icon><BankOutlined /></template>
+          <span>企业管理</span>
+        </a-menu-item>
+        
+        <a-menu-item v-if="userStore.hasPermission('school:view')" key="/school">
+          <template #icon><ReadOutlined /></template>
+          <span>学校管理</span>
+        </a-menu-item>
+        
         <a-sub-menu key="topic">
           <template #icon><FileTextOutlined /></template>
           <template #title>课题管理</template>
@@ -122,7 +132,9 @@ import {
   FolderOutlined,
   SettingOutlined,
   DownOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  BankOutlined,
+  ReadOutlined
 } from '@ant-design/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
@@ -162,6 +174,7 @@ const getOpenKeys = (path: string): string[] => {
   if (path.startsWith('/user')) return ['user-mgmt']
   if (path.startsWith('/topic')) return ['topic']
   if (path.startsWith('/document')) return ['document']
+  if (path.startsWith('/school')) return []
   return []
 }
 
@@ -171,6 +184,8 @@ const updateBreadcrumbs = (path: string) => {
     '/dashboard': [{ title: '首页' }, { title: '仪表盘' }],
     '/user': [{ title: '首页', path: '/' }, { title: '用户管理' }, { title: '用户列表' }],
     '/user/role': [{ title: '首页', path: '/' }, { title: '用户管理' }, { title: '角色权限' }],
+    '/enterprise': [{ title: '首页', path: '/' }, { title: '企业管理' }],
+    '/school': [{ title: '首页', path: '/' }, { title: '学校管理' }],
     '/profile': [{ title: '首页', path: '/' }, { title: '个人中心' }],
     '/topic/list': [{ title: '首页', path: '/' }, { title: '课题管理' }, { title: '课题列表' }],
     '/topic/approval': [{ title: '首页', path: '/' }, { title: '课题管理' }, { title: '课题审批' }],

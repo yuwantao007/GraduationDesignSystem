@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yuwan.completebackend.common.PageResult;
 import com.yuwan.completebackend.exception.BusinessException;
 import com.yuwan.completebackend.mapper.EnterpriseMapper;
+import com.yuwan.completebackend.mapper.SchoolMapper;
 import com.yuwan.completebackend.mapper.TopicMapper;
 import com.yuwan.completebackend.mapper.UserMapper;
 import com.yuwan.completebackend.model.dto.CreateTopicDTO;
@@ -12,6 +13,7 @@ import com.yuwan.completebackend.model.dto.SubmitTopicDTO;
 import com.yuwan.completebackend.model.dto.TopicSignDTO;
 import com.yuwan.completebackend.model.dto.UpdateTopicDTO;
 import com.yuwan.completebackend.model.entity.Enterprise;
+import com.yuwan.completebackend.model.entity.School;
 import com.yuwan.completebackend.model.entity.Topic;
 import com.yuwan.completebackend.model.entity.User;
 import com.yuwan.completebackend.model.vo.TopicListVO;
@@ -50,6 +52,7 @@ public class TopicServiceImpl implements ITopicService {
 
     private final TopicMapper topicMapper;
     private final EnterpriseMapper enterpriseMapper;
+    private final SchoolMapper schoolMapper;
     private final UserMapper userMapper;
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -65,17 +68,29 @@ public class TopicServiceImpl implements ITopicService {
             throw new BusinessException("课题名称已存在");
         }
 
-        // 验证企业是否存在
-        Enterprise enterprise = enterpriseMapper.selectById(createDTO.getEnterpriseId());
-        if (enterprise == null) {
-            throw new BusinessException("归属企业不存在");
-        }
-
-        // 验证3+1/实验班必须填写适用学校
+        // 根据课题大类验证企业或学校
         TopicCategory category = TopicCategory.fromCode(createDTO.getTopicCategory());
-        if (category != null && category.requiresApplicableSchool() 
-                && !StringUtils.hasText(createDTO.getApplicableSchool())) {
-            throw new BusinessException("3+1/实验班课题必须填写适用学校");
+        if (category == TopicCategory.UPGRADE) {
+            // 高职升本：验证企业
+            if (!StringUtils.hasText(createDTO.getEnterpriseId())) {
+                throw new BusinessException("高职升本课题必须选择归属企业");
+            }
+            Enterprise enterprise = enterpriseMapper.selectById(createDTO.getEnterpriseId());
+            if (enterprise == null) {
+                throw new BusinessException("归属企业不存在");
+            }
+        } else if (category == TopicCategory.THREE_PLUS_ONE || category == TopicCategory.EXPERIMENTAL) {
+            // 3+1/实验班：验证学校
+            if (!StringUtils.hasText(createDTO.getSchoolId())) {
+                throw new BusinessException("3+1/实验班课题必须选择关联学校");
+            }
+            School school = schoolMapper.selectById(createDTO.getSchoolId());
+            if (school == null) {
+                throw new BusinessException("关联学校不存在");
+            }
+            if (!StringUtils.hasText(createDTO.getApplicableSchool())) {
+                throw new BusinessException("3+1/实验班课题必须填写适用学校");
+            }
         }
 
         // 创建课题实体
@@ -420,10 +435,20 @@ public class TopicServiceImpl implements ITopicService {
         TopicReviewStatus status = TopicReviewStatus.fromCode(topic.getReviewStatus());
         vo.setReviewStatusDesc(status != null ? status.getDesc() : "未知");
 
-        // 查询企业名称
-        Enterprise enterprise = enterpriseMapper.selectById(topic.getEnterpriseId());
-        if (enterprise != null) {
-            vo.setEnterpriseName(enterprise.getEnterpriseName());
+        // 查询企业名称（高职升本课题）
+        if (StringUtils.hasText(topic.getEnterpriseId())) {
+            Enterprise enterprise = enterpriseMapper.selectById(topic.getEnterpriseId());
+            if (enterprise != null) {
+                vo.setEnterpriseName(enterprise.getEnterpriseName());
+            }
+        }
+
+        // 查询学校名称（3+1/实验班课题）
+        if (StringUtils.hasText(topic.getSchoolId())) {
+            School school = schoolMapper.selectById(topic.getSchoolId());
+            if (school != null) {
+                vo.setSchoolName(school.getSchoolName());
+            }
         }
 
         // 查询创建人姓名

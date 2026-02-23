@@ -51,9 +51,11 @@ public class CreateTopicDTO implements Serializable {
     @Schema(description = "适用学校（3+1/实验班必填）")
     private String applicableSchool;
 
-    @NotBlank(message = "归属企业不能为空")
-    @Schema(description = "归属企业ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "归属企业ID（高职升本必填）")
     private String enterpriseId;
+
+    @Schema(description = "关联学校ID（3+1/实验班必填）")
+    private String schoolId;
 
     @Schema(description = "指导方向/专业")
     private String guidanceDirection;

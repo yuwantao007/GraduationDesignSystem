@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/topic")
+@RequestMapping("/topic")
 @Tag(name = "课题管理", description = "课题申报CRUD、提交、签名等接口")
 public class TopicController {
 

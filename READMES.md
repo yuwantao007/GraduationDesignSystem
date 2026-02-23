@@ -1528,10 +1528,13 @@ graph TD
   - 响应拦截器（错误处理、Token失效处理）
   - 请求拦截器（Token自动携带）
 
+#### 11.1.7 课题管理模块（已完成 ✅）
+- ✅ 课题申报功能
+
+
 ### 11.2 待开发功能模块
 
 #### 11.2.1 课题管理模块（待开发 ⏳）
-- ⏳ 课题申报功能
 - ⏳ 四级审批流程
 - ⏳ 课题双选管理
 - ⏳ 课题状态跟踪
@@ -1631,9 +1634,26 @@ graph TD
 
 
 
-**文档版本**：V3.0  
-**更新日期**：2026年2月21日  
+**文档版本**：V3.1  
+**更新日期**：2026年2月22日  
 **更新内容**：
+
+### V3.1 更新（2026-02-22）- 企业管理功能模块开发完成
+- ✅ **企业管理模块（仅管理员）**
+  - **功能特性**：企业信息CRUD、批量操作、状态管理（启用/禁用）、条件搜索、分页查询
+  - **前端实现**（6个文件）
+    - 类型定义：`types/enterprise.ts`（EnterpriseVO, CreateEnterpriseDTO, UpdateEnterpriseDTO等）
+    - API封装：`api/enterprise.ts`（7个接口方法，对应后端Knife4j文档）
+    - 表单组件：`components/enterprise/EnterpriseFormModal.vue`（创建/编辑双模式，完整表单验证）
+    - 列表页面：`views/enterprise/EnterpriseList.vue`（搜索、分页、增删改查、批量删除、状态切换）
+    - 路由配置：添加企业管理路由（/enterprise），权限：`enterprise:view`
+    - 菜单配置：左侧菜单新增"企业管理"（银行图标），带权限显示控制
+  - **权限配置**：SQL脚本 `add_enterprise_permissions.sql`（7个权限定义，仅分配给SYSTEM_ADMIN）
+  - **权限控制**：三层防护（菜单v-if + 路由守卫 + 后端@PreAuthorize）
+  - **表单验证**：手机号正则（^1[3-9]\d{9}$）、邮箱格式、字段长度限制与后端DTO完全一致
+  - **部署要点**：执行SQL脚本 → 重启后端 → 已登录用户需退出重新登录（获取新权限）
+  - **代码规范**：严格遵循rule.md（Vue 3 Composition API、TypeScript、JSDoc注释、SCSS scoped）
+  - 📄 详细文档：`complete-backend/docs/企业管理功能部署指南.md`
 
 ### V3.0 更新（2026-02-21）- 业务流程与功能模块详细设计
 - ✨ **大幅扩充业务流程设计（第4章）**

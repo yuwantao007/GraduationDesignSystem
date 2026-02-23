@@ -44,10 +44,47 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '角色权限', icon: 'SafetyCertificateOutlined', permission: 'role:view' }
       },
       {
+        path: 'enterprise',
+        name: 'EnterpriseManagement',
+        component: () => import('@/views/enterprise/EnterpriseList.vue'),
+        meta: { title: '企业管理', icon: 'BankOutlined', permission: 'enterprise:view' }
+      },
+      {
+        path: 'school',
+        name: 'SchoolManagement',
+        component: () => import('@/views/school/SchoolList.vue'),
+        meta: { title: '学校管理', icon: 'ReadOutlined', permission: 'school:view' }
+      },
+      {
         path: 'profile',
         name: 'Profile',
         component: () => import('@/views/user/Profile.vue'),
         meta: { title: '个人中心', icon: 'UserOutlined' }
+      },
+      // 课题管理相关路由
+      {
+        path: 'topic/list',
+        name: 'TopicList',
+        component: () => import('@/views/topic/TopicList.vue'),
+        meta: { title: '课题列表', icon: 'FileTextOutlined', permission: 'topic:view' }
+      },
+      {
+        path: 'topic/create',
+        name: 'TopicCreate',
+        component: () => import('@/views/topic/TopicForm.vue'),
+        meta: { title: '创建课题', permission: 'topic:create', hideInMenu: true }
+      },
+      {
+        path: 'topic/edit/:id',
+        name: 'TopicEdit',
+        component: () => import('@/views/topic/TopicForm.vue'),
+        meta: { title: '编辑课题', permission: 'topic:edit', hideInMenu: true }
+      },
+      {
+        path: 'topic/detail/:id',
+        name: 'TopicDetail',
+        component: () => import('@/views/topic/TopicDetail.vue'),
+        meta: { title: '课题详情', permission: 'topic:view', hideInMenu: true }
       }
     ]
   },
