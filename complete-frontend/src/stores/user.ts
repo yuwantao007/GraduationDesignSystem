@@ -91,6 +91,11 @@ export const useUserStore = defineStore('user', () => {
     return roles.value.includes(role)
   }
 
+  // 检查是否拥有任意一个角色（不包含超管自动匹配）
+  const hasAnyRole = (roleList: string[]): boolean => {
+    return roleList.some(role => roles.value.includes(role))
+  }
+
   return {
     token,
     userInfo,
@@ -100,6 +105,7 @@ export const useUserStore = defineStore('user', () => {
     logout,
     getUserInfoData,
     hasPermission,
-    hasRole
+    hasRole,
+    hasAnyRole
   }
 })

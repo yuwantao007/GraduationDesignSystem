@@ -1,7 +1,12 @@
 package com.yuwan.completebackend.security;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Security上下文工具类
@@ -51,9 +56,37 @@ public class SecurityUtil {
     }
 
     /**
+     * 获取当前登录用户的角色列表（带ROLE_前缀）
+     * 例如：["ROLE_UNIVERSITY_TEACHER", "ROLE_SYSTEM_ADMIN"]
+     *
+     * @return 角色列表，如果未登录返回空列表
+     */
+    public static List<String> getCurrentUserRoles() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getAuthorities() != null) {
+            return authentication.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .filter(auth -> auth.startsWith("ROLE_"))
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * 获取当前登录用户的角色编码列表（不带ROLE_前缀）
+     * 例如：["UNIVERSITY_TEACHER", "SYSTEM_ADMIN"]
+     *
+     * @return 角色编码列表，如果未登录返回空列表
+     */
+    public static List<String> getCurrentUserRoleCodes() {
+        SecurityUserDetails user = getCurrentUser();
+        return user != null && user.getRoleCodes() != null ? user.getRoleCodes() : Collections.emptyList();
+    }
+
+    /**
      * 判断当前用户是否具有指定角色
      *
-     * @param roleCode 角色编码
+     * @param roleCode 角色编码（不带ROLE_前缀）
      * @return 是否具有该角色
      */
     public static boolean hasRole(String roleCode) {

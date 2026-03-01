@@ -4,6 +4,7 @@ import com.yuwan.completebackend.common.PageResult;
 import com.yuwan.completebackend.common.Result;
 import com.yuwan.completebackend.model.dto.CreateEnterpriseDTO;
 import com.yuwan.completebackend.model.dto.UpdateEnterpriseDTO;
+import com.yuwan.completebackend.model.vo.EnterpriseOverviewVO;
 import com.yuwan.completebackend.model.vo.EnterpriseQueryVO;
 import com.yuwan.completebackend.model.vo.EnterpriseVO;
 import com.yuwan.completebackend.service.IEnterpriseService;
@@ -96,6 +97,21 @@ public class EnterpriseController {
     public Result<PageResult<EnterpriseVO>> getEnterpriseList(EnterpriseQueryVO queryVO) {
         log.info("分页查询企业列表，页码: {}, 页大小: {}", queryVO.getPageNum(), queryVO.getPageSize());
         PageResult<EnterpriseVO> result = enterpriseService.getEnterpriseList(queryVO);
+        return Result.success(result);
+    }
+
+    /**
+     * 获取企业概览（包含统计数据）
+     *
+     * @param queryVO 查询参数
+     * @return 企业概览分页数据
+     */
+    @GetMapping("/overview")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @Operation(summary = "获取企业概览", description = "查询企业列表及统计数据（方向数、专业数、教师数、学生数）")
+    public Result<PageResult<EnterpriseOverviewVO>> getEnterpriseOverview(EnterpriseQueryVO queryVO) {
+        log.info("获取企业概览，页码: {}, 页大小: {}", queryVO.getPageNum(), queryVO.getPageSize());
+        PageResult<EnterpriseOverviewVO> result = enterpriseService.getEnterpriseOverview(queryVO);
         return Result.success(result);
     }
 

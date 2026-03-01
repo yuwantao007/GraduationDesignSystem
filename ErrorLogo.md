@@ -10,6 +10,13 @@
 7. [用户管理：编辑用户学号/工号未保存问题](#用户管理编辑用户学号工号未保存问题)
 8. [角色权限配置缺失问题](#角色权限配置缺失问题--企业教师等角色无法访问课题管理)
 9. [企业管理功能404错误 — Controller路径重复/api前缀](#企业管理功能404错误--controller路径重复api前缀)
+10. [角色权限配置API缺失问题 — Permission树形结构查询](#角色权限配置api缺失问题--permission树形结构查询)
+11. [角色CRUD API缺失问题 — 编辑角色功能无法使用](#角色crud-api缺失问题--编辑角色功能无法使用)
+12. [Maven JDK版本配置问题 — 编译失败无效标记](#maven-jdk版本配置问题--编译失败无效标记)
+13. [课题审查API参数必传问题 — 我的审批统计接口](#课题审查api参数必传问题--我的审批统计接口)
+14. [课题审查API参数必传问题 — 综合意见列表接口](#课题审查api参数必传问题--综合意见列表接口)
+15. [系统管理员创建专业方向报错问题](#系统管理员创建专业方向报错问题)
+16. [专业代码保存为空问题](#专业代码保存为空问题)
 
 ---
 
@@ -1840,5 +1847,2206 @@ public void testEnterpriseListPath() {
 **参考的正确示例：**
 - `complete-backend/src/main/java/com/yuwan/completebackend/controller/UserController.java` - 正确用法
 - `complete-backend/src/main/java/com/yuwan/completebackend/controller/RoleController.java` - 正确用法
+
+---
+
+# 角色权限配置API缺失问题 — Permission树形结构查询
+
+- 日期：2026-02-24
+- 严重程度：高（阻塞角色权限配置功能）
+
+## 一、问题描述
+
+### 问题表现
+
+管理员登录后，点击角色列表中的"权限配置"按钮时，前端显示**"请求资源不存在"**错误，权限配置弹窗无法正常显示权限树。
+
+### 影响范围
+
+- 角色权限配置功能完全无法使用
+- 无法为角色分配或修改权限
+- 影响所有需要配置角色权限的场景
+
+## 二、问题根源分析
+
+### 2.1 前端请求分析
+
+前端代码在打开权限配置弹窗时，会并行请求两个接口：
+
+```typescript
+// RoleList.vue
+const handlePermission = async (role: RoleInfo) => {
+  currentRole.value = role
+  permissionVisible.value = true
+  permissionLoading.value = true
+
+  try {
+    // 并行加载权限树和角色已有权限
+    await loadPermissionTree()  // ← 调用 GET /permission/tree
+    await loadRolePermissions(role.roleId)  // ← 调用 GET /role/{roleId}/permission-ids
+    
+    permissionLoading.value = false
+  } catch (error) {
+    // 错误处理
+  }
+}
+```
+
+### 2.2 后端API缺失
+
+检查后端 Controller 发现：
+- ✅ `RoleController` 已有角色相关接口
+- ❌ **缺少 `PermissionController`**，无法响应 `/permission/tree` 请求
+- ❌ **RoleController 缺少权限相关的端点**
+
+**前端需要但后端缺失的接口：**
+1. `GET /permission/tree` - 获取权限树形结构
+2. `GET /role/{roleId}/permissions` - 获取角色权限列表
+3. `GET /role/{roleId}/permission-ids` - 获取角色权限ID列表
+4. `PUT /role/{roleId}/permissions` - 更新角色权限
+
+### 2.3 错误链路
+
+```
+用户点击"权限配置"
+  ↓
+前端调用: permissionApi.getPermissionTree()
+  ↓ 请求: GET /api/permission/tree
+后端 Spring MVC 路径匹配
+  ↓ 查找 @RequestMapping("/permission")
+找不到对应的 Controller
+  ↓
+返回 HTTP 404 Not Found
+  ↓
+前端显示"请求资源不存在"
+```
+
+## 三、修复方案
+
+### 3.1 创建 PermissionVO（树形结构）
+
+**文件：** `complete-backend/src/main/java/com/yuwan/completebackend/model/vo/PermissionVO.java`
+
+```java
+@Data
+@Schema(description = "权限信息响应（树形结构）")
+public class PermissionVO implements Serializable {
+    
+    @Schema(description = "权限ID")
+    private String permissionId;
+    
+    @Schema(description = "父权限ID")
+    private String parentId;
+    
+    @Schema(description = "权限名称")
+    private String permissionName;
+    
+    @Schema(description = "权限编码")
+    private String permissionCode;
+    
+    @Schema(description = "权限类型（1-菜单 2-按钮）")
+    private Integer permissionType;
+    
+    @Schema(description = "路由路径")
+    private String path;
+    
+    @Schema(description = "图标")
+    private String icon;
+    
+    @Schema(description = "排序号")
+    private Integer sortOrder;
+    
+    @Schema(description = "子权限列表")
+    private List<PermissionVO> children;  // ← 支持树形结构
+}
+```
+
+### 3.2 创建 IPermissionService 接口
+
+**文件：** `complete-backend/src/main/java/com/yuwan/completebackend/service/IPermissionService.java`
+
+```java
+public interface IPermissionService {
+    
+    /**
+     * 获取权限树（所有权限的树形结构）
+     */
+    List<PermissionVO> getPermissionTree();
+    
+    /**
+     * 获取所有权限列表（平铺）
+     */
+    List<PermissionVO> getAllPermissions();
+    
+    /**
+     * 获取角色的权限列表（树形结构）
+     */
+    List<PermissionVO> getPermissionsByRoleId(String roleId);
+    
+    /**
+     * 获取角色的权限ID列表（用于前端树组件回显）
+     */
+    List<String> getPermissionIdsByRoleId(String roleId);
+    
+    /**
+     * 更新角色权限
+     */
+    void updateRolePermissions(String roleId, List<String> permissionIds);
+}
+```
+
+### 3.3 实现 PermissionServiceImpl
+
+**文件：** `complete-backend/src/main/java/com/yuwan/completebackend/service/impl/PermissionServiceImpl.java`
+
+**关键逻辑 — 构建权限树：**
+
+```java
+@Override
+public List<PermissionVO> getPermissionTree() {
+    // 1. 查询所有权限
+    List<Permission> allPermissions = permissionMapper.selectList(
+        new LambdaQueryWrapper<Permission>()
+            .orderByAsc(Permission::getSortOrder)
+    );
+    
+    // 2. 转换为 VO
+    List<PermissionVO> permissionVOs = allPermissions.stream()
+        .map(this::convertToVO)
+        .collect(Collectors.toList());
+    
+    // 3. 构建树形结构
+    return buildTree(permissionVOs, "0");  // "0" 为根节点的 parentId
+}
+
+/**
+ * 递归构建树形结构
+ */
+private List<PermissionVO> buildTree(List<PermissionVO> allNodes, String parentId) {
+    return allNodes.stream()
+        .filter(node -> parentId.equals(node.getParentId()))
+        .peek(node -> {
+            // 递归查找子节点
+            List<PermissionVO> children = buildTree(allNodes, node.getPermissionId());
+            node.setChildren(children.isEmpty() ? null : children);
+        })
+        .collect(Collectors.toList());
+}
+```
+
+**角色权限更新逻辑：**
+
+```java
+@Override
+@Transactional(rollbackFor = Exception.class)
+public void updateRolePermissions(String roleId, List<String> permissionIds) {
+    // 1. 删除角色的所有现有权限
+    rolePermissionMapper.delete(
+        new LambdaQueryWrapper<RolePermission>()
+            .eq(RolePermission::getRoleId, roleId)
+    );
+    
+    // 2. 批量插入新权限
+    if (permissionIds != null && !permissionIds.isEmpty()) {
+        List<RolePermission> rolePermissions = permissionIds.stream()
+            .map(permissionId -> {
+                RolePermission rp = new RolePermission();
+                rp.setRoleId(roleId);
+                rp.setPermissionId(permissionId);
+                return rp;
+            })
+            .collect(Collectors.toList());
+        
+        // 使用 MyBatis-Plus 的 saveBatch 批量插入
+        rolePermissions.forEach(rolePermissionMapper::insert);
+    }
+    
+    log.info("更新角色权限成功，角色ID: {}, 权限数量: {}", roleId, 
+            permissionIds != null ? permissionIds.size() : 0);
+}
+```
+
+### 3.4 创建 PermissionController
+
+**文件：** `complete-backend/src/main/java/com/yuwan/completebackend/controller/PermissionController.java`
+
+```java
+@Slf4j
+@RestController
+@RequestMapping("/permission")
+@RequiredArgsConstructor
+@Tag(name = "权限管理接口", description = "权限树查询与管理")
+public class PermissionController {
+
+    private final IPermissionService permissionService;
+
+    /**
+     * 获取权限树（所有权限的树形结构）
+     */
+    @GetMapping("/tree")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @Operation(summary = "获取权限树", description = "获取系统所有权限的树形结构")
+    public Result<List<PermissionVO>> getPermissionTree() {
+        log.info("获取权限树");
+        List<PermissionVO> tree = permissionService.getPermissionTree();
+        return Result.success(tree);
+    }
+
+    /**
+     * 获取所有权限列表（平铺）
+     */
+    @GetMapping("/list")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @Operation(summary = "获取权限列表", description = "获取所有权限的平铺列表")
+    public Result<List<PermissionVO>> getAllPermissions() {
+        log.info("获取所有权限列表");
+        List<PermissionVO> permissions = permissionService.getAllPermissions();
+        return Result.success(permissions);
+    }
+}
+```
+
+### 3.5 扩展 RoleController（添加权限相关接口）
+
+**文件：** `complete-backend/src/main/java/com/yuwan/completebackend/controller/RoleController.java`
+
+```java
+@RestController
+@RequestMapping("/role")
+public class RoleController {
+    
+    private final IRoleService roleService;
+    private final IPermissionService permissionService;  // ← 注入权限服务
+
+    /**
+     * 获取角色的权限列表
+     */
+    @GetMapping("/{roleId}/permissions")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @Operation(summary = "获取角色权限", description = "获取指定角色的权限列表")
+    public Result<List<PermissionVO>> getRolePermissions(
+            @PathVariable String roleId) {
+        log.info("获取角色权限，角色ID: {}", roleId);
+        List<PermissionVO> permissions = permissionService.getPermissionsByRoleId(roleId);
+        return Result.success(permissions);
+    }
+
+    /**
+     * 获取角色的权限ID列表
+     */
+    @GetMapping("/{roleId}/permission-ids")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @Operation(summary = "获取角色权限ID", description = "获取指定角色的权限ID列表")
+    public Result<List<String>> getRolePermissionIds(
+            @PathVariable String roleId) {
+        log.info("获取角色权限ID，角色ID: {}", roleId);
+        List<String> permissionIds = permissionService.getPermissionIdsByRoleId(roleId);
+        return Result.success(permissionIds);
+    }
+
+    /**
+     * 更新角色权限
+     */
+    @PutMapping("/{roleId}/permissions")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @Operation(summary = "更新角色权限", description = "更新指定角色的权限配置")
+    public Result<Void> updateRolePermissions(
+            @PathVariable String roleId,
+            @RequestBody Map<String, List<String>> body) {
+        List<String> permissionIds = body.get("permissionIds");
+        log.info("更新角色权限，角色ID: {}, 权限数量: {}", roleId, 
+                permissionIds != null ? permissionIds.size() : 0);
+        permissionService.updateRolePermissions(roleId, 
+                permissionIds != null ? permissionIds : List.of());
+        return Result.success();
+    }
+}
+```
+
+## 四、技术要点总结
+
+### 4.1 树形数据结构的构建
+
+**问题：** 数据库存储的是扁平的父子关系，前端需要嵌套的树形结构。
+
+**解决方案：** 
+1. 查询所有权限数据（按 sortOrder 排序）
+2. 使用递归算法构建树形结构
+3. 通过 `parentId` 找到每个节点的子节点
+
+**关键代码：**
+```java
+private List<PermissionVO> buildTree(List<PermissionVO> allNodes, String parentId) {
+    return allNodes.stream()
+        .filter(node -> parentId.equals(node.getParentId()))  // 找到当前层级的节点
+        .peek(node -> {
+            // 递归查找子节点
+            List<PermissionVO> children = buildTree(allNodes, node.getPermissionId());
+            node.setChildren(children.isEmpty() ? null : children);
+        })
+        .collect(Collectors.toList());
+}
+```
+
+### 4.2 批量更新的事务处理
+
+**问题：** 更新角色权限需要先删除旧数据再插入新数据，必须保证原子性。
+
+**解决方案：**
+- 使用 `@Transactional` 注解保证事务
+- 先 DELETE 后 INSERT
+- 如果出错自动回滚
+
+```java
+@Override
+@Transactional(rollbackFor = Exception.class)
+public void updateRolePermissions(String roleId, List<String> permissionIds) {
+    // 1. 删除旧权限
+    rolePermissionMapper.delete(...);
+    
+    // 2. 插入新权限
+    permissionIds.forEach(id -> rolePermissionMapper.insert(...));
+}
+```
+
+### 4.3 前后端权限树数据格式
+
+**前端需要的格式（Ant Design Vue Tree）：**
+```json
+[
+  {
+    "key": "100",
+    "title": "仪表盘",
+    "children": []
+  },
+  {
+    "key": "200",
+    "title": "用户管理",
+    "children": [
+      { "key": "201", "title": "用户列表" },
+      { "key": "202", "title": "角色权限" }
+    ]
+  }
+]
+```
+
+**后端返回的格式：**
+```json
+[
+  {
+    "permissionId": "100",
+    "permissionName": "仪表盘",
+    "children": null
+  },
+  {
+    "permissionId": "200",
+    "permissionName": "用户管理",
+    "children": [
+      { "permissionId": "201", "permissionName": "用户列表" },
+      { "permissionId": "202", "permissionName": "角色权限" }
+    ]
+  }
+]
+```
+
+前端通过映射转换：
+```typescript
+const treeData = permissionTree.map(item => ({
+  key: item.permissionId,
+  title: item.permissionName,
+  children: item.children?.map(child => ({
+    key: child.permissionId,
+    title: child.permissionName
+  }))
+}))
+```
+
+## 五、验证步骤
+
+1. **重启后端服务**
+2. **清除前端缓存**
+   ```javascript
+   localStorage.clear()
+   sessionStorage.clear()
+   ```
+3. **测试权限配置功能**：
+   - 登录管理员账号
+   - 进入角色权限页面
+   - 点击某个角色的"权限配置"按钮
+   - ✅ 权限树正常显示
+   - ✅ 角色已有权限正确回显（勾选状态）
+   - ✅ 修改权限并保存，提示成功
+   - ✅ 重新打开权限配置，勾选状态正确
+
+## 六、相关文件清单
+
+**新增文件：**
+- `PermissionVO.java` - 权限树形结构VO
+- `IPermissionService.java` - 权限服务接口
+- `PermissionServiceImpl.java` - 权限服务实现
+- `PermissionController.java` - 权限管理Controller
+
+**修改文件：**
+- `RoleController.java` - 添加权限相关接口
+
+---
+
+# 角色CRUD API缺失问题 — 编辑角色功能无法使用
+
+- 日期：2026-02-24
+- 严重程度：高（阻塞角色编辑功能）
+
+## 一、问题描述
+
+### 问题表现
+
+在角色权限管理页面，点击"编辑"按钮修改角色信息后，点击"确定"按钮时，前端显示**"请求资源不存在"**错误，角色信息无法保存。
+
+### 影响范围
+
+- 角色编辑功能完全无法使用
+- 无法创建新角色
+- 无法删除角色
+- 影响角色管理的所有 CRUD 操作（除了查询）
+
+## 二、问题根源分析
+
+### 2.1 前端请求分析
+
+前端在提交角色编辑表单时，会调用：
+
+```typescript
+// RoleList.vue
+const handleFormSubmit = async () => {
+  try {
+    await roleFormRef.value?.validate()
+  } catch {
+    return
+  }
+
+  formLoading.value = true
+  try {
+    if (isEditMode.value && currentRole.value) {
+      // 编辑模式
+      const updateData: UpdateRoleDTO = {
+        roleName: roleForm.roleName,
+        description: roleForm.description
+      }
+      await roleApi.updateRole(currentRole.value.roleId, updateData)  // ← PUT /role/{roleId}
+      message.success('角色更新成功')
+    } else {
+      // 创建模式
+      await roleApi.createRole({
+        roleName: roleForm.roleName,
+        roleCode: roleForm.roleCode,
+        description: roleForm.description
+      })  // ← POST /role/create
+      message.success('角色创建成功')
+    }
+    // ...
+  }
+}
+```
+
+### 2.2 后端API缺失
+
+检查 `RoleController` 发现：
+- ✅ `GET /role/list` - 查询角色列表（已有）
+- ✅ `GET /role/user/{userId}` - 查询用户角色（已有）
+- ❌ **`GET /role/{roleId}`** - 获取角色详情（缺失）
+- ❌ **`POST /role/create`** - 创建角色（缺失）
+- ❌ **`PUT /role/{roleId}`** - 更新角色（缺失）
+- ❌ **`DELETE /role/{roleId}`** - 删除角色（缺失）
+
+### 2.3 错误链路
+
+```
+用户点击"确定"保存角色
+  ↓
+前端调用: roleApi.updateRole(roleId, updateData)
+  ↓ 请求: PUT /api/role/{roleId}
+后端 Spring MVC 路径匹配
+  ↓ 查找 @PutMapping("/{roleId}") in RoleController
+找不到对应的方法
+  ↓
+返回 HTTP 404 Not Found
+  ↓
+前端显示"请求资源不存在"
+```
+
+## 三、修复方案
+
+### 3.1 创建 CreateRoleDTO
+
+**文件：** `complete-backend/src/main/java/com/yuwan/completebackend/model/dto/CreateRoleDTO.java`
+
+```java
+@Data
+@Schema(description = "创建角色请求")
+public class CreateRoleDTO implements Serializable {
+
+    @NotBlank(message = "角色名称不能为空")
+    @Schema(description = "角色名称", required = true)
+    private String roleName;
+
+    @NotBlank(message = "角色代码不能为空")
+    @Pattern(regexp = "^[A-Z_]+$", message = "角色代码只能包含大写字母和下划线")
+    @Schema(description = "角色代码", required = true, example = "CUSTOM_ROLE")
+    private String roleCode;
+
+    @Schema(description = "角色描述")
+    private String description;
+
+    @Schema(description = "权限ID列表")
+    private List<String> permissionIds;
+}
+```
+
+### 3.2 创建 UpdateRoleDTO
+
+**文件：** `complete-backend/src/main/java/com/yuwan/completebackend/model/dto/UpdateRoleDTO.java`
+
+```java
+@Data
+@Schema(description = "更新角色请求")
+public class UpdateRoleDTO implements Serializable {
+
+    @Schema(description = "角色名称")
+    private String roleName;
+
+    @Schema(description = "角色描述")
+    private String description;
+
+    @Schema(description = "权限ID列表")
+    private List<String> permissionIds;
+}
+```
+
+**关键设计：**
+- `CreateRoleDTO` 需要 `roleName` 和 `roleCode`（必填）
+- `UpdateRoleDTO` 只需要 `roleName` 和 `description`（可选，不传则不修改）
+- 两个 DTO 都支持 `permissionIds`，用于同时更新权限
+
+### 3.3 扩展 IRoleService 接口
+
+**文件：** `complete-backend/src/main/java/com/yuwan/completebackend/service/IRoleService.java`
+
+```java
+public interface IRoleService {
+    
+    /**
+     * 查询所有角色
+     */
+    List<RoleVO> getAllRoles();
+    
+    /**
+     * 查询用户角色
+     */
+    List<RoleVO> getRolesByUserId(String userId);
+    
+    /**
+     * 获取角色详情
+     */
+    RoleVO getRoleById(String roleId);
+    
+    /**
+     * 创建角色
+     */
+    RoleVO createRole(CreateRoleDTO createDTO);
+    
+    /**
+     * 更新角色
+     */
+    RoleVO updateRole(String roleId, UpdateRoleDTO updateDTO);
+    
+    /**
+     * 删除角色
+     */
+    void deleteRole(String roleId);
+}
+```
+
+### 3.4 实现 RoleServiceImpl
+
+**文件：** `complete-backend/src/main/java/com/yuwan/completebackend/service/impl/RoleServiceImpl.java`
+
+**关键实现逻辑：**
+
+```java
+@Service
+@RequiredArgsConstructor
+public class RoleServiceImpl implements IRoleService {
+
+    private final RoleMapper roleMapper;
+    private final RolePermissionMapper rolePermissionMapper;
+    private final UserRoleMapper userRoleMapper;
+    private final IPermissionService permissionService;
+
+    @Override
+    public RoleVO getRoleById(String roleId) {
+        Role role = roleMapper.selectById(roleId);
+        if (role == null || role.getDeleted() == 1) {
+            throw new BusinessException("角色不存在");
+        }
+        return convertToVO(role);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "role:list", allEntries = true)
+    public RoleVO createRole(CreateRoleDTO createDTO) {
+        // 1. 检查角色代码是否已存在
+        LambdaQueryWrapper<Role> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Role::getRoleCode, createDTO.getRoleCode());
+        queryWrapper.eq(Role::getDeleted, 0);
+        if (roleMapper.selectCount(queryWrapper) > 0) {
+            throw new BusinessException("角色代码已存在");
+        }
+
+        // 2. 创建角色
+        Role role = new Role();
+        role.setRoleName(createDTO.getRoleName());
+        role.setRoleCode(createDTO.getRoleCode());
+        role.setRoleDesc(createDTO.getDescription());  // ← description → roleDesc
+        role.setRoleStatus(1);
+        role.setSortOrder(0);
+        roleMapper.insert(role);
+
+        // 3. 分配权限
+        if (createDTO.getPermissionIds() != null && !createDTO.getPermissionIds().isEmpty()) {
+            permissionService.updateRolePermissions(role.getRoleId(), createDTO.getPermissionIds());
+        }
+
+        log.info("创建角色成功，角色ID: {}, 角色名称: {}", role.getRoleId(), role.getRoleName());
+        return convertToVO(role);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "role:list", allEntries = true)
+    public RoleVO updateRole(String roleId, UpdateRoleDTO updateDTO) {
+        // 1. 查询角色
+        Role role = roleMapper.selectById(roleId);
+        if (role == null || role.getDeleted() == 1) {
+            throw new BusinessException("角色不存在");
+        }
+
+        // 2. 更新基本信息
+        if (StringUtils.hasText(updateDTO.getRoleName())) {
+            role.setRoleName(updateDTO.getRoleName());
+        }
+        if (updateDTO.getDescription() != null) {
+            role.setRoleDesc(updateDTO.getDescription());  // ← description → roleDesc
+        }
+        role.setUpdateTime(new Date());
+        roleMapper.updateById(role);
+
+        // 3. 更新权限
+        if (updateDTO.getPermissionIds() != null) {
+            permissionService.updateRolePermissions(roleId, updateDTO.getPermissionIds());
+        }
+
+        log.info("更新角色成功，角色ID: {}, 角色名称: {}", role.getRoleId(), role.getRoleName());
+        return convertToVO(role);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "role:list", allEntries = true)
+    public void deleteRole(String roleId) {
+        // 1. 查询角色
+        Role role = roleMapper.selectById(roleId);
+        if (role == null || role.getDeleted() == 1) {
+            throw new BusinessException("角色不存在");
+        }
+
+        // 2. 检查是否有用户使用该角色
+        LambdaQueryWrapper<UserRole> userRoleQuery = new LambdaQueryWrapper<>();
+        userRoleQuery.eq(UserRole::getRoleId, roleId);
+        if (userRoleMapper.selectCount(userRoleQuery) > 0) {
+            throw new BusinessException("该角色已分配给用户，无法删除");
+        }
+
+        // 3. 删除角色权限关联
+        LambdaQueryWrapper<RolePermission> permissionQuery = new LambdaQueryWrapper<>();
+        permissionQuery.eq(RolePermission::getRoleId, roleId);
+        rolePermissionMapper.delete(permissionQuery);
+
+        // 4. 逻辑删除角色
+        roleMapper.deleteById(roleId);
+
+        log.info("删除角色成功，角色ID: {}", roleId);
+    }
+}
+```
+
+**关键点：**
+1. **字段映射**：前端 `description` ↔ 后端 `roleDesc`
+2. **事务处理**：CRUD 操作使用 `@Transactional` 保证原子性
+3. **缓存清理**：修改操作使用 `@CacheEvict` 清除角色列表缓存
+4. **业务校验**：
+   - 创建时检查 `roleCode` 唯一性
+   - 删除时检查是否有用户使用
+5. **级联操作**：删除角色时同时删除角色权限关联
+
+### 3.5 扩展 RoleController
+
+**文件：** `complete-backend/src/main/java/com/yuwan/completebackend/controller/RoleController.java`
+
+```java
+@RestController
+@RequestMapping("/role")
+@RequiredArgsConstructor
+public class RoleController {
+
+    private final IRoleService roleService;
+    private final IPermissionService permissionService;
+
+    // ... 已有的 list 和 user/{userId} 接口 ...
+
+    /**
+     * 获取角色详情
+     */
+    @GetMapping("/{roleId}")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @Operation(summary = "获取角色详情", description = "获取指定角色的详细信息")
+    public Result<RoleVO> getRoleById(@PathVariable String roleId) {
+        log.info("获取角色详情，角色ID: {}", roleId);
+        RoleVO role = roleService.getRoleById(roleId);
+        return Result.success(role);
+    }
+
+    /**
+     * 创建角色
+     */
+    @PostMapping("/create")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @Operation(summary = "创建角色", description = "创建新角色并分配权限")
+    public Result<RoleVO> createRole(@Valid @RequestBody CreateRoleDTO createDTO) {
+        log.info("创建角色，角色名称: {}, 角色代码: {}", 
+                createDTO.getRoleName(), createDTO.getRoleCode());
+        RoleVO role = roleService.createRole(createDTO);
+        return Result.success(role);
+    }
+
+    /**
+     * 更新角色
+     */
+    @PutMapping("/{roleId}")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @Operation(summary = "更新角色", description = "更新角色信息和权限")
+    public Result<RoleVO> updateRole(
+            @PathVariable String roleId,
+            @Valid @RequestBody UpdateRoleDTO updateDTO) {
+        log.info("更新角色，角色ID: {}", roleId);
+        RoleVO role = roleService.updateRole(roleId, updateDTO);
+        return Result.success(role);
+    }
+
+    /**
+     * 删除角色
+     */
+    @DeleteMapping("/{roleId}")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @Operation(summary = "删除角色", description = "删除指定角色")
+    public Result<Void> deleteRole(@PathVariable String roleId) {
+        log.info("删除角色，角色ID: {}", roleId);
+        roleService.deleteRole(roleId);
+        return Result.success();
+    }
+    
+    // ... 权限相关接口 ...
+}
+```
+
+## 四、技术要点总结
+
+### 4.1 DTO 设计原则
+
+**CreateDTO vs UpdateDTO：**
+
+| 字段 | CreateDTO | UpdateDTO | 说明 |
+|------|-----------|-----------|------|
+| `roleName` | ✅ 必填 | ✅ 可选 | 创建必须提供，更新可选 |
+| `roleCode` | ✅ 必填 | ❌ 不可改 | 角色代码一旦创建不可修改 |
+| `description` | ✅ 可选 | ✅ 可选 | 描述信息可为空 |
+| `permissionIds` | ✅ 可选 | ✅ 可选 | 权限列表可为空 |
+
+**设计理由：**
+- `roleCode` 是角色的唯一标识，创建后不应修改（避免影响已有的权限判断逻辑）
+- `UpdateDTO` 的字段都是可选的，只更新传入的字段（部分更新）
+
+### 4.2 字段映射处理
+
+**前后端字段不一致：**
+- 前端字段：`description`（符合前端命名习惯）
+- 后端字段：`roleDesc`（数据库字段名）
+
+**解决方案：**
+- DTO 层使用前端字段名 `description`
+- Service 层进行字段映射：`description` → `roleDesc`
+- VO 层保持数据库字段名 `roleDesc`
+
+```java
+// UpdateRoleDTO
+private String description;  // 前端传入
+
+// Service 层映射
+if (updateDTO.getDescription() != null) {
+    role.setRoleDesc(updateDTO.getDescription());  // 映射到 roleDesc
+}
+
+// RoleVO
+private String roleDesc;  // 返回给前端
+```
+
+### 4.3 缓存管理策略
+
+**缓存注解使用：**
+
+```java
+// 查询方法：使用 @Cacheable
+@Cacheable(value = "role:list")
+public List<RoleVO> getAllRoles() { ... }
+
+// 修改方法：使用 @CacheEvict
+@CacheEvict(value = "role:list", allEntries = true)
+public RoleVO createRole(CreateRoleDTO createDTO) { ... }
+
+@CacheEvict(value = "role:list", allEntries = true)
+public RoleVO updateRole(String roleId, UpdateRoleDTO updateDTO) { ... }
+
+@CacheEvict(value = "role:list", allEntries = true)
+public void deleteRole(String roleId) { ... }
+```
+
+**缓存策略：**
+- 角色列表读多写少，适合使用缓存
+- 任何修改操作都清空缓存（`allEntries = true`）
+- 下次查询时重新加载最新数据
+
+### 4.4 业务校验规则
+
+**创建角色时的校验：**
+1. `roleName` 不能为空（Bean Validation）
+2. `roleCode` 不能为空且格式正确（`^[A-Z_]+$`）
+3. `roleCode` 不能重复（数据库查询）
+
+**删除角色时的校验：**
+1. 角色必须存在
+2. 角色未被用户使用（检查 `user_role` 表）
+3. 先删除角色权限关联，再删除角色
+
+## 五、验证步骤
+
+1. **重启后端服务**
+2. **清除前端缓存**
+3. **测试创建角色**：
+   - 点击"新建角色"
+   - 填写角色名称和角色代码
+   - 保存，验证创建成功
+4. **测试编辑角色**：
+   - 点击某个角色的"编辑"
+   - 修改角色名称和描述
+   - 保存，验证更新成功
+5. **测试删除角色**：
+   - 点击某个未使用的角色的"删除"
+   - 确认删除，验证删除成功
+   - 尝试删除已分配给用户的角色，应提示无法删除
+
+## 六、相关文件清单
+
+**新增文件：**
+- `CreateRoleDTO.java` - 创建角色DTO
+- `UpdateRoleDTO.java` - 更新角色DTO
+
+**修改文件：**
+- `IRoleService.java` - 添加 CRUD 方法签名
+- `RoleServiceImpl.java` - 实现 CRUD 方法
+- `RoleController.java` - 添加 CRUD 端点
+
+---
+
+# Maven JDK版本配置问题 — 编译失败无效标记
+
+- 日期：2026-02-24
+- 严重程度：高（阻塞后端编译和启动）
+
+## 一、问题描述
+
+### 问题表现
+
+执行 `mvn compile` 时，编译失败并显示以下错误：
+
+```
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile 
+(default-compile) on project complete-backend: Fatal error compiling: 无效的标记: --release
+```
+
+### 影响范围
+
+- 无法编译后端项目
+- 无法打包部署
+- 阻塞所有后端开发工作
+
+## 二、问题根源分析
+
+### 2.1 Maven 使用的 JDK 版本不匹配
+
+执行 `mvn -version` 查看 Maven 使用的 JDK 版本：
+
+```
+Apache Maven 3.9.9
+Maven home: E:\Java_utils\Maven\maven-3.9.9
+Java version: 1.8.0_202, vendor: Oracle Corporation, runtime: E:\java版本\Java_1.8\jdk-1.8.0\jre
+```
+
+**问题：Maven 使用的是 Java 1.8，但项目需要 Java 17。**
+
+### 2.2 `--release` 标记不支持
+
+`pom.xml` 中的编译器配置：
+
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <version>3.11.0</version>
+    <configuration>
+        <release>17</release>  <!-- ← --release 标记 -->
+        <encoding>UTF-8</encoding>
+    </configuration>
+</plugin>
+```
+
+**问题：**
+- `<release>` 标记是 Java 9+ 引入的新特性
+- Java 8 不支持 `--release` 参数
+- Maven 使用 Java 8 编译时抛出"无效的标记"错误
+
+### 2.3 Spring Boot 3.x 需要 Java 17+
+
+**项目依赖：**
+```xml
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.2.2</version>  <!-- ← Spring Boot 3.x 需要 Java 17+ -->
+</parent>
+```
+
+**结论：** 必须使用 Java 17 编译项目。
+
+### 2.4 错误链路
+
+```
+执行 mvn compile
+  ↓
+Maven 使用系统默认 JDK 1.8
+  ↓
+Maven Compiler Plugin 尝试使用 --release 17 参数
+  ↓
+Java 8 不识别 --release 参数
+  ↓
+抛出 "Fatal error compiling: 无效的标记: --release"
+  ↓
+编译失败
+```
+
+## 三、修复方案
+
+### 方案选择
+
+检查系统已安装 JDK 17：
+```
+E:\java版本\java_17
+```
+
+采用**修改 Maven Compiler Plugin 配置**的方式，显式指定 JDK 17 编译器路径。
+
+### 3.1 修改 pom.xml 编译器配置
+
+**文件：** `complete-backend/pom.xml`
+
+**修改前（错误）：**
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <version>3.11.0</version>
+    <configuration>
+        <release>17</release>  <!-- ❌ Java 8 不支持 -->
+        <encoding>UTF-8</encoding>
+    </configuration>
+</plugin>
+```
+
+**修改后（正确）：**
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <version>3.11.0</version>
+    <configuration>
+        <source>17</source>
+        <target>17</target>
+        <encoding>UTF-8</encoding>
+        <fork>true</fork>  <!-- ← 启用独立进程编译 -->
+        <executable>E:\java版本\java_17\bin\javac.exe</executable>  <!-- ← 指定 JDK 17 编译器 -->
+        <compilerArgs>
+            <arg>-parameters</arg>  <!-- 保留方法参数名 -->
+        </compilerArgs>
+    </configuration>
+</plugin>
+```
+
+**配置说明：**
+1. **`<source>17</source>`** - 指定源代码兼容 Java 17
+2. **`<target>17</target>`** - 指定编译目标为 Java 17 字节码
+3. **`<fork>true</fork>`** - 启用独立进程编译（避免使用 Maven 运行时 JDK）
+4. **`<executable>`** - 显式指定 JDK 17 的 javac 编译器路径
+5. **`<compilerArgs><arg>-parameters</arg>`** - 保留方法参数名（Spring Boot 需要）
+
+### 3.2 为什么这样修改可以解决问题
+
+**Maven Compiler Plugin 的编译器选择逻辑：**
+
+1. **默认行为（`fork=false`）：**
+   - 使用运行 Maven 的 JDK（当前是 Java 8）
+   - 传递 `<release>17` 参数给 Java 8 编译器
+   - Java 8 不识别 `--release`，抛出错误
+
+2. **修改后（`fork=true` + `executable`）：**
+   - Maven 创建独立的编译进程
+   - 使用 `<executable>` 指定的 JDK 17 编译器
+   - JDK 17 编译器正常工作
+   - 编译成功
+
+**为什么不改为 `<release>17>`：**
+- `<release>17>` 等价于 `<source>17` + `<target>17` + `--release 17`
+- 仍然需要 Maven 运行在 Java 9+ 环境
+- 使用 `<source>` + `<target>` + `<executable>` 更灵活
+
+### 3.3 验证修改
+
+**执行编译：**
+```bash
+cd complete-backend
+mvn clean compile -q
+```
+
+**预期结果：**
+```
+编译成功，无错误输出
+```
+
+**验证编译产物：**
+```powershell
+Test-Path "target\classes\com\yuwan\completebackend\controller\RoleController.class"
+# 输出：True
+```
+
+## 四、其他解决方案（未采用）
+
+### 方案1：修改系统 JAVA_HOME 环境变量
+
+**优点：** 一劳永逸，Maven 自动使用 Java 17
+
+**缺点：**
+- 需要管理员权限修改系统环境变量
+- 影响其他依赖 Java 8 的项目
+- 重启终端才能生效
+
+**实施方式：**
+```powershell
+# 临时设置（仅当前会话）
+$env:JAVA_HOME = "E:\java版本\java_17"
+$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+
+# 永久设置（需管理员权限）
+[System.Environment]::SetEnvironmentVariable("JAVA_HOME", "E:\java版本\java_17", "Machine")
+```
+
+### 方案2：使用 Maven Toolchains
+
+**优点：** 项目级配置，不影响其他项目
+
+**缺点：**
+- 需要额外配置 `~/.m2/toolchains.xml`
+- 配置复杂，不适合新手
+
+**实施方式：**
+
+创建 `~/.m2/toolchains.xml`：
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<toolchains>
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <version>17</version>
+    </provides>
+    <configuration>
+      <jdkHome>E:\java版本\java_17</jdkHome>
+    </configuration>
+  </toolchain>
+</toolchains>
+```
+
+### 方案3：使用 `.mvn/jvm.config`（尝试失败）
+
+尝试创建 `.mvn/jvm.config` 文件：
+```
+-Djava.home=E:\java版本\java_17
+```
+
+**失败原因：**
+- 中文路径导致编码问题
+- Maven ClassLoader 加载失败
+- 抛出 `java.lang.InternalError: Error loading java.security file`
+
+## 五、技术要点总结
+
+### 5.1 Maven Compiler Plugin 配置项
+
+| 配置项 | 说明 | 适用版本 |
+|--------|------|----------|
+| `<source>` | 源代码语言级别 | 所有 JDK |
+| `<target>` | 编译目标字节码版本 | 所有 JDK |
+| `<release>` | 统一设置 source/target/bootclasspath | Java 9+ |
+| `<fork>` | 是否启用独立编译进程 | 所有 JDK |
+| `<executable>` | 指定 javac 路径 | fork=true 时有效 |
+
+### 5.2 Java 版本兼容性
+
+| Spring Boot 版本 | 最低 Java 版本 | 推荐 Java 版本 |
+|-----------------|---------------|---------------|
+| 2.x | Java 8 | Java 11 |
+| 3.x | Java 17 | Java 17/21 |
+
+**本项目使用：**
+- Spring Boot 3.2.2 → **必须使用 Java 17+**
+
+### 5.3 `<release>` vs `<source>` + `<target>`
+
+**`<release>` 的作用：**
+```xml
+<release>17</release>
+```
+等价于：
+```xml
+<source>17</source>
+<target>17</target>
+<compilerArgs>
+  <arg>--release</arg>
+  <arg>17</arg>
+</compilerArgs>
+```
+
+**`--release` 参数的额外作用：**
+- 确保编译时只能使用目标 JDK 版本的 API
+- 例如：`<release>11</release>` 时不能使用 Java 17 新增的 API
+
+**为什么不用 `<release>`：**
+- 需要 Maven 运行在 Java 9+ 环境
+- 当前环境 Maven 使用 Java 8
+- 使用 `<source>` + `<target>` + `<fork>` + `<executable>` 更灵活
+
+## 六、验证步骤
+
+### 6.1 验证 JDK 17 可用
+
+```powershell
+& "E:\java版本\java_17\bin\java.exe" -version
+```
+
+**预期输出：**
+```
+java version "17.0.13" 2024-10-15 LTS
+Java(TM) SE Runtime Environment (build 17.0.13+10-LTS-268)
+Java HotSpot(TM) 64-Bit Server VM (build 17.0.13+10-LTS-268, mixed mode, sharing)
+```
+
+### 6.2 验证编译成功
+
+```powershell
+cd complete-backend
+mvn clean compile
+```
+
+**预期输出：**
+```
+[INFO] BUILD SUCCESS
+```
+
+### 6.3 验证编译产物
+
+```powershell
+Test-Path "target\classes\com\yuwan\completebackend\controller\RoleController.class"
+```
+
+**预期输出：**
+```
+True
+```
+
+### 6.4 验证运行
+
+```powershell
+mvn spring-boot:run
+```
+
+**预期输出：**
+```
+Started CompleteBackendApplication in X.XXX seconds
+```
+
+## 七、预防措施建议
+
+### 7.1 项目文档中明确 JDK 版本要求
+
+在 `README.md` 中添加：
+
+```markdown
+## 开发环境要求
+
+- JDK 17 或更高版本
+- Maven 3.8+
+- MySQL 8.0+
+
+### 配置 Maven 使用 JDK 17
+
+如果系统默认 JDK 不是 17，需要修改 pom.xml 中的 `<executable>` 路径：
+
+```xml
+<executable>你的JDK17路径/bin/javac.exe</executable>
+```
+```
+
+### 7.2 添加 Maven Wrapper
+
+使用 Maven Wrapper 可以锁定 Maven 版本：
+
+```bash
+mvn wrapper:wrapper -Dmaven=3.9.9
+```
+
+生成的 `mvnw` 和 `mvnw.cmd` 脚本会自动下载指定版本的 Maven。
+
+### 7.3 CI/CD 配置
+
+在 CI/CD 环境中明确指定 JDK 版本：
+
+```yaml
+# GitHub Actions 示例
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Build with Maven
+        run: mvn clean package
+```
+
+### 7.4 开发规范文档
+
+创建 `docs/development-setup.md`，详细说明：
+- JDK 安装和配置
+- Maven 配置
+- IDE 配置（IntelliJ IDEA / Eclipse）
+- 常见问题排查
+
+## 八、相关文件清单
+
+**修改文件：**
+- `complete-backend/pom.xml` - Maven Compiler Plugin 配置
+
+**相关文档：**
+- Maven Compiler Plugin：https://maven.apache.org/plugins/maven-compiler-plugin/
+- Java Platform, Standard Edition Tools Reference (Java 17)：https://docs.oracle.com/en/java/javase/17/docs/specs/man/javac.html
+
+---
+
+# 课题审查API参数必传问题 — 我的审批统计接口
+
+- 日期：2026-02-28
+- 作者：系统维护者
+- 严重程度：中（影响课题审查模块功能）
+
+## 一、问题描述
+
+### 问题表现
+在课题审查页面点击"我的审批统计"按钮时，后端报错：
+```
+org.springframework.web.bind.MissingServletRequestParameterException: 
+Required request parameter 'teacherId' for method parameter type String is not present
+```
+
+页面显示"系统内部错误"和"获取统计数据失败"。
+
+### 影响范围
+- 课题审查模块的"我的审批统计"功能无法使用
+- 所有尝试查看自己审批统计的用户
+
+## 二、问题根源分析
+
+### 2.1 后端接口定义问题
+
+**问题代码 (TopicReviewController.java)：**
+```java
+@GetMapping("/stats/passed-count")
+public Result<TeacherPassedCountVO> getTeacherPassedCount(
+        @RequestParam String teacherId) {  // ❌ 必传参数
+    // ...
+}
+```
+
+**前端调用 (topicReview.ts)：**
+```typescript
+getTeacherPassedCount(teacherId?: string) {
+    return request.get<TeacherPassedCountVO>('/topic/review/stats/passed-count', {
+        params: teacherId ? { teacherId } : undefined  // 不传teacherId时查当前用户
+    })
+}
+```
+
+### 2.2 业务逻辑缺陷
+
+接口设计要求必须传入`teacherId`，但实际业务场景中：
+- 用户查看自己的统计时，不需要传入ID，应该自动使用当前登录用户
+- 管理员查看其他教师统计时，才需要传入指定的`teacherId`
+
+## 三、修复方案
+
+### 3.1 修改Controller层
+
+```java
+// 修改前
+@RequestParam String teacherId
+
+// 修改后
+@RequestParam(required = false) String teacherId
+
+// 并在方法内添加逻辑
+if (teacherId == null || teacherId.isEmpty()) {
+    teacherId = SecurityUtil.getCurrentUserId();
+}
+```
+
+### 3.2 扩展权限配置
+
+```java
+// 修改前
+@PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'ENTERPRISE_LEADER', 'SUPERVISOR_TEACHER')")
+
+// 修改后：增加ENTERPRISE_TEACHER，使企业教师可以查看自己的统计
+@PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'ENTERPRISE_LEADER', 'SUPERVISOR_TEACHER', 'ENTERPRISE_TEACHER')")
+```
+
+## 四、修改文件清单
+
+| 文件 | 修改内容 |
+|---|---|
+| `TopicReviewController.java` | 添加`SecurityUtil`导入，`teacherId`设为可选，添加默认值逻辑 |
+
+## 五、经验教训
+
+### 5.1 设计原则
+
+**API设计时考虑"查询自己"场景：**
+- 对于涉及当前用户数据的查询接口，ID参数应设为可选
+- 不传ID时，默认查询当前登录用户的数据
+- 这样可以简化前端调用，减少不必要的参数传递
+
+### 5.2 开发检查清单
+
+- [ ] `@RequestParam`是否需要设置`required = false`？
+- [ ] 不传参数时的默认行为是什么？
+- [ ] 权限配置是否覆盖了所有需要使用该接口的角色？
+
+---
+
+# 课题审查API参数必传问题 — 综合意见列表接口
+
+- 日期：2026-02-28
+- 作者：系统维护者
+- 严重程度：中（影响课题审查模块功能）
+
+## 一、问题描述
+
+### 问题表现
+在课题审查页面点击"综合意见管理"按钮时，后端报错：
+```
+org.springframework.web.bind.MissingServletRequestParameterException: 
+Required request parameter 'guidanceDirection' for method parameter type String is not present
+```
+
+页面显示"系统内部错误"和"获取综合意见失败"。
+
+### 影响范围
+- 课题审查模块的"综合意见管理"功能无法使用
+- 所有尝试查看或管理综合意见的用户
+
+## 二、问题根源分析
+
+### 2.1 后端接口定义问题
+
+**问题代码 (TopicReviewController.java)：**
+```java
+@GetMapping("/general-opinions")
+public Result<List<GeneralOpinionVO>> getGeneralOpinions(
+        @RequestParam(required = false) Integer reviewStage,
+        @RequestParam String guidanceDirection) {  // ❌ 必传参数
+    // ...
+}
+```
+
+**前端调用 (topicReview.ts)：**
+```typescript
+getGeneralOpinions(guidanceDirection?: string) {
+    return request.get<GeneralOpinionVO[]>('/topic/review/general-opinions', {
+        params: guidanceDirection ? { guidanceDirection } : undefined  // 不传则查询所有
+    })
+}
+```
+
+### 2.2 业务逻辑缺陷
+
+原始设计假设用户总是按专业方向筛选，但实际场景中：
+- 首次打开综合意见管理时，应显示所有意见
+- 用户可以选择性地按专业方向筛选
+
+### 2.3 Mapper XML问题
+
+**问题SQL (TopicGeneralOpinionMapper.xml)：**
+```xml
+WHERE guidance_direction = #{guidanceDirection}  -- ❌ 固定条件，不支持空值
+```
+
+## 三、修复方案
+
+### 3.1 修改Controller层
+
+```java
+// 修改前
+@RequestParam String guidanceDirection
+
+// 修改后
+@RequestParam(required = false) String guidanceDirection
+```
+
+### 3.2 修改Mapper XML
+
+```xml
+<!-- 修改前 -->
+WHERE guidance_direction = #{guidanceDirection}
+  AND deleted = 0
+
+<!-- 修改后：使用动态条件 -->
+WHERE deleted = 0
+  <if test="guidanceDirection != null and guidanceDirection != ''">
+      AND guidance_direction = #{guidanceDirection}
+  </if>
+```
+
+## 四、修改文件清单
+
+| 文件 | 修改内容 |
+|---|---|
+| `TopicReviewController.java` | `guidanceDirection`参数设为可选 |
+| `TopicGeneralOpinionMapper.xml` | SQL改为动态条件查询 |
+
+## 五、经验教训
+
+### 5.1 设计原则
+
+**列表查询接口的筛选参数应全部可选：**
+- 筛选条件应允许为空，不传时返回全部数据
+- 在SQL中使用MyBatis的`<if>`标签实现动态条件
+- 这样可以支持灵活的筛选组合
+
+### 5.2 MyBatis动态SQL最佳实践
+
+```xml
+<!-- 推荐写法：所有筛选条件使用动态条件 -->
+<select id="selectByConditions" resultType="...">
+    SELECT * FROM table_name
+    WHERE deleted = 0
+    <if test="param1 != null and param1 != ''">
+        AND column1 = #{param1}
+    </if>
+    <if test="param2 != null">
+        AND column2 = #{param2}
+    </if>
+</select>
+```
+
+### 5.3 开发检查清单
+
+- [ ] 列表查询接口的筛选参数是否都设为可选？
+- [ ] Mapper XML中是否使用了动态SQL？
+- [ ] 不传筛选条件时，接口返回结果是否正确？
+
+---
+
+# 通用开发规范 — 避免API参数必传问题
+
+## RequestParam参数设计规范
+
+### 1. 何时设置 required = false
+
+| 场景 | 是否必传 | 示例 |
+|---|---|---|
+| 分页参数 | 可选（有默认值） | `pageNum=1, pageSize=10` |
+| 筛选/搜索条件 | 可选 | `keyword, status, category` |
+| 查询当前用户数据 | 可选（默认当前用户） | `userId, teacherId` |
+| 主键ID（详情/删除） | 必传 | `topicId, userId` |
+| 业务必需字段 | 必传 | `审批结果, 操作类型` |
+
+### 2. 代码模板
+
+```java
+// ✅ 正确：筛选参数可选
+@GetMapping("/list")
+public Result<List<Item>> getList(
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false) Integer status,
+        @RequestParam(defaultValue = "1") Integer pageNum,
+        @RequestParam(defaultValue = "10") Integer pageSize) {
+    // ...
+}
+
+// ✅ 正确：查询自己数据时ID可选
+@GetMapping("/my-stats")
+public Result<StatsVO> getMyStats(
+        @RequestParam(required = false) String userId) {
+    if (userId == null || userId.isEmpty()) {
+        userId = SecurityUtil.getCurrentUserId();
+    }
+    // ...
+}
+```
+
+### 3. 前端调用注意事项
+
+```typescript
+// ✅ 正确：参数为空时不传递
+getList(params?: QueryParams) {
+    return request.get('/api/list', { 
+        params: params || undefined 
+    })
+}
+
+// ❌ 错误：传递空对象可能导致参数问题
+getList(params: QueryParams) {
+    return request.get('/api/list', { params })  // params可能是 {}
+}
+```
+
+---
+
+# 系统管理员创建专业方向报错问题
+
+- 日期：2026-03-01
+- 作者：系统维护者
+- 严重程度：高（阻塞系统管理员创建专业方向功能）
+
+## 一、问题描述
+
+### 问题表现
+系统管理员点击企业节点（如"IBM"）下的"添加专业方向"按钮时，填写表单后提交报错：**"系统管理员请指定企业ID"**
+
+### 影响范围
+- 系统管理员无法为指定企业创建专业方向
+- 前端虽然通过组件props传递了企业ID，但后端未能接收
+- 完全阻断专业方向管理功能
+
+### 错误截图描述
+弹窗显示红色错误提示："系统管理员请指定企业ID"，数据未能保存。
+
+## 二、问题根源分析
+
+### 2.1 数据流断层问题
+
+**问题链路：**
+```
+1. 用户点击"IBM"企业 → MajorList传递enterpriseId给DirectionFormModal
+2. DirectionFormModal接收props.enterpriseId（值正确）
+3. 表单提交 → formState中没有enterpriseId字段
+4. 前端发送请求 → 不包含enterpriseId参数
+5. 后端MajorDirectionDTO → 没有enterpriseId字段接收
+6. 后端addDirection() → 调用getCurrentUserEnterpriseId()
+7. 方法检测到系统管理员 → 抛出异常："系统管理员请指定企业ID"
+```
+
+### 2.2 具体原因
+
+#### 后端问题
+**MajorDirectionDTO缺少enterpriseId字段：**
+```java
+// ❌ 问题代码：没有enterpriseId字段
+@Data
+@Schema(description = "专业方向表单参数")
+public class MajorDirectionDTO implements Serializable {
+    @NotBlank(message = "专业方向名称不能为空")
+    private String directionName;
+    private String directionCode;
+    // ... 其他字段，但没有enterpriseId
+}
+```
+
+**addDirection()方法逻辑问题：**
+```java
+// ❌ 问题代码：只从当前用户获取企业ID
+@Override
+public MajorDirectionVO addDirection(MajorDirectionDTO dto) {
+    String enterpriseId = getCurrentUserEnterpriseId(); // 系统管理员会抛异常
+    // ...
+}
+```
+
+**getCurrentUserEnterpriseId()对管理员的限制：**
+```java
+private String getCurrentUserEnterpriseId() {
+    // 系统管理员需要指定企业ID
+    if (SecurityUtil.hasRole("SYSTEM_ADMIN")) {
+        throw new BusinessException("系统管理员请指定企业ID"); // ❌ 直接抛异常
+    }
+    // ...
+}
+```
+
+#### 前端问题
+**DirectionFormModal表单状态缺少enterpriseId：**
+```typescript
+// ❌ 问题代码：formState没有enterpriseId字段
+const formState = reactive<MajorDirectionDTO>({
+  directionName: '',
+  directionCode: '',
+  leaderId: undefined,
+  sortOrder: 0,
+  description: ''
+  // 缺少 enterpriseId 字段
+})
+```
+
+虽然组件接收了`props.enterpriseId`，但提交时没有将其包含在表单数据中。
+
+## 三、解决方案
+
+### 3.1 后端DTO添加企业ID字段
+
+**修改文件：** `MajorDirectionDTO.java`
+
+```java
+@Data
+@Schema(description = "专业方向表单参数")
+public class MajorDirectionDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    // ✅ 新增：企业ID字段
+    @Schema(description = "企业ID（系统管理员创建时必填）")
+    private String enterpriseId;
+
+    @NotBlank(message = "专业方向名称不能为空")
+    @Schema(description = "专业方向名称", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String directionName;
+
+    // ... 其他字段
+}
+```
+
+### 3.2 后端创建逻辑优化
+
+**修改文件：** `MajorServiceImpl.java`
+
+```java
+@Override
+public MajorDirectionVO addDirection(MajorDirectionDTO dto) {
+    // ✅ 优先使用DTO中的enterpriseId（系统管理员指定），否则从当前用户获取
+    String enterpriseId = StringUtils.hasText(dto.getEnterpriseId()) 
+            ? dto.getEnterpriseId() 
+            : getCurrentUserEnterpriseId();
+
+    // 检查专业方向名称是否重复
+    if (isDirectionNameExists(enterpriseId, dto.getDirectionName(), null)) {
+        throw new BusinessException("专业方向名称已存在");
+    }
+
+    // ... 后续逻辑保持不变
+}
+```
+
+**修改说明：**
+- 增加条件判断：如果DTO中有enterpriseId就使用，否则才调用getCurrentUserEnterpriseId()
+- 这样系统管理员可以指定企业ID，企业负责人自动使用自己的企业ID
+
+### 3.3 前端类型定义更新
+
+**修改文件：** `src/types/major.ts`
+
+```typescript
+/**
+ * 专业方向表单 DTO
+ */
+export interface MajorDirectionDTO {
+  /** 企业ID（系统管理员创建时必填） */
+  enterpriseId?: string  // ✅ 添加字段
+  /** 方向名称 */
+  directionName: string
+  /** 方向代码 */
+  directionCode?: string
+  /** 描述 */
+  description?: string
+  /** 负责人ID */
+  leaderId?: string
+  /** 排序 */
+  sortOrder?: number
+}
+```
+
+### 3.4 前端表单状态初始化
+
+**修改文件：** `DirectionFormModal.vue`
+
+```typescript
+// ✅ 表单数据包含enterpriseId
+const formState = reactive<MajorDirectionDTO>({
+  enterpriseId: undefined,  // 新增字段
+  directionName: '',
+  directionCode: '',
+  leaderId: undefined,
+  sortOrder: 0,
+  description: ''
+})
+
+// ✅ 重置表单时设置企业ID
+const resetForm = () => {
+  formState.enterpriseId = props.enterpriseId || undefined  // 从props获取
+  formState.directionName = ''
+  formState.directionCode = ''
+  formState.leaderId = undefined
+  formState.sortOrder = 0
+  formState.description = ''
+  formRef.value?.clearValidate()
+  
+  // 新建模式：自动生成代码
+  if (!isEdit.value && enterpriseCode.value) {
+    formState.directionCode = generateDirectionCode()
+  }
+}
+
+// ✅ 填充表单时包含企业ID
+const fillFormData = (data: MajorDirectionVO) => {
+  formState.enterpriseId = data.enterpriseId  // 保存企业ID
+  formState.directionName = data.directionName
+  formState.directionCode = data.directionCode || ''
+  formState.leaderId = data.leaderId
+  formState.sortOrder = data.sortOrder || 0
+  formState.description = data.description || ''
+}
+```
+
+## 四、验证步骤
+
+### 4.1 后端验证
+```bash
+cd complete-backend
+mvn compile -q
+```
+✅ 编译通过，无错误
+
+### 4.2 前端验证
+```bash
+cd complete-frontend
+npm run type-check
+```
+✅ 类型检查通过
+
+### 4.3 功能验证
+1. **系统管理员操作：**
+   - 登录系统管理员账号
+   - 进入"专业管理"页面
+   - 点击"IBM"企业节点的"添加专业方向"按钮
+   - 填写方向名称（如"软件工程"）
+   - 提交表单
+   - ✅ 预期：创建成功，数据正确关联到IBM企业
+
+2. **企业负责人操作：**
+   - 登录企业负责人账号
+   - 点击"新建专业方向"按钮
+   - 填写表单并提交
+   - ✅ 预期：创建成功，自动关联到当前用户的企业
+
+## 五、关键技术点
+
+### 5.1 前后端数据传递链路
+
+```
+MajorList (点击企业节点)
+  ↓ 传递 enterpriseId
+DirectionFormModal (组件props)
+  ↓ 初始化 formState.enterpriseId
+表单提交
+  ↓ POST /major/direction
+后端 MajorDirectionDTO
+  ↓ dto.getEnterpriseId()
+MajorServiceImpl.addDirection()
+  ↓ 使用enterpriseId创建方向
+```
+
+### 5.2 兼容性设计
+
+解决方案采用了**优雅降级**策略：
+- 系统管理员：必须指定enterpriseId（从前端传递）
+- 企业负责人：可选，未指定时自动使用当前用户的企业ID
+- 向后兼容：旧的getCurrentUserEnterpriseId()逻辑保留
+
+## 六、经验总结
+
+### 6.1 问题类型
+- **数据流断层**：前端有数据但未传递给后端
+- **DTO设计不完整**：缺少必要的业务字段
+- **权限逻辑过于严格**：没有提供指定参数的途径
+
+### 6.2 最佳实践
+1. **DTO字段设计**：应包含所有可能需要的业务参数，使用`@Schema`标注是否必填
+2. **权限控制**：提供多种获取方式（指定参数 > 当前用户信息 > 默认值）
+3. **前端表单**：props传递的关键参数必须包含在formState中
+4. **错误提示**：明确告知用户缺少什么，而不是直接拒绝
+
+### 6.3 调试技巧
+- 使用浏览器Network查看请求payload，确认参数是否发送
+- 后端断点调试DTO对象，查看字段值
+- 检查前端formState和后端DTO的字段映射关系
+
+---
+
+# 专业代码保存为空问题
+
+- 日期：2026-03-01
+- 作者：系统维护者
+- 严重程度：中（数据完整性问题）
+
+## 一、问题描述
+
+### 问题表现
+用户在"软件工程"专业方向下点击"添加专业"：
+1. 弹窗显示"专业代码"字段标注为"自动生成"（禁用状态）
+2. 填写专业名称后点击"确定"
+3. 系统提示"添加成功"
+4. 但数据库中`major_code`字段为空（NULL或空字符串）
+
+### 影响范围
+- 所有新创建的专业记录
+- 专业代码字段数据缺失
+- 影响后续基于代码的查询和统计
+
+### 期望行为
+专业代码应该自动生成格式：`{方向代码}M{4位随机数}`，例如：`DEMO001D1234M5678`
+
+## 二、问题根源分析
+
+### 2.1 时序竞态条件（Race Condition）
+
+**问题执行流程：**
+```
+1. 弹窗打开 → watch 触发
+2. loadDirectionList() 异步请求开始 ▶ [异步执行中...]
+3. resetForm() 立即执行 → 设置 directionId = "软件工程的ID"
+4. watch(directionId) 触发 → 尝试从 directionOptions 查找
+5. ❌ directionOptions 还是空数组（异步请求未完成）
+6. ❌ 找不到 directionCode，majorCode 保持为空字符串 ''
+7. （稍后）loadDirectionList() 完成，但为时已晚
+8. 用户点击提交 → majorCode = '' 被发送到后端并保存到数据库
+```
+
+### 2.2 代码问题详解
+
+#### 问题代码1：loadDirectionList()
+```typescript
+// ❌ 问题代码：加载完成后没有触发代码生成
+const loadDirectionList = async () => {
+  directionLoading.value = true
+  try {
+    const response = await majorApi.getDirectionList()
+    directionOptions.value = response.data.map((item: MajorDirectionVO) => ({
+      value: item.directionId,
+      label: item.directionName,
+      directionCode: item.directionCode
+    }))
+    // 缺少：检查是否需要生成专业代码
+  } catch (error) {
+    console.error('加载专业方向列表失败:', error)
+  } finally {
+    directionLoading.value = false
+  }
+}
+```
+
+#### 问题代码2：watch执行顺序
+```typescript
+// ❌ 问题代码：先启动异步请求，再设置directionId
+watch(
+  () => [props.open, props.majorData],
+  ([newOpen, newData]) => {
+    if (newOpen) {
+      loadDirectionList()  // 异步，立即返回
+      if (newData) {
+        fillFormData(newData as MajorVO)
+      } else {
+        resetForm()  // 设置directionId，触发另一个watch
+      }
+    }
+  },
+  { immediate: true }
+)
+```
+
+#### 问题代码3：directionId的watch
+```typescript
+// ⚠️ 依赖directionOptions已加载，但不保证时序
+watch(
+  () => formState.directionId,
+  (newDirectionId) => {
+    if (!isEdit.value && newDirectionId) {
+      const direction = directionOptions.value.find(opt => opt.value === newDirectionId)
+      if (direction && direction.directionCode) {  // ❌ 找不到，因为数组还是空的
+        currentDirectionCode.value = direction.directionCode
+        formState.majorCode = generateMajorCode(direction.directionCode)
+      }
+    }
+  }
+)
+```
+
+### 2.3 时间线分析
+
+```
+T0: 弹窗打开
+T1: watch触发 → loadDirectionList()开始（异步）
+T2: resetForm()执行 → directionId = "xxx"
+T3: watch(directionId)触发 → 尝试find(...) 
+T4: directionOptions = [] （空数组）❌
+T5: majorCode保持为 ''
+T6: （500ms后）loadDirectionList()完成
+T7: directionOptions = [完整数据] （但太晚了）
+T8: 用户提交 → majorCode = '' 被保存
+```
+
+## 三、解决方案
+
+### 3.1 增强loadDirectionList方法
+
+**修改文件：** `MajorFormModal.vue`
+
+```typescript
+/**
+ * 加载专业方向列表
+ */
+const loadDirectionList = async () => {
+  directionLoading.value = true
+  try {
+    const response = await majorApi.getDirectionList()
+    directionOptions.value = response.data.map((item: MajorDirectionVO) => ({
+      value: item.directionId,
+      label: item.directionName,
+      directionCode: item.directionCode
+    }))
+    
+    // ✅ 关键修复：加载完成后，如果已有选中的方向，生成专业代码
+    if (!isEdit.value && formState.directionId) {
+      const direction = directionOptions.value.find(opt => opt.value === formState.directionId)
+      if (direction && direction.directionCode) {
+        currentDirectionCode.value = direction.directionCode
+        formState.majorCode = generateMajorCode(direction.directionCode)
+        console.log('✅ 自动生成专业代码:', formState.majorCode)
+      }
+    }
+  } catch (error) {
+    console.error('加载专业方向列表失败:', error)
+  } finally {
+    directionLoading.value = false
+  }
+}
+```
+
+### 3.2 调整watch执行顺序
+
+```typescript
+/**
+ * 监听弹窗开关和数据变化
+ */
+watch(
+  () => [props.open, props.majorData],
+  async ([newOpen, newData]) => {  // ✅ 改为 async 函数
+    if (newOpen) {
+      // ✅ 先设置表单数据（包括directionId）
+      if (newData) {
+        fillFormData(newData as MajorVO)
+      } else {
+        resetForm()  // 这里会设置 directionId
+      }
+      // ✅ 然后等待加载完成（它会自动检查并生成代码）
+      await loadDirectionList()
+    }
+  },
+  { immediate: true }
+)
+```
+
+### 3.3 修复后的执行流程
+
+```
+T0: 弹窗打开
+T1: watch触发（async函数）
+T2: resetForm()执行 → directionId = "软件工程ID"
+T3: await loadDirectionList() 开始
+T4: 异步请求发送...
+T5: 异步请求返回 → directionOptions = [完整数据] ✅
+T6: 检测到 formState.directionId 有值
+T7: 从 directionOptions 找到对应的 directionCode ✅
+T8: 生成 majorCode = "DEMO001D1234M5678" ✅
+T9: watch继续执行（但已完成核心逻辑）
+T10: 用户看到自动生成的代码
+T11: 用户提交 → majorCode 正确保存到数据库 ✅
+```
+
+## 四、验证步骤
+
+### 4.1 代码验证
+```bash
+cd complete-frontend
+npm run type-check
+```
+✅ TypeScript类型检查通过
+
+### 4.2 功能验证步骤
+
+1. **清空测试数据**
+   ```sql
+   DELETE FROM major WHERE major_name = '测试专业';
+   ```
+
+2. **创建专业**
+   - 登录系统管理员账号
+   - 进入"专业管理"页面
+   - 点击"软件工程"方向的"添加专业"按钮
+   - 填写专业名称："测试专业"
+   - 观察"专业代码"字段：应显示类似 `DEMO001D1234M5678` 的代码
+   - 点击"确定"提交
+
+3. **验证数据库**
+   ```sql
+   SELECT major_id, major_name, major_code, direction_id
+   FROM major
+   WHERE major_name = '测试专业';
+   ```
+   ✅ 预期结果：`major_code` 字段有值，格式正确
+
+4. **多次测试**
+   - 创建多个专业，确保每次代码都不同（随机数部分）
+   - 编辑专业时，代码应保持不变（只读）
+
+## 五、关键技术点
+
+### 5.1 异步编程最佳实践
+
+**问题模式（避免）：**
+```typescript
+// ❌ 错误：启动异步任务后立即执行依赖它的代码
+async function badPattern() {
+  loadData()  // 异步，立即返回
+  useData()   // ❌ 数据可能还未加载
+}
+```
+
+**正确模式：**
+```typescript
+// ✅ 正确：等待异步任务完成
+async function goodPattern() {
+  await loadData()  // 等待完成
+  useData()         // ✅ 数据已就绪
+}
+```
+
+### 5.2 Vue3 Watch的异步处理
+
+```typescript
+// ✅ watch回调可以是async函数
+watch(
+  () => someRef.value,
+  async (newValue) => {
+    await doSomethingAsync()
+    // 继续处理
+  }
+)
+```
+
+### 5.3 数据加载后的二次处理模式
+
+```typescript
+const loadData = async () => {
+  const data = await fetchData()
+  // ✅ 关键：加载完成后立即处理依赖该数据的逻辑
+  if (needsProcessing) {
+    processData(data)
+  }
+}
+```
+
+## 六、经验总结
+
+### 6.1 问题类型识别
+
+**时序竞态条件的典型特征：**
+- ✓ 某些时候工作正常（异步任务快速完成时）
+- ✓ 某些时候失败（网络慢或数据量大时）
+- ✓ 难以复现（取决于异步任务完成时间）
+- ✓ 调试时问题消失（断点延迟了执行）
+
+### 6.2 调试技巧
+
+1. **添加时间戳日志**
+   ```typescript
+   console.log('[T0] 弹窗打开:', Date.now())
+   console.log('[T1] 开始加载:', Date.now())
+   console.log('[T2] 加载完成:', Date.now(), directionOptions.value.length)
+   console.log('[T3] 生成代码:', Date.now(), formState.majorCode)
+   ```
+
+2. **检查数据状态**
+   ```typescript
+   console.log('directionOptions:', directionOptions.value)
+   console.log('formState.directionId:', formState.directionId)
+   console.log('computed majorCode:', formState.majorCode)
+   ```
+
+3. **使用Vue DevTools**
+   - 查看组件props和state的实时值
+   - 追踪watch的触发时机和顺序
+
+### 6.3 预防措施
+
+1. **异步依赖明确化**：确保依赖异步数据的代码使用`await`
+2. **数据加载后处理**：在异步加载完成后立即检查并处理相关逻辑
+3. **watch顺序控制**：使用`async/await`控制watch回调中的执行顺序
+4. **防御性编程**：检查数组不为空再进行查找操作
+
+### 6.4 测试建议
+
+1. **慢速网络测试**：使用Chrome DevTools限速，模拟慢速网络
+2. **延迟注入**：人为添加延迟，验证时序处理是否正确
+   ```typescript
+   await new Promise(resolve => setTimeout(resolve, 1000))
+   ```
+3. **并发测试**：快速打开关闭弹窗，测试并发场景
 
 ---

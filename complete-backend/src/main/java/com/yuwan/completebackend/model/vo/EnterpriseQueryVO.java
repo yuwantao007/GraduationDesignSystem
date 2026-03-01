@@ -27,8 +27,14 @@ public class EnterpriseQueryVO implements Serializable {
     @Schema(description = "企业编码")
     private String enterpriseCode;
 
+    @Schema(description = "关键词（企业名称或编码，用于概览页面）")
+    private String keyword;
+
     @Schema(description = "状态（0-禁用 1-正常）")
     private Integer enterpriseStatus;
+
+    @Schema(description = "状态（用于概览页面，0-禁用 1-正常）")
+    private Integer status;
 
     @Schema(description = "页码", example = "1")
     private Integer pageNum = 1;

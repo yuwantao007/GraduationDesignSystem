@@ -388,3 +388,250 @@ export interface TopicFormData extends Omit<CreateTopicDTO, 'startDate' | 'endDa
   /** 起止日期范围 */
   dateRange?: [string, string]
 }
+
+// ======================== 课题审查相关类型定义 ========================
+
+/**
+ * 审查阶段枚举
+ */
+export enum ReviewStage {
+  /** 预审 */
+  PRE_REVIEW = 1,
+  /** 初审 */
+  INITIAL_REVIEW = 2,
+  /** 终审 */
+  FINAL_REVIEW = 3
+}
+
+/**
+ * 审查结果枚举
+ */
+export enum ReviewResult {
+  /** 通过 */
+  PASSED = 1,
+  /** 需修改 */
+  NEED_MODIFY = 2,
+  /** 不通过 */
+  REJECTED = 3
+}
+
+/**
+ * 待审查课题列表VO
+ */
+export interface TopicReviewListVO {
+  /** 课题ID */
+  topicId: string
+  /** 课题名称 */
+  topicTitle: string
+  /** 课题大类（1-高职升本 2-3+1 3-实验班） */
+  topicCategory: TopicCategory
+  /** 课题大类名称 */
+  topicCategoryName: string
+  /** 课题类型（1-设计 2-论文） */
+  topicType: TopicType
+  /** 课题类型名称 */
+  topicTypeName: string
+  /** 指导方向/专业 */
+  guidanceDirection?: string
+  /** 归属企业ID */
+  enterpriseId?: string
+  /** 归属企业名称 */
+  enterpriseName?: string
+  /** 创建人ID（企业教师） */
+  creatorId: string
+  /** 创建人姓名 */
+  creatorName?: string
+  /** 当前审查状态 */
+  reviewStatus: number
+  /** 当前审查状态名称 */
+  reviewStatusName: string
+  /** 是否可审批 */
+  canReview: boolean
+  /** 提交时间 */
+  submitTime?: string
+  /** 最近审查时间 */
+  lastReviewTime?: string
+  /** 已有审查记录数 */
+  reviewCount: number
+  /** 最近审查意见（简略） */
+  lastReviewOpinion?: string
+  /** 历史审查记录列表 */
+  reviewHistory?: TopicReviewRecordVO[]
+}
+
+/**
+ * 课题审查记录VO
+ */
+export interface TopicReviewRecordVO {
+  /** 审查记录ID */
+  reviewId: string
+  /** 课题ID */
+  topicId: string
+  /** 课题名称 */
+  topicTitle?: string
+  /** 审查阶段（1-预审 2-初审 3-终审） */
+  reviewStage: ReviewStage
+  /** 审查阶段名称 */
+  reviewStageName: string
+  /** 审查人ID */
+  reviewerId: string
+  /** 审查人角色代码 */
+  reviewerRole: string
+  /** 审查人角色名称 */
+  reviewerRoleName: string
+  /** 审查人姓名 */
+  reviewerName: string
+  /** 审查结果（1-通过 2-需修改 3-不通过） */
+  reviewResult: ReviewResult
+  /** 审查结果名称 */
+  reviewResultName: string
+  /** 审查意见 */
+  reviewOpinion?: string
+  /** 是否批量审查 */
+  isBatchReview: boolean
+  /** 是否被修改过 */
+  isModified: boolean
+  /** 修改人姓名 */
+  modifiedByName?: string
+  /** 修改时间 */
+  modifiedTime?: string
+  /** 审查时间 */
+  createTime: string
+}
+
+/**
+ * 综合意见VO
+ */
+export interface GeneralOpinionVO {
+  /** 意见ID */
+  opinionId: string
+  /** 审查阶段 */
+  reviewStage: ReviewStage
+  /** 审查阶段名称 */
+  reviewStageName: string
+  /** 专业方向 */
+  guidanceDirection: string
+  /** 意见内容 */
+  opinionContent: string
+  /** 提交人ID */
+  submitterId: string
+  /** 提交人姓名 */
+  submitterName: string
+  /** 提交人角色名称 */
+  submitterRoleName: string
+  /** 提交时间 */
+  createTime: string
+}
+
+/**
+ * 批量审查结果VO
+ */
+export interface BatchReviewResultVO {
+  /** 成功数量 */
+  successCount: number
+  /** 失败数量 */
+  failCount: number
+  /** 失败详情列表 */
+  failDetails: BatchReviewFailDetail[]
+}
+
+/**
+ * 批量审查失败详情
+ */
+export interface BatchReviewFailDetail {
+  /** 课题ID */
+  topicId: string
+  /** 课题名称 */
+  topicTitle?: string
+  /** 失败原因 */
+  reason: string
+}
+
+/**
+ * 教师通过终审课题统计VO
+ */
+export interface TeacherPassedCountVO {
+  /** 教师ID */
+  teacherId: string
+  /** 教师姓名 */
+  teacherName: string
+  /** 已通过终审课题数 */
+  passedCount: number
+  /** 剩余可提交数（上限18个） */
+  remainingCount: number
+  /** 是否已达上限 */
+  reachedLimit: boolean
+}
+
+/**
+ * 审查查询参数VO
+ */
+export interface ReviewQueryVO {
+  /** 课题名称（模糊查询） */
+  topicTitle?: string
+  /** 课题大类 */
+  topicCategory?: TopicCategory
+  /** 课题类型 */
+  topicType?: TopicType
+  /** 指导方向/专业 */
+  guidanceDirection?: string
+  /** 归属企业ID */
+  enterpriseId?: string
+  /** 创建人姓名（模糊查询） */
+  creatorName?: string
+  /** 审查状态 */
+  reviewStatus?: number
+  /** 页码 */
+  pageNum?: number
+  /** 每页大小 */
+  pageSize?: number
+}
+
+/**
+ * 单个课题审批请求DTO
+ */
+export interface ReviewTopicDTO {
+  /** 课题ID */
+  topicId: string
+  /** 审查结果（1-通过 2-需修改 3-不通过） */
+  reviewResult: ReviewResult
+  /** 审查意见（最多500字） */
+  reviewOpinion?: string
+}
+
+/**
+ * 批量课题审批请求DTO
+ */
+export interface BatchReviewDTO {
+  /** 课题ID列表 */
+  topicIds: string[]
+  /** 审查结果（1-通过 2-需修改 3-不通过） */
+  reviewResult: ReviewResult
+  /** 批量审查意见（最多500字） */
+  reviewOpinion?: string
+}
+
+/**
+ * 修改审查结果请求DTO
+ */
+export interface ModifyReviewDTO {
+  /** 审查记录ID */
+  reviewId: string
+  /** 新的审查结果（1-通过 2-需修改 3-不通过） */
+  newReviewResult: ReviewResult
+  /** 新的审查意见（最多500字） */
+  newReviewOpinion?: string
+}
+
+/**
+ * 综合意见提交请求DTO
+ */
+export interface GeneralOpinionDTO {
+  /** 审查阶段（2-初审 3-终审） */
+  reviewStage: ReviewStage
+  /** 专业方向 */
+  guidanceDirection: string
+  /** 意见内容（最多200字） */
+  opinionContent: string
+}
+

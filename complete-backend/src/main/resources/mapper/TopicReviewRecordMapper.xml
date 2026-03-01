@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuwan.completebackend.mapper.TopicReviewRecordMapper">
+
+    <!-- 根据课题ID查询审查历史记录 -->
+    <select id="selectByTopicIdOrderByTime" resultType="com.yuwan.completebackend.model.entity.TopicReviewRecord">
+        SELECT review_id, topic_id, review_stage, reviewer_id, reviewer_role, reviewer_name,
+               review_result, review_opinion, is_batch_review, batch_review_id,
+               previous_status, new_status, is_modified, modified_by, modified_time,
+               deleted, create_time, update_time
+        FROM topic_review_record
+        WHERE topic_id = #{topicId}
+          AND deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据课题ID和审查阶段查询最新审查记录 -->
+    <select id="selectLatestByTopicAndStage" resultType="com.yuwan.completebackend.model.entity.TopicReviewRecord">
+        SELECT review_id, topic_id, review_stage, reviewer_id, reviewer_role, reviewer_name,
+               review_result, review_opinion, is_batch_review, batch_review_id,
+               previous_status, new_status, is_modified, modified_by, modified_time,
+               deleted, create_time, update_time
+        FROM topic_review_record
+        WHERE topic_id = #{topicId}
+          AND review_stage = #{reviewStage}
+          AND deleted = 0
+        ORDER BY create_time DESC
+        LIMIT 1
+    </select>
+
+    <!-- 统计课题的审查记录数 -->
+    <select id="countByTopicId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM topic_review_record
+        WHERE topic_id = #{topicId}
+          AND deleted = 0
+    </select>
+
+</mapper>

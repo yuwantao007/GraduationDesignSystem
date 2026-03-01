@@ -347,6 +347,42 @@ public class UserServiceImpl implements IUserService {
         return getUserDetail(userId);
     }
 
+    @Override
+    public List<UserVO> getLeaderList() {
+        // 查询所有正常状态的用户
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getUserStatus, 1) // 只查询正常状态的用户
+                .orderByAsc(User::getRealName);
+
+        List<User> users = userMapper.selectList(queryWrapper);
+        
+        // 过滤掉学生和系统管理员角色
+        List<UserVO> leaderList = new ArrayList<>();
+        for (User user : users) {
+            List<Role> roles = roleMapper.selectRolesByUserId(user.getUserId());
+            
+            // 检查该用户是否有学生或系统管理员角色
+            boolean isStudentOrAdmin = roles.stream()
+                    .anyMatch(role -> "STUDENT".equals(role.getRoleCode()) 
+                            || "SYSTEM_ADMIN".equals(role.getRoleCode()));
+            
+            // 如果不是学生或管理员，则添加到列表中
+            if (!isStudentOrAdmin) {
+                UserVO userVO = new UserVO();
+                userVO.setUserId(user.getUserId());
+                userVO.setRealName(user.getRealName());
+                userVO.setUsername(user.getUsername());
+                userVO.setEmployeeNo(user.getEmployeeNo());
+                userVO.setUserEmail(user.getUserEmail());
+                userVO.setUserPhone(user.getUserPhone());
+                leaderList.add(userVO);
+            }
+        }
+        
+        log.info("获取负责人列表成功，共{}人", leaderList.size());
+        return leaderList;
+    }
+
     /**
      * 批量插入用户角色关联
      * 性能优化：将循环插入改为批量插入，减少数据库交互次数

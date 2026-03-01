@@ -72,4 +72,13 @@ public interface IEnterpriseService {
      * @param status       状态（0-禁用 1-正常）
      */
     void updateEnterpriseStatus(String enterpriseId, Integer status);
+
+    /**
+     * 获取企业概览统计数据
+     * 包含企业基本信息及其下属的方向、专业、人员统计
+     *
+     * @param queryVO 查询参数（支持关键词搜索和状态筛选）
+     * @return 企业概览分页结果
+     */
+    PageResult<com.yuwan.completebackend.model.vo.EnterpriseOverviewVO> getEnterpriseOverview(EnterpriseQueryVO queryVO);
 }

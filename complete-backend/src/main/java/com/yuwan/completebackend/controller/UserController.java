@@ -121,4 +121,11 @@ public class UserController {
         UserVO userVO = userService.getCurrentUserInfo(userId);
         return Result.success(userVO);
     }
+
+    @GetMapping("/leaders")
+    @Operation(summary = "获取负责人列表", description = "获取可以作为负责人的用户列表（排除学生和系统管理员）")
+    public Result<java.util.List<UserVO>> getLeaderList() {
+        java.util.List<UserVO> leaders = userService.getLeaderList();
+        return Result.success(leaders);
+    }
 }

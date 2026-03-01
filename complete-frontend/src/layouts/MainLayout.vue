@@ -34,21 +34,33 @@
           </a-menu-item>
         </a-sub-menu>
         
-        <a-menu-item v-if="userStore.hasPermission('enterprise:view')" key="/enterprise">
+        <a-sub-menu v-if="userStore.hasPermission('enterprise:view') || userStore.hasPermission('enterprise:major:view')" key="enterprise-mgmt">
           <template #icon><BankOutlined /></template>
-          <span>企业管理</span>
-        </a-menu-item>
+          <template #title>企业管理</template>
+          <a-menu-item v-if="userStore.hasPermission('enterprise:view')" key="/enterprise/overview">
+            企业概览
+          </a-menu-item>
+          <a-menu-item v-if="userStore.hasPermission('enterprise:view')" key="/enterprise/list">
+            企业列表
+          </a-menu-item>
+          <a-menu-item v-if="userStore.hasPermission('enterprise:major:view') || userStore.hasAnyRole(['SYSTEM_ADMIN', 'ENTERPRISE_LEADER'])" key="/enterprise/major">
+            专业管理
+          </a-menu-item>
+        </a-sub-menu>
         
         <a-menu-item v-if="userStore.hasPermission('school:view')" key="/school">
           <template #icon><ReadOutlined /></template>
           <span>学校管理</span>
         </a-menu-item>
         
-        <a-sub-menu key="topic">
+        <!-- 课题管理：根据角色显示不同子菜单 -->
+        <a-sub-menu v-if="userStore.hasAnyRole(['ENTERPRISE_TEACHER', 'SYSTEM_ADMIN', 'UNIVERSITY_TEACHER', 'MAJOR_DIRECTOR', 'SUPERVISOR_TEACHER'])" key="topic">
           <template #icon><FileTextOutlined /></template>
           <template #title>课题管理</template>
-          <a-menu-item key="/topic/list">课题列表</a-menu-item>
-          <a-menu-item key="/topic/approval">课题审批</a-menu-item>
+          <!-- 课题列表：仅企业教师和系统管理员可见（课题创建/编辑/删除） -->
+          <a-menu-item v-if="userStore.hasPermission('topic:view') && userStore.hasAnyRole(['ENTERPRISE_TEACHER', 'SYSTEM_ADMIN'])" key="/topic/list">课题列表</a-menu-item>
+          <!-- 课题审查：仅审查角色可见（高校教师/专业方向主管/督导教师） -->
+          <a-menu-item v-if="userStore.hasPermission('topic:review') && userStore.hasAnyRole(['UNIVERSITY_TEACHER', 'MAJOR_DIRECTOR', 'SUPERVISOR_TEACHER'])" key="/topic/review">课题审查</a-menu-item>
         </a-sub-menu>
         
         <a-sub-menu key="document">
@@ -172,6 +184,7 @@ const userInfo = computed(() => userStore.userInfo)
  */
 const getOpenKeys = (path: string): string[] => {
   if (path.startsWith('/user')) return ['user-mgmt']
+  if (path.startsWith('/enterprise')) return ['enterprise-mgmt']
   if (path.startsWith('/topic')) return ['topic']
   if (path.startsWith('/document')) return ['document']
   if (path.startsWith('/school')) return []
@@ -184,11 +197,12 @@ const updateBreadcrumbs = (path: string) => {
     '/dashboard': [{ title: '首页' }, { title: '仪表盘' }],
     '/user': [{ title: '首页', path: '/' }, { title: '用户管理' }, { title: '用户列表' }],
     '/user/role': [{ title: '首页', path: '/' }, { title: '用户管理' }, { title: '角色权限' }],
-    '/enterprise': [{ title: '首页', path: '/' }, { title: '企业管理' }],
+    '/enterprise/list': [{ title: '首页', path: '/' }, { title: '企业管理' }, { title: '企业列表' }],
+    '/enterprise/major': [{ title: '首页', path: '/' }, { title: '企业管理' }, { title: '专业管理' }],
     '/school': [{ title: '首页', path: '/' }, { title: '学校管理' }],
     '/profile': [{ title: '首页', path: '/' }, { title: '个人中心' }],
     '/topic/list': [{ title: '首页', path: '/' }, { title: '课题管理' }, { title: '课题列表' }],
-    '/topic/approval': [{ title: '首页', path: '/' }, { title: '课题管理' }, { title: '课题审批' }],
+    '/topic/review': [{ title: '首页', path: '/' }, { title: '课题管理' }, { title: '课题审查' }],
     '/document/list': [{ title: '首页', path: '/' }, { title: '文档管理' }, { title: '文档列表' }],
     '/document/upload': [{ title: '首页', path: '/' }, { title: '文档管理' }, { title: '文档上传' }],
     '/settings': [{ title: '首页', path: '/' }, { title: '系统设置' }]

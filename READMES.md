@@ -279,7 +279,7 @@ graph TD
 - 专业训练描述不少于50字
 - 不同大类课题审查链路：
   - 高职升本：高校教师预审 → 专业方向主管初审 → 督导教师终审
-  - 3+1/实验班：专业方向主管初审 → 高校负责人终审
+  - 3+1/实验班：专业方向主管初审 → 高校教师终审
 
 **流程图**：
 ```
@@ -1530,12 +1530,19 @@ graph TD
 
 #### 11.1.7 课题管理模块（已完成 ✅）
 - ✅ 课题申报功能
+- ✅ 课题审查功能（状态机模式实现三级审批流程：预审→初审→终审）
+  - ✅ 审查记录管理（TopicReviewRecord）
+  - ✅ 综合意见管理（TopicGeneralOpinion）
+  - ✅ 批量审批功能（TopicBatchReview）
+  - ✅ 单个/批量审批 API
+  - ✅ 审批结果修改（需满足下级未通过条件）
+  - ✅ 教师课题数量限制（≤18个）
+  - ✅ 权限配置脚本（add_topic_review_permissions.sql）
 
 
 ### 11.2 待开发功能模块
 
 #### 11.2.1 课题管理模块（待开发 ⏳）
-- ⏳ 四级审批流程
 - ⏳ 课题双选管理
 - ⏳ 课题状态跟踪
 
@@ -1601,11 +1608,11 @@ graph TD
 
 ### 11.4 近期开发计划
 
-#### 第一阶段：课题管理核心功能（预计2-3周）
-1. 课题信息实体设计与数据库表创建
-2. 课题申报功能开发（前后端）
-3. 四级审批流程实现
-4. 课题双选功能开发
+#### 第一阶段：课题管理核心功能（已完成 ✅）
+1. ✅ 课题信息实体设计与数据库表创建
+2. ✅ 课题申报功能开发（前后端）
+3. ✅ 三级审批流程实现（状态机模式：预审→初审→终审）
+4. ⏳ 课题双选功能开发
 
 #### 第二阶段：文档管理与过程跟踪（预计3-4周）
 1. MinIO对象存储集成
@@ -1635,8 +1642,58 @@ graph TD
 
 
 **文档版本**：V3.1  
-**更新日期**：2026年2月22日  
+**更新日期**：2026年2月23日  
 **更新内容**：
+
+### V3.2 更新（2026-02-23）- 课题审查子模块开发完成
+- ✅ **课题审查模块（后端）**
+  - **审查流程设计**：状态机模式实现三级审批流程（高校教师预审→专业方向主管初审→督导教师终审）
+  - **数据库设计**：SQL脚本 `topic_review.sql`（3张表：topic_review_record、topic_general_opinion、topic_batch_review）
+  - **实体类**（3个）
+    - `TopicReviewRecord.java`：审查记录实体（课题ID、审查阶段、审查结果、审查意见等）
+    - `TopicGeneralOpinion.java`：综合意见实体（专业方向、审查阶段、意见内容）
+    - `TopicBatchReview.java`：批量审批记录实体（批量审批统计）
+  - **枚举类**（2个）
+    - `ReviewStage.java`：审查阶段枚举（PRE_REVIEW/INIT_REVIEW/FINAL_REVIEW）
+    - `ReviewResult.java`：审查结果枚举（PASSED/NEED_MODIFY/REJECTED）
+  - **DTO/VO对象**（10个）
+    - DTOs：ReviewTopicDTO、BatchReviewDTO、ModifyReviewDTO、GeneralOpinionDTO
+    - VOs：TopicReviewRecordVO、GeneralOpinionVO、BatchReviewResultVO、ReviewQueryVO、TopicReviewListVO、TeacherPassedCountVO
+  - **Mapper接口及XML**（3组）
+    - TopicReviewRecordMapper：审查记录查询（含复杂联表查询）
+    - TopicGeneralOpinionMapper：综合意见CRUD
+    - TopicBatchReviewMapper：批量审批记录
+  - **Service层**：ITopicReviewService接口 + TopicReviewServiceImpl实现
+    - 待审课题分页查询、单个/批量审批、审查历史、综合意见管理
+    - 审批结果修改（需满足下级未通过条件）
+    - 教师课题数量统计与限制（≤18个）
+    - 角色-审查阶段自动映射逻辑
+  - **Controller层**：TopicReviewController（12个API端点）
+    - GET `/topic/review/pending` - 获取待审查课题列表
+    - POST `/topic/review` - 单个课题审批
+    - POST `/topic/review/batch` - 批量课题审批
+    - GET `/topic/review/{topicId}/history` - 获取审查历史
+    - POST `/topic/review/general-opinion` - 提交综合意见
+    - GET `/topic/review/general-opinions` - 获取综合意见列表
+    - PUT `/topic/review/modify` - 修改审查结果
+    - DELETE `/topic/review/general-opinion/{opinionId}` - 删除综合意见
+    - GET `/topic/review/stats/passed-count` - 教师通过终审统计
+    - GET `/topic/review/check-submit` - 检查教师提交资格
+    - GET `/topic/review/{topicId}/can-review` - 检查是否可审查
+    - GET `/topic/review/{topicId}/modifiable-record` - 获取可修改审查记录
+  - **权限配置**：SQL脚本 `add_topic_review_permissions.sql`
+    - 权限ID范围：600-649
+    - 系统管理员：全部权限
+    - 高校教师：预审高职升本课题 + 终审3+1/实验班课题、查看历史、查看综合意见
+    - 专业方向主管：初审所有课题、综合意见管理
+    - 督导教师：终审高职升本课题、综合意见管理、统计查看
+    - 企业教师：查看审查历史、查看综合意见、检查提交资格
+    - 企业负责人：查看教师统计
+  - **业务规则实现**
+    - 高职升本课题：预审→初审→终审（完整三级）
+    - 3+1/实验班课题：跳过预审，初审(专业方向主管) → 终审(高校教师)
+    - 企业教师通过终审课题数≤18个
+    - 审查修改规则：仅当下级阶段未通过时允许修改
 
 ### V3.1 更新（2026-02-22）- 企业管理功能模块开发完成
 - ✅ **企业管理模块（仅管理员）**
@@ -1654,6 +1711,65 @@ graph TD
   - **部署要点**：执行SQL脚本 → 重启后端 → 已登录用户需退出重新登录（获取新权限）
   - **代码规范**：严格遵循rule.md（Vue 3 Composition API、TypeScript、JSDoc注释、SCSS scoped）
   - 📄 详细文档：`complete-backend/docs/企业管理功能部署指南.md`
+
+#### V4.1（2026-03-01）- 企业专业管理模块
+- ✨ **企业概览功能**
+  - 新增企业概览页面（`/enterprise/overview`），作为企业管理首页
+  - 功能特性：
+    - 简洁主表格展示：企业名称、方向数、专业数、教师数、学生数、状态
+    - 详情按钮：点击打开模态框，以表格报表形式展示专业方向与专业详情
+    - 顶部统计卡片：汇总显示专业方向、专业、教师、学生总数
+    - 扁平化表格展示：专业方向行（浅蓝背景）+ 专业行（缩进显示）
+  - 技术实现：
+    - 后端VO：`EnterpriseOverviewVO`（包含directions列表）、`DirectionOverviewVO`、`MajorOverviewVO`
+    - Service层：递归查询企业→方向→专业，按方向统计教师/学生数
+    - 前端：模态框展示（900px宽）、图标区分（📁方向/📄专业）、颜色标识（教师蓝色/学生绿色）
+  
+- ✨ **专业方向与专业管理模块**（完整实现）
+  - **业务背景**：解决专业方向文本输入不规范问题，建立企业→方向→专业三级树型结构
+  - **数据库设计**：
+    - 表1：`major_direction_info`（专业方向表）- 9字段：direction_id, enterprise_id, direction_name, direction_code, description, leader_id, leader_name, sort_order, status
+    - 表2：`major_info`（专业表）- 11字段：major_id, direction_id, enterprise_id, major_name, major_code, degree_type, education_years, max_students, description, sort_order, status
+    - 关系：enterprise ← 1:N → direction ← 1:N → major
+    - SQL文件：`complete-backend/docs/sql/major_module.sql`
+  - **后端实现**（14个文件）：
+    - Entity：MajorDirection.java、Major.java
+    - DTO：MajorDirectionDTO.java、MajorDTO.java
+    - VO：MajorDirectionVO.java、MajorVO.java、MajorTreeVO.java、MajorCascadeVO.java、MajorQueryVO.java
+    - Mapper：MajorDirectionMapper（13个方法）、MajorMapper（12个方法）+ XML映射文件
+    - Service：IMajorService.java（15个方法声明）、MajorServiceImpl.java（完整业务逻辑实现）
+    - Controller：MajorController.java（12个RESTful接口 + Swagger文档）
+  - **前端实现**（7个文件）：
+    - 类型定义：`types/major.ts`（8个TypeScript接口）
+    - API封装：`api/major.ts`（12个接口方法）
+    - 组件：DirectionFormModal.vue（专业方向表单）、MajorFormModal.vue（专业表单）
+    - 页面：`views/major/MajorList.vue`（树型结构展示、搜索筛选、CRUD操作、状态管理）
+    - 路由：`/enterprise/major`（权限：enterprise:major:view）
+    - 菜单：左侧菜单"企业管理"下新增"专业管理"子菜单项
+  - **核心功能**：
+    - 树型结构管理：展开/收起、拖拽排序、层级展示
+    - 专业方向：创建/编辑/删除（删除前检查子专业）、启用/禁用（级联子专业）
+    - 专业管理：创建/编辑/删除（删除前检查关联课题）、启用/禁用
+    - 级联选择器：课题创建时选择"专业方向→专业"
+    - 数据校验：名称唯一性、代码唯一性、关联关系完整性
+  - **权限配置**（9个权限 700-7008）：
+    - 700: 专业管理模块
+    - 7001: enterprise:major:view（查看）
+    - 7002-7004: 专业方向增删改
+    - 7005-7007: 专业增删改
+    - 7008: enterprise:major:status（启用/禁用）
+    - 角色映射：企业负责人、系统管理员拥有全部权限
+  - **测试数据**（IBM企业E002）：
+    - 专业方向：3个（计算机科学与技术CS、软件工程SE、网络工程NE）
+    - 专业：7个（计算机科学与技术、人工智能、大数据技术、软件工程、移动应用开发、网络工程、信息安全）
+  - **业务规则**：
+    - 企业教师指导上限：16人/届
+    - 删除专业方向：需先删除所有子专业
+    - 删除专业：若有关联课题则不可删除（可禁用）
+    - 禁用专业方向：级联禁用所有子专业
+    - 数据隔离：用户仅能管理所属企业的专业数据
+  - **向下兼容**：保留原guidance_direction字段，支持渐进式迁移
+  - 📄 完整文档：`complete-backend/docs/企业专业管理模块开发计划.md`（已精简合并至本文档）
 
 ### V3.0 更新（2026-02-21）- 业务流程与功能模块详细设计
 - ✨ **大幅扩充业务流程设计（第4章）**

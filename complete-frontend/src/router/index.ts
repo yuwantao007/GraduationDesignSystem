@@ -46,8 +46,28 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'enterprise',
         name: 'EnterpriseManagement',
-        component: () => import('@/views/enterprise/EnterpriseList.vue'),
-        meta: { title: '企业管理', icon: 'BankOutlined', permission: 'enterprise:view' }
+        redirect: '/enterprise/overview',
+        meta: { title: '企业管理', icon: 'BankOutlined', permission: 'enterprise:view' },
+        children: [
+          {
+            path: 'overview',
+            name: 'EnterpriseOverview',
+            component: () => import('@/views/enterprise/EnterpriseOverview.vue'),
+            meta: { title: '企业概览', permission: 'enterprise:view' }
+          },
+          {
+            path: 'list',
+            name: 'EnterpriseList',
+            component: () => import('@/views/enterprise/EnterpriseList.vue'),
+            meta: { title: '企业列表', permission: 'enterprise:view' }
+          },
+          {
+            path: 'major',
+            name: 'MajorManagement',
+            component: () => import('@/views/major/MajorList.vue'),
+            meta: { title: '专业管理', permission: 'enterprise:major:view' }
+          }
+        ]
       },
       {
         path: 'school',
@@ -85,6 +105,13 @@ const routes: RouteRecordRaw[] = [
         name: 'TopicDetail',
         component: () => import('@/views/topic/TopicDetail.vue'),
         meta: { title: '课题详情', permission: 'topic:view', hideInMenu: true }
+      },
+      // 课题审查路由
+      {
+        path: 'topic/review',
+        name: 'TopicReview',
+        component: () => import('@/views/topic/TopicReview.vue'),
+        meta: { title: '课题审查', icon: 'AuditOutlined', permission: 'topic:review' }
       }
     ]
   },

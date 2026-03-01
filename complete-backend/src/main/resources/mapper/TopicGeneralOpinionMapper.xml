@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuwan.completebackend.mapper.TopicGeneralOpinionMapper">
+
+    <!-- 根据专业方向和审查阶段查询综合意见 -->
+    <select id="selectByDirectionAndStage" resultType="com.yuwan.completebackend.model.entity.TopicGeneralOpinion">
+        SELECT opinion_id, reviewer_id, reviewer_role, reviewer_name, review_stage,
+               guidance_direction, opinion_content, target_scope, deleted, create_time, update_time
+        FROM topic_general_opinion
+        WHERE deleted = 0
+          <if test="guidanceDirection != null and guidanceDirection != ''">
+              AND guidance_direction = #{guidanceDirection}
+          </if>
+          <if test="reviewStage != null">
+              AND review_stage = #{reviewStage}
+          </if>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

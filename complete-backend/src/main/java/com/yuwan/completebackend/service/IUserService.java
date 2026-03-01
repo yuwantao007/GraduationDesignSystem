@@ -95,4 +95,12 @@ public interface IUserService {
      * @return 用户信息
      */
     UserVO getCurrentUserInfo(String userId);
+
+    /**
+     * 获取负责人列表
+     * 返回可以作为负责人的用户列表（排除学生和系统管理员角色）
+     *
+     * @return 负责人列表
+     */
+    java.util.List<UserVO> getLeaderList();
 }

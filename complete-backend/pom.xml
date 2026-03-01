@@ -171,6 +171,11 @@
                     <source>17</source>
                     <target>17</target>
                     <encoding>UTF-8</encoding>
+                    <fork>true</fork>
+                    <executable>E:\java版本\java_17\bin\javac.exe</executable>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>

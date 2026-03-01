@@ -79,9 +79,19 @@
     <!-- 操作按钮 -->
     <a-card class="topic-list__actions" :bordered="false">
       <a-space>
-        <a-button type="primary" @click="handleCreate">
+        <!-- 只有企业教师才能新建课题 -->
+        <a-button v-if="isEnterpriseTeacher" type="primary" @click="handleCreate">
           <template #icon><PlusOutlined /></template>
           新建课题
+        </a-button>
+        <!-- 企业教师显示综合意见管理和审批统计按钮 -->
+        <a-button v-if="isEnterpriseTeacher" @click="showOpinionModal">
+          <template #icon><MessageOutlined /></template>
+          综合意见管理
+        </a-button>
+        <a-button v-if="isEnterpriseTeacher" @click="showStatsModal">
+          <template #icon><BarChartOutlined /></template>
+          我的审批统计
         </a-button>
       </a-space>
     </a-card>
@@ -121,8 +131,9 @@
           <template v-else-if="column.key === 'action'">
             <a-space>
               <a-button type="link" size="small" @click="handleView(record)">查看</a-button>
+              <!-- 以下操作仅企业教师可见 -->
               <a-button
-                v-if="record.isSubmitted === 0"
+                v-if="isEnterpriseTeacher && record.isSubmitted === 0"
                 type="link"
                 size="small"
                 @click="handleEdit(record)"
@@ -130,14 +141,14 @@
                 编辑
               </a-button>
               <a-popconfirm
-                v-if="record.isSubmitted === 0"
+                v-if="isEnterpriseTeacher && record.isSubmitted === 0"
                 title="确定要删除该课题吗？"
                 @confirm="handleDelete(record.topicId)"
               >
                 <a-button type="link" danger size="small">删除</a-button>
               </a-popconfirm>
               <a-button
-                v-if="record.isSubmitted === 0"
+                v-if="isEnterpriseTeacher && record.isSubmitted === 0"
                 type="link"
                 size="small"
                 @click="handleSubmit(record.topicId)"
@@ -145,7 +156,7 @@
                 提交
               </a-button>
               <a-popconfirm
-                v-if="record.isSubmitted === 1 && record.reviewStatus === TopicReviewStatus.PENDING_PRE_REVIEW"
+                v-if="isEnterpriseTeacher && record.isSubmitted === 1 && record.reviewStatus === TopicReviewStatus.PENDING_PRE_REVIEW"
                 title="确定要撤回该课题吗？"
                 @confirm="handleWithdraw(record.topicId)"
               >
@@ -156,22 +167,101 @@
         </template>
       </a-table>
     </a-card>
+
+    <!-- 综合意见管理模态框（企业教师专用） -->
+    <a-modal
+      v-model:open="opinionModalVisible"
+      title="综合意见管理"
+      :width="660"
+      :footer="null"
+      centered
+    >
+      <div class="opinion-modal-content">
+        <a-tabs v-model:activeKey="opinionActiveTab" size="small">
+          <a-tab-pane key="list" tab="意见列表">
+            <a-spin :spinning="opinionLoading">
+              <a-list
+                v-if="generalOpinions.length > 0"
+                :data-source="generalOpinions"
+                item-layout="horizontal"
+              >
+                <template #renderItem="{ item }">
+                  <a-list-item>
+                    <a-list-item-meta
+                      :title="`${item.reviewStageName} - ${item.guidanceDirection}`"
+                      :description="item.opinionContent"
+                    >
+                      <template #avatar>
+                        <a-avatar style="background-color: #1890ff">
+                          {{ item.submitterName?.charAt(0) }}
+                        </a-avatar>
+                      </template>
+                    </a-list-item-meta>
+                    <template #actions>
+                      <span>{{ item.createTime }}</span>
+                    </template>
+                  </a-list-item>
+                </template>
+              </a-list>
+              <a-empty v-else description="暂无综合意见" />
+            </a-spin>
+          </a-tab-pane>
+        </a-tabs>
+      </div>
+    </a-modal>
+
+    <!-- 统计信息模态框（企业教师专用） -->
+    <a-modal
+      v-model:open="statsModalVisible"
+      title="我的审批统计"
+      :footer="null"
+    >
+      <a-spin :spinning="statsLoading">
+        <a-descriptions v-if="passedCountStats" :column="1" bordered>
+          <a-descriptions-item label="教师姓名">
+            {{ passedCountStats.teacherName }}
+          </a-descriptions-item>
+          <a-descriptions-item label="已通过终审课题数">
+            <a-statistic
+              :value="passedCountStats.passedCount"
+              :value-style="{ color: passedCountStats.reachedLimit ? '#f5222d' : '#3f8600' }"
+            />
+          </a-descriptions-item>
+          <a-descriptions-item label="剩余可提交数">
+            <a-statistic
+              :value="passedCountStats.remainingCount"
+              :value-style="{ color: passedCountStats.remainingCount === 0 ? '#f5222d' : '#1890ff' }"
+            />
+          </a-descriptions-item>
+          <a-descriptions-item label="状态">
+            <a-tag :color="passedCountStats.reachedLimit ? 'error' : 'success'">
+              {{ passedCountStats.reachedLimit ? '已达上限' : '可继续提交' }}
+            </a-tag>
+          </a-descriptions-item>
+        </a-descriptions>
+        <a-empty v-else description="暂无统计数据" />
+      </a-spin>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import {
   SearchOutlined,
   ReloadOutlined,
-  PlusOutlined
+  PlusOutlined,
+  MessageOutlined,
+  BarChartOutlined
 } from '@ant-design/icons-vue'
 import { topicApi } from '@/api/topic'
-import type { TopicListVO, TopicQueryVO } from '@/types/topic'
-import { TopicCategory, TopicType, TopicReviewStatus } from '@/types/topic'
-import type { TableProps } from 'ant-design-vue'
+import { topicReviewApi } from '@/api/topicReview'
+import { useUserStore } from '@/stores/user'
+import type { TopicListVO, TopicQueryVO, GeneralOpinionVO, GeneralOpinionDTO, TeacherPassedCountVO } from '@/types/topic'
+import { TopicCategory, TopicType, TopicReviewStatus, ReviewStage } from '@/types/topic'
+import type { TableProps, FormInstance } from 'ant-design-vue'
 
 // 定义组件选项
 defineOptions({
@@ -180,6 +270,14 @@ defineOptions({
 
 // 路由
 const router = useRouter()
+
+// 用户状态
+const userStore = useUserStore()
+
+// 是否为企业教师（显示综合意见管理和审批统计按钮）
+const isEnterpriseTeacher = computed(() => {
+  return userStore.hasAnyRole(['ENTERPRISE_TEACHER'])
+})
 
 // 搜索表单
 const searchForm = reactive<TopicQueryVO>({
@@ -262,6 +360,17 @@ const columns: TableProps['columns'] = [
     width: 250
   }
 ]
+
+// ==================== 综合意见相关（企业教师专用）====================
+const opinionModalVisible = ref(false)
+const opinionLoading = ref(false)
+const opinionActiveTab = ref('list')
+const generalOpinions = ref<GeneralOpinionVO[]>([])
+
+// ==================== 统计相关（企业教师专用）====================
+const statsModalVisible = ref(false)
+const statsLoading = ref(false)
+const passedCountStats = ref<TeacherPassedCountVO | null>(null)
 
 /**
  * 获取审查状态颜色
@@ -395,6 +504,53 @@ const handleWithdraw = async (topicId: string) => {
   } catch (error) {
     console.error('撤回课题失败', error)
     message.error('撤回课题失败')
+  }
+}
+
+// ==================== 综合意见操作（企业教师专用）====================
+
+/**
+ * 显示综合意见模态框
+ */
+const showOpinionModal = async () => {
+  opinionModalVisible.value = true
+  opinionActiveTab.value = 'list'
+  await loadGeneralOpinions()
+}
+
+/**
+ * 加载综合意见列表
+ */
+const loadGeneralOpinions = async () => {
+  try {
+    opinionLoading.value = true
+    const result = await topicReviewApi.getGeneralOpinions()
+    generalOpinions.value = result.data || []
+  } catch (error) {
+    console.error('获取综合意见失败', error)
+    message.error('获取综合意见失败')
+  } finally {
+    opinionLoading.value = false
+  }
+}
+
+// ==================== 统计操作（企业教师专用）====================
+
+/**
+ * 显示统计模态框
+ */
+const showStatsModal = async () => {
+  statsModalVisible.value = true
+  
+  try {
+    statsLoading.value = true
+    const result = await topicReviewApi.getTeacherPassedCount()
+    passedCountStats.value = result.data
+  } catch (error) {
+    console.error('获取统计数据失败', error)
+    message.error('获取统计数据失败')
+  } finally {
+    statsLoading.value = false
   }
 }
 
