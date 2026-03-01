@@ -62,6 +62,74 @@ export interface EnterpriseVO {
 }
 
 /**
+ * 专业概览 VO
+ */
+export interface MajorOverviewVO {
+  /** 专业ID */
+  majorId: string
+  /** 专业名称 */
+  majorName: string
+  /** 专业代码 */
+  majorCode?: string
+  /** 学位类型 */
+  degreeType?: string
+}
+
+/**
+ * 专业方向概览 VO
+ */
+export interface DirectionOverviewVO {
+  /** 专业方向ID */
+  directionId: string
+  /** 专业方向名称 */
+  directionName: string
+  /** 专业方向代码 */
+  directionCode?: string
+  /** 方向负责人 */
+  leaderName?: string
+  /** 该方向下的教师数量 */
+  teacherCount: number
+  /** 该方向下的学生数量 */
+  studentCount: number
+  /** 该方向下的专业列表 */
+  majors: MajorOverviewVO[]
+}
+
+/**
+ * 企业概览 VO（包含统计数据）
+ */
+export interface EnterpriseOverviewVO {
+  /** 企业ID */
+  enterpriseId: string
+  /** 企业名称 */
+  enterpriseName: string
+  /** 企业编码 */
+  enterpriseCode?: string
+  /** 负责人 */
+  leaderName?: string
+  /** 负责人电话 */
+  leaderPhone?: string
+  /** 企业地址 */
+  address?: string
+  /** 状态（0-禁用 1-正常） */
+  status: number
+  /** 状态描述 */
+  statusDesc?: string
+  /** 创建时间 */
+  createTime: string
+  /** 方向数量 */
+  directionCount: number
+  /** 专业数量 */
+  majorCount: number
+  /** 教师数量 */
+  teacherCount: number
+  /** 学生数量 */
+  studentCount: number
+  /** 专业方向列表（包含专业详情） */
+  directions: DirectionOverviewVO[]
+}
+
+/**
  * 企业查询参数 QueryVO
  */
 export interface EnterpriseQueryVO {
@@ -69,8 +137,12 @@ export interface EnterpriseQueryVO {
   enterpriseName?: string
   /** 企业编码 */
   enterpriseCode?: string
+  /** 关键词（企业名称或编码，用于概览页面） */
+  keyword?: string
   /** 状态（0-禁用 1-正常） */
   enterpriseStatus?: number
+  /** 状态（用于概览页面，0-禁用 1-正常） */
+  status?: number
   /** 页码 */
   pageNum?: number
   /** 每页大小 */

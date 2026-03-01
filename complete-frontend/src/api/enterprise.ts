@@ -8,6 +8,7 @@ import request from './request'
 import type { PageResult } from '@/types/common'
 import type {
   EnterpriseVO,
+  EnterpriseOverviewVO,
   EnterpriseQueryVO,
   CreateEnterpriseDTO,
   UpdateEnterpriseDTO
@@ -23,6 +24,14 @@ export const enterpriseApi = {
    */
   getEnterpriseList(params: EnterpriseQueryVO) {
     return request.get<PageResult<EnterpriseVO>>('/enterprise/list', { params })
+  },
+
+  /**
+   * 获取企业概览（包含统计数据）
+   * @param params - 查询参数
+   */
+  getEnterpriseOverview(params: EnterpriseQueryVO) {
+    return request.get<PageResult<EnterpriseOverviewVO>>('/enterprise/overview', { params })
   },
 
   /**

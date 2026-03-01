@@ -110,6 +110,14 @@ export const userApi = {
   },
 
   /**
+   * 获取负责人列表
+   * @description 获取可以作为负责人的用户列表（排除学生和系统管理员）
+   */
+  getLeaderList() {
+    return request.get<UserVO[]>('/user/leaders')
+  },
+
+  /**
    * 更新个人信息
    * @param data - 更新个人信息请求参数
    */
