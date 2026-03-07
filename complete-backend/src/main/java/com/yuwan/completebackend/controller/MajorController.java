@@ -8,12 +8,17 @@ import com.yuwan.completebackend.service.IMajorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -255,5 +260,62 @@ public class MajorController {
         log.info("切换专业状态，专业ID: {}, 状态: {}", majorId, status);
         majorService.updateMajorStatus(majorId, status);
         return Result.success();
+    }
+
+    // ==================== 企业老师搜索 ====================
+
+    /**
+     * 搜索企业老师（用于专业关联老师的下拉搜索）
+     *
+     * @param keyword      搜索关键词（姓名或账号，可选）
+     * @param enterpriseId 企业ID（可选，限定范围）
+     * @return 匹配的企业老师列表
+     */
+    @GetMapping("/teachers/search")
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'ENTERPRISE_LEADER')")
+    @Operation(summary = "搜索企业老师", description = "搜索 ENTERPRISE_TEACHER 角色用户，用于专业关联老师的下拉选择")
+    public Result<List<UserVO>> searchMajorTeachers(
+            @Parameter(description = "搜索关键词（姓名或账号）") @RequestParam(required = false) String keyword,
+            @Parameter(description = "企业ID（可选，限定范围）") @RequestParam(required = false) String enterpriseId) {
+        log.info("搜索企业老师，关键词: {}, 企业ID: {}", keyword, enterpriseId);
+        List<UserVO> result = majorService.searchMajorTeachers(keyword, enterpriseId);
+        return Result.success(result);
+    }
+
+    // ==================== Excel 导入 ====================
+
+    /**
+     * 下载专业导入模板
+     */
+    @GetMapping("/import/template")
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'ENTERPRISE_LEADER')")
+    @Operation(summary = "下载专业导入模板", description = "下载用于批量导入专业方向和专业的 Excel 模板")
+    public void downloadImportTemplate(HttpServletResponse response) throws Exception {
+        byte[] templateBytes = majorService.downloadImportTemplate();
+        String filename = URLEncoder.encode("专业导入模板.xls", StandardCharsets.UTF_8);
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + filename);
+        response.setContentLength(templateBytes.length);
+        response.getOutputStream().write(templateBytes);
+        response.getOutputStream().flush();
+    }
+
+    /**
+     * 通过 Excel 批量导入专业方向、专业及教师关联
+     *
+     * @param file         上传的 Excel 文件（.xlsx）
+     * @param enterpriseId 企业ID（系统管理员可指定；非管理员自动使用当前用户企业）
+     * @return 导入结果摘要
+     */
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'ENTERPRISE_LEADER')")
+    @Operation(summary = "Excel导入专业", description = "通过 Excel 批量导入专业方向、专业及关联教师")
+    public Result<ImportMajorResultVO> importMajors(
+            @Parameter(description = "Excel文件（.xlsx）") @RequestParam("file") MultipartFile file,
+            @Parameter(description = "企业ID（系统管理员可指定）") @RequestParam(required = false) String enterpriseId)
+            throws Exception {
+        log.info("Excel导入专业，文件名: {}, 企业ID: {}", file.getOriginalFilename(), enterpriseId);
+        ImportMajorResultVO result = majorService.importMajors(file, enterpriseId);
+        return Result.success(result);
     }
 }

@@ -1,5 +1,41 @@
 <template>
   <div class="dashboard">
+    <!-- 当前阶段进度卡片 -->
+    <a-card style="margin-bottom: 16px" :loading="phaseLoading">
+      <template #title>
+        <FieldTimeOutlined style="margin-right: 8px" />
+        当前阶段进度
+      </template>
+      <template v-if="phaseStatus?.initialized">
+        <a-row :gutter="24" style="margin-bottom: 12px">
+          <a-col :span="8">
+            <a-statistic title="当前阶段" :value="phaseStatus.phaseName || '--'">
+              <template #suffix>
+                <a-tag :color="currentPhaseColor" style="margin-left: 4px">
+                  {{ phaseStatus.phaseOrder }} / {{ phaseStatus.totalPhases }}
+                </a-tag>
+              </template>
+            </a-statistic>
+          </a-col>
+          <a-col :span="8">
+            <a-statistic title="毕业届别" :value="phaseStatus.cohort || '--'" />
+          </a-col>
+          <a-col :span="8">
+            <a-statistic title="整体进度" :value="phaseStatus.progressPercent" suffix="%" />
+          </a-col>
+        </a-row>
+        <a-progress :percent="phaseStatus.progressPercent" :stroke-color="progressColor" :show-info="false" />
+        <a-steps size="small" :current="currentStepIndex" style="margin-top: 16px">
+          <a-step
+            v-for="phase in phaseStatus.phaseList"
+            :key="phase.phaseCode"
+            :title="phase.phaseName"
+          />
+        </a-steps>
+      </template>
+      <a-empty v-else description="系统阶段尚未初始化" />
+    </a-card>
+
     <a-row :gutter="16">
       <a-col :span="6">
         <a-card>
@@ -88,13 +124,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, h } from 'vue'
+import { ref, computed, onMounted, h } from 'vue'
 import {
   UserOutlined,
   FileTextOutlined,
   ClockCircleOutlined,
-  EyeOutlined
+  EyeOutlined,
+  FieldTimeOutlined
 } from '@ant-design/icons-vue'
+import { phaseApi } from '@/api/phase'
+import type { PhaseStatusVO } from '@/types/phase'
+
+// 阶段状态
+const phaseStatus = ref<PhaseStatusVO | null>(null)
+const phaseLoading = ref(false)
+
+const progressColor = computed(() => {
+  const percent = phaseStatus.value?.progressPercent || 0
+  if (percent < 30) return { from: '#108ee9', to: '#87d068' }
+  if (percent < 60) return { from: '#87d068', to: '#faad14' }
+  return { from: '#faad14', to: '#52c41a' }
+})
+
+const currentPhaseColor = computed(() => {
+  const order = phaseStatus.value?.phaseOrder || 0
+  const colors = ['', 'blue', 'cyan', 'orange', 'green']
+  return colors[order] || 'blue'
+})
+
+const currentStepIndex = computed(() => {
+  if (!phaseStatus.value?.phaseOrder) return -1
+  return phaseStatus.value.phaseOrder - 1
+})
 
 // 统计数据
 const statistics = ref({
@@ -141,8 +202,21 @@ const loadData = async () => {
   }
 }
 
+const loadPhaseStatus = async () => {
+  phaseLoading.value = true
+  try {
+    const res = await phaseApi.getCurrentPhaseStatus()
+    phaseStatus.value = res.data
+  } catch {
+    // 阶段数据加载失败，不影响其他功能
+  } finally {
+    phaseLoading.value = false
+  }
+}
+
 onMounted(() => {
   loadData()
+  loadPhaseStatus()
 })
 </script>
 

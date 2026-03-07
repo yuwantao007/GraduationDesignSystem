@@ -8,6 +8,7 @@ import request from './request'
 import type { PageResult } from '@/types/common'
 import type {
   SchoolVO,
+  SchoolOptionVO,
   SchoolQueryVO,
   CreateSchoolDTO,
   UpdateSchoolDTO
@@ -26,10 +27,18 @@ export const schoolApi = {
   },
 
   /**
-   * 获取全部启用学校（下拉选择用）
+   * 获取全部启用学校（完整版，管理员专用）
    */
   getAllSchools() {
     return request.get<SchoolVO[]>('/school/all')
+  },
+
+  /**
+   * 获取学校下拉选项（精简版，所有登录用户可用）
+   * 仅返回 schoolId 和 schoolName
+   */
+  getSchoolOptions() {
+    return request.get<SchoolOptionVO[]>('/school/options')
   },
 
   /**

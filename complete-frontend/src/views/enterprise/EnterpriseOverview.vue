@@ -159,7 +159,7 @@
             size="middle"
             :scroll="{ y: 400 }"
           >
-            <!-- 专业方向列 - 支持合并单元格 -->
+            <!-- 专业方向 / 专业名称列 -->
             <template #directionName="{ record }">
               <span v-if="record.isDirection" style="font-weight: 600; color: #1890ff; font-size: 14px">
                 📁 {{ record.directionName }}
@@ -169,18 +169,33 @@
               </span>
             </template>
 
-            <!-- 教师数列 -->
-            <template #teacherCount="{ record }">
-              <span v-if="record.teacherCount !== ''" style="font-weight: 500; color: #1890ff">
-                {{ record.teacherCount }} 人
-              </span>
+            <!-- 企业老师列（专业行显示老师标签，方向行显示人数统计） -->
+            <template #teachers="{ record }">
+              <template v-if="record.isDirection">
+                <span v-if="record.teacherCount > 0" style="font-weight: 500; color: #1890ff">
+                  {{ record.teacherCount }} 人
+                </span>
+                <span v-else style="color: #bfbfbf">—</span>
+              </template>
+              <template v-else>
+                <template v-if="record.teacherNames && record.teacherNames.length > 0">
+                  <a-tag
+                    v-for="name in record.teacherNames"
+                    :key="name"
+                    color="blue"
+                    style="margin: 2px"
+                  >{{ name }}</a-tag>
+                </template>
+                <span v-else style="color: #bfbfbf">暂无</span>
+              </template>
             </template>
 
             <!-- 学生数列 -->
             <template #studentCount="{ record }">
-              <span v-if="record.studentCount !== ''" style="font-weight: 500; color: #52c41a">
+              <span v-if="record.isDirection && record.studentCount > 0" style="font-weight: 500; color: #52c41a">
                 {{ record.studentCount }} 人
               </span>
+              <span v-else-if="record.isDirection" style="color: #bfbfbf">—</span>
             </template>
           </a-table>
         </div>
@@ -316,22 +331,20 @@ const detailColumns: TableColumnsType = [
     title: '专业方向 / 专业名称',
     dataIndex: 'directionName',
     key: 'directionName',
-    width: 300,
+    width: 220,
     slots: { customRender: 'directionName' }
   },
   {
-    title: '教师数',
-    dataIndex: 'teacherCount',
-    key: 'teacherCount',
-    width: 120,
-    align: 'center',
-    slots: { customRender: 'teacherCount' }
+    title: '企业老师',
+    dataIndex: 'teachers',
+    key: 'teachers',
+    slots: { customRender: 'teachers' }
   },
   {
     title: '学生数',
     dataIndex: 'studentCount',
     key: 'studentCount',
-    width: 120,
+    width: 100,
     align: 'center',
     slots: { customRender: 'studentCount' }
   }
@@ -404,10 +417,11 @@ const handleViewDetail = (record: EnterpriseOverviewVO) => {
         majorName: '',
         teacherCount: direction.teacherCount,
         studentCount: direction.studentCount,
+        teacherNames: null,
         isDirection: true,
         rowIndex: rowIndex++
       })
-      
+
       // 添加专业行（缩进显示）
       if (direction.majors && direction.majors.length > 0) {
         direction.majors.forEach((major) => {
@@ -415,8 +429,9 @@ const handleViewDetail = (record: EnterpriseOverviewVO) => {
             key: `major-${major.majorId}`,
             directionName: direction.directionName,
             majorName: major.majorName,
-            teacherCount: '',
-            studentCount: '',
+            teacherCount: 0,
+            studentCount: 0,
+            teacherNames: major.teacherNames || [],
             isDirection: false,
             rowIndex: rowIndex++
           })

@@ -70,6 +70,18 @@
           <a-menu-item key="/document/upload">文档上传</a-menu-item>
         </a-sub-menu>
         
+        <!-- 阶段管理：管理员显示含切换记录的子菜单，其他角色直接显示阶段概览 -->
+        <a-sub-menu v-if="userStore.hasAnyRole(['SYSTEM_ADMIN']) && userStore.hasPermission('phase:view')" key="phase-mgmt">
+          <template #icon><FieldTimeOutlined /></template>
+          <template #title>阶段管理</template>
+          <a-menu-item key="/system/phase/overview">阶段概览</a-menu-item>
+          <a-menu-item key="/system/phase/records">切换记录</a-menu-item>
+        </a-sub-menu>
+        <a-menu-item v-if="!userStore.hasAnyRole(['SYSTEM_ADMIN']) && userStore.hasPermission('phase:view')" key="/system/phase/overview">
+          <template #icon><FieldTimeOutlined /></template>
+          <span>阶段概览</span>
+        </a-menu-item>
+        
         <a-menu-item key="/settings">
           <template #icon><SettingOutlined /></template>
           <span>系统设置</span>
@@ -132,9 +144,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { message, Modal } from 'ant-design-vue'
+import { message, Modal, notification } from 'ant-design-vue'
 import {
   DashboardOutlined,
   UserOutlined,
@@ -146,10 +158,12 @@ import {
   DownOutlined,
   LogoutOutlined,
   BankOutlined,
-  ReadOutlined
+  ReadOutlined,
+  FieldTimeOutlined
 } from '@ant-design/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
+import { phaseApi } from '@/api/phase'
 
 const router = useRouter()
 const route = useRoute()
@@ -187,6 +201,7 @@ const getOpenKeys = (path: string): string[] => {
   if (path.startsWith('/enterprise')) return ['enterprise-mgmt']
   if (path.startsWith('/topic')) return ['topic']
   if (path.startsWith('/document')) return ['document']
+  if (path.startsWith('/system/phase')) return userStore.hasAnyRole(['SYSTEM_ADMIN']) ? ['phase-mgmt'] : []
   if (path.startsWith('/school')) return []
   return []
 }
@@ -203,6 +218,10 @@ const updateBreadcrumbs = (path: string) => {
     '/profile': [{ title: '首页', path: '/' }, { title: '个人中心' }],
     '/topic/list': [{ title: '首页', path: '/' }, { title: '课题管理' }, { title: '课题列表' }],
     '/topic/review': [{ title: '首页', path: '/' }, { title: '课题管理' }, { title: '课题审查' }],
+    '/system/phase/overview': userStore.hasAnyRole(['SYSTEM_ADMIN'])
+      ? [{ title: '首页', path: '/' }, { title: '阶段管理' }, { title: '阶段概览' }]
+      : [{ title: '首页', path: '/' }, { title: '阶段概览' }],
+    '/system/phase/records': [{ title: '首页', path: '/' }, { title: '阶段管理' }, { title: '切换记录' }],
     '/document/list': [{ title: '首页', path: '/' }, { title: '文档管理' }, { title: '文档列表' }],
     '/document/upload': [{ title: '首页', path: '/' }, { title: '文档管理' }, { title: '文档上传' }],
     '/settings': [{ title: '首页', path: '/' }, { title: '系统设置' }]
@@ -232,6 +251,35 @@ const handleMenuClick = ({ key }: { key: string }) => {
 const handleProfile = () => {
   router.push('/profile')
 }
+
+// 登录后阶段提示（非管理员角色，每次会话仅提示一次）
+onMounted(async () => {
+  if (!userStore.hasAnyRole(['SYSTEM_ADMIN']) && userStore.hasPermission('phase:view')) {
+    const shown = sessionStorage.getItem('phaseNotificationShown')
+    if (!shown) {
+      // 延迟 600ms 确保页面及通知容器完全渲染后再弹窗
+      setTimeout(async () => {
+        try {
+          const res = await phaseApi.getCurrentPhaseStatus()
+          const status = res.data
+          if (status?.initialized) {
+            notification.info({
+              key: 'phase-login-tip',
+              message: `当前系统阶段：${status.phaseName}`,
+              description: `毕业届别：${status.cohort || '--'} | 整体进度：${status.progressPercent}%（第 ${status.phaseOrder} / ${status.totalPhases} 阶段）`,
+              icon: h(FieldTimeOutlined, { style: { color: '#1890ff' } }),
+              duration: 3,
+              placement: 'topRight'
+            })
+            sessionStorage.setItem('phaseNotificationShown', '1')
+          }
+        } catch {
+          // 忽略错误，不影响主流程
+        }
+      }, 600)
+    }
+  }
+})
 
 // 退出登录
 const handleLogout = () => {

@@ -31,8 +31,11 @@ public class CreateEnterpriseDTO implements Serializable {
     @Schema(description = "企业编码")
     private String enterpriseCode;
 
+    @Schema(description = "企业负责人用户ID")
+    private String leaderId;
+
     @Size(max = 50, message = "联系人姓名长度不能超过50个字符")
-    @Schema(description = "联系人")
+    @Schema(description = "联系人（由负责人姓名自动填充，也可手动填写）")
     private String contactPerson;
 
     @Pattern(regexp = "^1[3-9]\\d{9}$", message = "联系电话格式不正确")

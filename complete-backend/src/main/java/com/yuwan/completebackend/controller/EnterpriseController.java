@@ -7,6 +7,7 @@ import com.yuwan.completebackend.model.dto.UpdateEnterpriseDTO;
 import com.yuwan.completebackend.model.vo.EnterpriseOverviewVO;
 import com.yuwan.completebackend.model.vo.EnterpriseQueryVO;
 import com.yuwan.completebackend.model.vo.EnterpriseVO;
+import com.yuwan.completebackend.model.vo.UserVO;
 import com.yuwan.completebackend.service.IEnterpriseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -161,5 +162,39 @@ public class EnterpriseController {
         log.info("更新企业状态请求，企业ID: {}, 状态: {}", enterpriseId, status);
         enterpriseService.updateEnterpriseStatus(enterpriseId, status);
         return Result.success();
+    }
+
+    /**
+     * 根据企业名称自动生成企业编码
+     * 规则：名称英文/拼音首字母简写 + 4位随机数，保证唯一性
+     *
+     * @param name 企业名称
+     * @return 生成的企业编码
+     */
+    @GetMapping("/generate-code")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ENTERPRISE_LEADER')")
+    @Operation(summary = "自动生成企业编码", description = "根据企业名称生成唯一企业编码（英文/拼音首字母+4位随机数）")
+    public Result<String> generateEnterpriseCode(
+            @Parameter(description = "企业名称") @RequestParam String name) {
+        log.info("生成企业编码，企业名称: {}", name);
+        String code = enterpriseService.generateEnterpriseCode(name);
+        return Result.success(code);
+    }
+
+    /**
+     * 搜索企业负责人（ENTERPRISE_LEADER 角色用户）
+     * 用于新建/编辑企业时的负责人选择下拉框
+     *
+     * @param keyword 姓名或账号关键词（可为空）
+     * @return 企业负责人列表
+     */
+    @GetMapping("/leaders/search")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ENTERPRISE_LEADER')")
+    @Operation(summary = "搜索企业负责人", description = "按关键词搜索拥有 ENTERPRISE_LEADER 角色的用户，用于负责人下拉框")
+    public Result<List<UserVO>> searchEnterpriseLeaders(
+            @Parameter(description = "姓名或账号关键词") @RequestParam(required = false) String keyword) {
+        log.info("搜索企业负责人，关键词: {}", keyword);
+        List<UserVO> leaders = enterpriseService.searchEnterpriseLeaders(keyword);
+        return Result.success(leaders);
     }
 }

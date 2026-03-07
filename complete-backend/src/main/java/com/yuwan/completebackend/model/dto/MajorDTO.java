@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 专业创建/更新DTO
@@ -47,4 +48,7 @@ public class MajorDTO implements Serializable {
 
     @Schema(description = "状态（1-启用 0-禁用）", defaultValue = "1")
     private Integer status;
+
+    @Schema(description = "关联企业老师的用户ID列表（可为空，表示不修改）")
+    private List<String> teacherIds;
 }

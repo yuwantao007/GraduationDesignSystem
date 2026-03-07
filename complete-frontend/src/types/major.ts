@@ -4,6 +4,7 @@
  * @author YuWan
  * @date 2026-03-01
  */
+import type { UserVO } from '@/types/user'
 
 /**
  * 状态枚举
@@ -113,6 +114,8 @@ export interface MajorVO {
   createTime?: string
   /** 更新时间 */
   updateTime?: string
+  /** 关联的企业老师列表 */
+  teachers?: UserVO[]
 }
 
 /**
@@ -201,6 +204,8 @@ export interface MajorDTO {
   description?: string
   /** 排序 */
   sortOrder?: number
+  /** 关联企业老师的用户ID列表（null 表示不修改，空数组表示清空） */
+  teacherIds?: string[]
 }
 
 /**
@@ -219,4 +224,36 @@ export interface MajorQueryVO {
   pageNum?: number
   /** 每页大小 */
   pageSize?: number
+}
+
+// ==================== Excel 导入 ====================
+
+/**
+ * 导入错误行明细
+ */
+export interface ImportRowErrorVO {
+  /** 行号（从2开始） */
+  rowNum: number
+  /** 错误信息 */
+  errorMsg: string
+}
+
+/**
+ * Excel 导入专业结果 VO
+ */
+export interface ImportMajorResultVO {
+  /** 总数据行数（不含表头） */
+  totalCount: number
+  /** 成功创建的专业方向数 */
+  directionCreatedCount: number
+  /** 成功创建的专业数 */
+  majorCreatedCount: number
+  /** 成功关联的教师数 */
+  teacherLinkedCount: number
+  /** 跳过的行数（数据已存在） */
+  skipCount: number
+  /** 失败的行数 */
+  failureCount: number
+  /** 错误明细列表 */
+  errors: ImportRowErrorVO[]
 }

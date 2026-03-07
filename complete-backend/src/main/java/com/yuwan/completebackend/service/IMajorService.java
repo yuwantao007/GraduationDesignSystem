@@ -3,6 +3,7 @@ package com.yuwan.completebackend.service;
 import com.yuwan.completebackend.model.dto.MajorDTO;
 import com.yuwan.completebackend.model.dto.MajorDirectionDTO;
 import com.yuwan.completebackend.model.vo.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -133,4 +134,31 @@ public interface IMajorService {
      * @return 专业方向列表
      */
     List<MajorDirectionVO> getDirectionList(String enterpriseId);
+
+    /**
+     * 搜索企业老师（ENTERPRISE_TEACHER 角色用户），用于专业关联老师的下拉搜索
+     *
+     * @param keyword      搜索关键词（姓名或账号，可为空）
+     * @param enterpriseId 企业ID（可选，限定企业范围）
+     * @return 匹配的企业老师列表
+     */
+    List<UserVO> searchMajorTeachers(String keyword, String enterpriseId);
+
+    // ==================== Excel 导入 ====================
+
+    /**
+     * 通过 Excel 批量导入专业方向、专业及教师关联
+     *
+     * @param file         上传的 Excel 文件（.xlsx）
+     * @param enterpriseId 指定企业ID（系统管理员可指定；非管理员自动使用当前用户企业）
+     * @return 导入结果摘要
+     */
+    ImportMajorResultVO importMajors(MultipartFile file, String enterpriseId) throws Exception;
+
+    /**
+     * 下载专业导入 Excel 模板
+     *
+     * @return Excel 模板字节数组
+     */
+    byte[] downloadImportTemplate() throws Exception;
 }

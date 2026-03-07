@@ -112,6 +112,19 @@ const routes: RouteRecordRaw[] = [
         name: 'TopicReview',
         component: () => import('@/views/topic/TopicReview.vue'),
         meta: { title: '课题审查', icon: 'AuditOutlined', permission: 'topic:review' }
+      },
+      // 阶段管理路由
+      {
+        path: 'system/phase/overview',
+        name: 'PhaseOverview',
+        component: () => import('@/views/phase/PhaseOverview.vue'),
+        meta: { title: '阶段概览', icon: 'FieldTimeOutlined', permission: 'phase:view' }
+      },
+      {
+        path: 'system/phase/records',
+        name: 'PhaseRecords',
+        component: () => import('@/views/phase/PhaseRecords.vue'),
+        meta: { title: '切换记录', icon: 'HistoryOutlined', permission: 'phase:records' }
       }
     ]
   },

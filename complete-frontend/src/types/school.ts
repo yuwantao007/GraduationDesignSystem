@@ -32,6 +32,16 @@ export const SCHOOL_STATUS_COLORS: Record<number, string> = {
 }
 
 /**
+ * 学校下拉选项 VO（精简版，所有登录用户可用）
+ */
+export interface SchoolOptionVO {
+  /** 学校ID */
+  schoolId: string
+  /** 学校名称 */
+  schoolName: string
+}
+
+/**
  * 学校信息 VO
  */
 export interface SchoolVO {

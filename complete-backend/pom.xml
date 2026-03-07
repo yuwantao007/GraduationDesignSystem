@@ -98,6 +98,13 @@
             <artifactId>hutool-all</artifactId>
             <version>${hutool.version}</version>
         </dependency>
+
+        <!-- Pinyin4j：汉字转拼音（企业编码自动生成） -->
+        <dependency>
+            <groupId>com.belerweb</groupId>
+            <artifactId>pinyin4j</artifactId>
+            <version>2.5.1</version>
+        </dependency>
         
         <!-- FastJson2 -->
         <dependency>
@@ -144,6 +151,14 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>5.2.5</version>
+        </dependency>
+
+        <!-- 显式声明 commons-compress 1.24，覆盖 MinIO 引入的旧版本 -->
+        <!-- POI 5.2.x 需要 commons-compress >= 1.21，旧版本缺少 putArchiveEntry(ZipArchiveEntry) 方法 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.24.0</version>
         </dependency>
         
         <!-- Spring Boot Test -->

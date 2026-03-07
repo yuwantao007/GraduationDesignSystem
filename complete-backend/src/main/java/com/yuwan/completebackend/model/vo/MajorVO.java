@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 专业响应VO
@@ -65,4 +66,7 @@ public class MajorVO implements Serializable {
 
     @Schema(description = "更新时间")
     private String updateTime;
+
+    @Schema(description = "关联的企业老师列表")
+    private List<UserVO> teachers;
 }

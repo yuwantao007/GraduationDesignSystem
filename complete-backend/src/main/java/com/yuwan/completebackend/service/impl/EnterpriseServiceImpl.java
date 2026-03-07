@@ -7,19 +7,26 @@ import com.yuwan.completebackend.exception.BusinessException;
 import com.yuwan.completebackend.mapper.EnterpriseMapper;
 import com.yuwan.completebackend.mapper.MajorDirectionMapper;
 import com.yuwan.completebackend.mapper.MajorMapper;
+import com.yuwan.completebackend.mapper.MajorTeacherMapper;
+import com.yuwan.completebackend.mapper.RoleMapper;
 import com.yuwan.completebackend.mapper.UserMapper;
+import com.yuwan.completebackend.mapper.UserRoleMapper;
 import com.yuwan.completebackend.model.dto.CreateEnterpriseDTO;
 import com.yuwan.completebackend.model.dto.UpdateEnterpriseDTO;
 import com.yuwan.completebackend.model.entity.Enterprise;
 import com.yuwan.completebackend.model.entity.Major;
 import com.yuwan.completebackend.model.entity.MajorDirection;
+import com.yuwan.completebackend.model.entity.MajorTeacher;
+import com.yuwan.completebackend.model.entity.Role;
 import com.yuwan.completebackend.model.entity.User;
 import com.yuwan.completebackend.model.vo.EnterpriseOverviewVO;
 import com.yuwan.completebackend.model.vo.EnterpriseQueryVO;
 import com.yuwan.completebackend.model.vo.EnterpriseVO;
 import com.yuwan.completebackend.model.vo.DirectionOverviewVO;
 import com.yuwan.completebackend.model.vo.MajorOverviewVO;
+import com.yuwan.completebackend.model.vo.UserVO;
 import com.yuwan.completebackend.service.IEnterpriseService;
+import cn.hutool.extra.pinyin.PinyinUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -29,7 +36,10 @@ import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 /**
@@ -49,7 +59,10 @@ public class EnterpriseServiceImpl implements IEnterpriseService {
     private final EnterpriseMapper enterpriseMapper;
     private final MajorDirectionMapper majorDirectionMapper;
     private final MajorMapper majorMapper;
+    private final MajorTeacherMapper majorTeacherMapper;
     private final UserMapper userMapper;
+    private final RoleMapper roleMapper;
+    private final UserRoleMapper userRoleMapper;
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -75,6 +88,11 @@ public class EnterpriseServiceImpl implements IEnterpriseService {
         Enterprise enterprise = new Enterprise();
         BeanUtils.copyProperties(createDTO, enterprise);
         enterprise.setEnterpriseStatus(1); // 默认正常状态
+
+        // 如果选择了负责人，自动填充联系信息
+        if (StringUtils.hasText(createDTO.getLeaderId())) {
+            fillContactFromLeader(enterprise, createDTO.getLeaderId());
+        }
 
         // 保存到数据库
         enterpriseMapper.insert(enterprise);
@@ -119,6 +137,14 @@ public class EnterpriseServiceImpl implements IEnterpriseService {
         }
         if (StringUtils.hasText(updateDTO.getEnterpriseCode())) {
             enterprise.setEnterpriseCode(updateDTO.getEnterpriseCode());
+        }
+        // 负责人变更时重新填充联系信息
+        if (StringUtils.hasText(updateDTO.getLeaderId())) {
+            enterprise.setLeaderId(updateDTO.getLeaderId());
+            fillContactFromLeader(enterprise, updateDTO.getLeaderId());
+        } else if (updateDTO.getLeaderId() != null && updateDTO.getLeaderId().isEmpty()) {
+            // 显式清空负责人
+            enterprise.setLeaderId(null);
         }
         if (StringUtils.hasText(updateDTO.getContactPerson())) {
             enterprise.setContactPerson(updateDTO.getContactPerson());
@@ -278,22 +304,40 @@ public class EnterpriseServiceImpl implements IEnterpriseService {
                 majorWrapper.orderByAsc(Major::getSortOrder);
                 List<Major> majors = majorMapper.selectList(majorWrapper);
                 
-                // 转换为专业概览VO
-                List<MajorOverviewVO> majorVOs = majors.stream().map(major -> {
+                // 转换为专业概览VO，并填充每个专业关联的教师姓名
+                Set<String> directionTeacherIds = new HashSet<>();
+                List<MajorOverviewVO> majorVOs = new ArrayList<>();
+                for (Major major : majors) {
                     MajorOverviewVO majorVO = new MajorOverviewVO();
                     majorVO.setMajorId(major.getMajorId());
                     majorVO.setMajorName(major.getMajorName());
                     majorVO.setMajorCode(major.getMajorCode());
                     majorVO.setDegreeType(major.getDegreeType());
-                    return majorVO;
-                }).collect(Collectors.toList());
+
+                    // 查询该专业关联的老师（via major_teacher）
+                    List<MajorTeacher> relations = majorTeacherMapper.selectList(
+                            new LambdaQueryWrapper<MajorTeacher>()
+                                    .eq(MajorTeacher::getMajorId, major.getMajorId()));
+                    if (!relations.isEmpty()) {
+                        List<String> teacherUserIds = relations.stream()
+                                .map(MajorTeacher::getUserId).collect(Collectors.toList());
+                        // 记录到方向层去重集合
+                        directionTeacherIds.addAll(teacherUserIds);
+                        List<String> teacherNames = userMapper.selectList(
+                                new LambdaQueryWrapper<User>()
+                                        .in(User::getUserId, teacherUserIds)
+                                        .orderByAsc(User::getRealName))
+                                .stream().map(User::getRealName).collect(Collectors.toList());
+                        majorVO.setTeacherNames(teacherNames);
+                    } else {
+                        majorVO.setTeacherNames(new ArrayList<>());
+                    }
+                    majorVOs.add(majorVO);
+                }
                 directionVO.setMajors(majorVOs);
-                
-                // 统计该方向下的教师数量
-                LambdaQueryWrapper<User> teacherWrapper = new LambdaQueryWrapper<>();
-                teacherWrapper.eq(User::getDirectionId, direction.getDirectionId());
-                teacherWrapper.isNull(User::getStudentNo); // 教师没有学号
-                int teacherCount = Math.toIntExact(userMapper.selectCount(teacherWrapper));
+
+                // 统计该方向下的教师数量（去重：一个老师可能关联多个专业）
+                int teacherCount = directionTeacherIds.size();
                 directionVO.setTeacherCount(teacherCount);
                 totalTeacherCount += teacherCount;
                 
@@ -349,8 +393,127 @@ public class EnterpriseServiceImpl implements IEnterpriseService {
         if (enterprise.getUpdateTime() != null) {
             vo.setUpdateTime(DATE_FORMAT.format(enterprise.getUpdateTime()));
         }
+
+        // 填充负责人信息
+        if (StringUtils.hasText(enterprise.getLeaderId())) {
+            User leader = userMapper.selectById(enterprise.getLeaderId());
+            if (leader != null) {
+                vo.setLeaderId(leader.getUserId());
+                vo.setLeaderName(leader.getRealName());
+                vo.setLeaderPhone(leader.getUserPhone());
+                vo.setLeaderEmail(leader.getUserEmail());
+                // 以负责人为联系人（若企业侧未单独设置）
+                if (!StringUtils.hasText(enterprise.getContactPerson())) {
+                    vo.setContactPerson(leader.getRealName());
+                }
+            }
+        }
         
         return vo;
+    }
+
+    /**
+     * 根据负责人ID将联系信息填充到企业实体
+     */
+    private void fillContactFromLeader(Enterprise enterprise, String leaderId) {
+        User leader = userMapper.selectById(leaderId);
+        if (leader == null) {
+            throw new BusinessException("所选负责人不存在");
+        }
+        enterprise.setLeaderId(leaderId);
+        enterprise.setContactPerson(leader.getRealName());
+        // 若企业未单独指定电话/邮箱，使用负责人信息
+        if (!StringUtils.hasText(enterprise.getContactPhone())) {
+            enterprise.setContactPhone(leader.getUserPhone());
+        }
+        if (!StringUtils.hasText(enterprise.getContactEmail())) {
+            enterprise.setContactEmail(leader.getUserEmail());
+        }
+    }
+
+    @Override
+    public String generateEnterpriseCode(String name) {
+        if (!StringUtils.hasText(name)) {
+            return "ENT" + String.format("%04d", ThreadLocalRandom.current().nextInt(1000, 10000));
+        }
+
+        // 去除常见中文企业后缀
+        String cleaned = name.replaceAll("有限公司|股份公司|集团|科技|网络|实业|技术|软件|智能|信息|数字|创新", "").trim();
+        if (!StringUtils.hasText(cleaned)) {
+            cleaned = name;
+        }
+
+        // 使用 Hutool PinyinUtil 取每个字符首字母（汉字取拼音首字母，ASCII字母保留）
+        String prefix;
+        try {
+            prefix = PinyinUtil.getFirstLetter(cleaned, "").toUpperCase().replaceAll("[^A-Z]", "");
+        } catch (Exception e) {
+            // Fallback：直接取ASCII大写字母
+            prefix = cleaned.toUpperCase().replaceAll("[^A-Z]", "");
+        }
+
+        if (!StringUtils.hasText(prefix)) {
+            prefix = "ENT";
+        }
+        // 限制前缀长度为 2~6 位
+        if (prefix.length() > 6) {
+            prefix = prefix.substring(0, 6);
+        }
+
+        // 生成唯一编码（最多重试5次）
+        String finalPrefix = prefix;
+        for (int i = 0; i < 5; i++) {
+            String code = finalPrefix + String.format("%04d", ThreadLocalRandom.current().nextInt(1000, 10000));
+            LambdaQueryWrapper<Enterprise> codeWrapper = new LambdaQueryWrapper<>();
+            codeWrapper.eq(Enterprise::getEnterpriseCode, code);
+            if (enterpriseMapper.selectCount(codeWrapper) == 0) {
+                return code;
+            }
+        }
+        // 仍冲突时用更大随机数
+        return finalPrefix + System.currentTimeMillis() % 100000;
+    }
+
+    @Override
+    public List<UserVO> searchEnterpriseLeaders(String keyword) {
+        // 找到 ENTERPRISE_LEADER 角色
+        Role leaderRole = roleMapper.selectOne(
+                new LambdaQueryWrapper<Role>().eq(Role::getRoleCode, "ENTERPRISE_LEADER"));
+        if (leaderRole == null) {
+            return new ArrayList<>();
+        }
+
+        // 找到持有该角色的所有用户ID
+        List<String> userIds = userRoleMapper.selectList(
+                        new LambdaQueryWrapper<com.yuwan.completebackend.model.entity.UserRole>()
+                                .eq(com.yuwan.completebackend.model.entity.UserRole::getRoleId, leaderRole.getRoleId()))
+                .stream()
+                .map(com.yuwan.completebackend.model.entity.UserRole::getUserId)
+                .collect(Collectors.toList());
+
+        if (userIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 按关键词过滤（姓名或账号模糊匹配），只返回正常状态用户
+        LambdaQueryWrapper<User> userWrapper = new LambdaQueryWrapper<User>()
+                .in(User::getUserId, userIds)
+                .eq(User::getUserStatus, 1)
+                .orderByAsc(User::getRealName);
+        if (StringUtils.hasText(keyword)) {
+            userWrapper.and(w -> w.like(User::getRealName, keyword).or().like(User::getUsername, keyword));
+        }
+
+        return userMapper.selectList(userWrapper).stream().map(user -> {
+            UserVO vo = new UserVO();
+            vo.setUserId(user.getUserId());
+            vo.setRealName(user.getRealName());
+            vo.setUsername(user.getUsername());
+            vo.setUserPhone(user.getUserPhone());
+            vo.setUserEmail(user.getUserEmail());
+            vo.setEmployeeNo(user.getEmployeeNo());
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     /**

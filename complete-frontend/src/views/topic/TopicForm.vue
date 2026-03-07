@@ -345,7 +345,7 @@ import { schoolApi } from '@/api/school'
 import { useUserStore } from '@/stores/user'
 import type { CreateTopicDTO } from '@/types/topic'
 import type { EnterpriseVO } from '@/types/enterprise'
-import type { SchoolVO } from '@/types/school'
+import type { SchoolOptionVO } from '@/types/school'
 
 // 定义组件选项
 defineOptions({
@@ -399,7 +399,7 @@ const classInfo = ref('')
 const enterpriseList = ref<EnterpriseVO[]>([])
 
 // 学校列表
-const schoolList = ref<SchoolVO[]>([])
+const schoolList = ref<SchoolOptionVO[]>([])
 
 // 加载状态
 const saving = ref(false)
@@ -422,7 +422,7 @@ const getEnterpriseList = async () => {
  */
 const getSchoolList = async () => {
   try {
-    const result = await schoolApi.getAllSchools()
+    const result = await schoolApi.getSchoolOptions()
     schoolList.value = result.data || []
   } catch (error) {
     console.error('获取学校列表失败', error)
@@ -437,6 +437,10 @@ const handleCategoryChange = (value: number) => {
   formData.enterpriseId = ''
   formData.schoolId = ''
   formData.applicableSchool = ''
+  // 3+1 或实验班时懒加载学校列表
+  if ((value === 2 || value === 3) && schoolList.value.length === 0) {
+    getSchoolList()
+  }
 }
 
 /**
@@ -527,6 +531,11 @@ const getTopicDetail = async (topicId: string) => {
         dayjs(topic.startDate),
         dayjs(topic.endDate)
       ]
+    }
+    
+    // 编辑模式下，若课题大类为3+1或实验班，懒加载学校列表
+    if (topic.topicCategory === 2 || topic.topicCategory === 3) {
+      getSchoolList()
     }
   } catch (error) {
     console.error('获取课题详情失败', error)
@@ -746,10 +755,9 @@ const handleBack = () => {
 onMounted(() => {
   // 加载企业列表
   getEnterpriseList()
-  // 加载学校列表
-  getSchoolList()
+  // 学校列表在选择3+1/实验班课题大类时懒加载，此处不预加载
   
-  // 如果是编辑模式，加载课题详情
+  // 如果是编辑模式，加载课题详情（详情加载后会根据课题大类决定是否加载学校列表）
   if (isEditMode.value) {
     getTopicDetail(route.params.id as string)
   }

@@ -5,6 +5,10 @@
       <div class="major-list__header">
         <h3 class="major-list__title">专业管理</h3>
         <a-space>
+          <a-button @click="handleImportExcel">
+            <template #icon><ImportOutlined /></template>
+            Excel 导入
+          </a-button>
           <a-button type="primary" @click="handleAddDirection">
             <template #icon><PlusOutlined /></template>
             新建专业方向
@@ -200,6 +204,12 @@
       @success="loadMajorTree"
     />
 
+    <!-- Excel 导入弹窗 -->
+    <ImportMajorModal
+      v-model:open="importModalVisible"
+      @success="loadMajorTree"
+    />
+
     <!-- 专业详情抽屉 -->
     <a-drawer
       v-model:open="detailDrawerVisible"
@@ -237,6 +247,23 @@
         <a-descriptions-item label="更新时间">
           {{ majorDetail.updateTime || '-' }}
         </a-descriptions-item>
+        <a-descriptions-item label="企业老师">
+          <template v-if="majorDetail.teachers && majorDetail.teachers.length > 0">
+            <a-space wrap>
+              <a-tag
+                v-for="teacher in majorDetail.teachers"
+                :key="teacher.userId"
+                color="blue"
+              >
+                {{ teacher.realName }}
+                <span v-if="teacher.userCode" style="font-size: 11px; color: #91caff">
+                  ({{ teacher.userCode }})
+                </span>
+              </a-tag>
+            </a-space>
+          </template>
+          <span v-else style="color: #bfbfbf">暂未关联企业老师</span>
+        </a-descriptions-item>
       </a-descriptions>
     </a-drawer>
   </div>
@@ -261,7 +288,8 @@ import {
   EyeOutlined,
   FolderOutlined,
   BookOutlined,
-  BankOutlined
+  BankOutlined,
+  ImportOutlined
 } from '@ant-design/icons-vue'
 import { majorApi } from '@/api/major'
 import { enterpriseApi } from '@/api/enterprise'
@@ -274,6 +302,7 @@ import {
 } from '@/types/major'
 import DirectionFormModal from '@/components/major/DirectionFormModal.vue'
 import MajorFormModal from '@/components/major/MajorFormModal.vue'
+import ImportMajorModal from '@/components/major/ImportMajorModal.vue'
 import { useUserStore } from '@/stores/user'
 
 defineOptions({
@@ -335,6 +364,7 @@ const columns: TableColumnsType = [
 const directionModalVisible = ref(false)
 const majorModalVisible = ref(false)
 const detailDrawerVisible = ref(false)
+const importModalVisible = ref(false)
 
 // 当前编辑数据
 const currentDirection = ref<MajorDirectionVO | null>(null)
@@ -458,6 +488,13 @@ const handleAddDirectionToEnterprise = (record: MajorTreeVO) => {
 }
 
 // ==================== 专业方向操作 ====================
+
+/**
+ * 打开 Excel 导入弹窗
+ */
+const handleImportExcel = () => {
+  importModalVisible.value = true
+}
 
 /**
  * 新建专业方向

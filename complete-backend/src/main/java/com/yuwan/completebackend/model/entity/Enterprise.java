@@ -34,6 +34,9 @@ public class Enterprise implements Serializable {
     @Schema(description = "企业编码")
     private String enterpriseCode;
 
+    @Schema(description = "企业负责人用户ID")
+    private String leaderId;
+
     @Schema(description = "联系人")
     private String contactPerson;
 

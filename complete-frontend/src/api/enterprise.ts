@@ -81,5 +81,23 @@ export const enterpriseApi = {
    */
   updateEnterpriseStatus(enterpriseId: string, status: number) {
     return request.put(`/enterprise/${enterpriseId}/status`, null, { params: { status } })
+  },
+
+  /**
+   * 根据企业名称自动生成企业编码
+   * @param name - 企业名称
+   */
+  generateCode(name: string) {
+    return request.get<string>('/enterprise/generate-code', { params: { name } })
+  },
+
+  /**
+   * 搜索企业负责人（ENTERPRISE_LEADER 角色用户）
+   * @param keyword - 姓名或账号关键词（可为空）
+   */
+  searchLeaders(keyword?: string) {
+    return request.get<import('@/types/user').UserVO[]>('/enterprise/leaders/search', {
+      params: keyword ? { keyword } : {}
+    })
   }
 }

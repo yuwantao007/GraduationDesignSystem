@@ -2,6 +2,8 @@ package com.yuwan.completebackend.controller;
 
 import com.yuwan.completebackend.common.PageResult;
 import com.yuwan.completebackend.common.Result;
+import com.yuwan.completebackend.common.annotation.PhaseRequired;
+import com.yuwan.completebackend.model.enums.SystemPhase;
 import com.yuwan.completebackend.model.dto.CreateTopicDTO;
 import com.yuwan.completebackend.model.dto.SubmitTopicDTO;
 import com.yuwan.completebackend.model.dto.TopicSignDTO;
@@ -44,6 +46,7 @@ public class TopicController {
      */
     @PostMapping
     @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'ENTERPRISE_TEACHER')")
+    @PhaseRequired(SystemPhase.TOPIC_DECLARATION)
     @Operation(summary = "创建课题", description = "企业教师创建新课题（保存为草稿）")
     public Result<TopicVO> createTopic(@Valid @RequestBody CreateTopicDTO createDTO) {
         log.info("创建课题请求，课题名称: {}", createDTO.getTopicTitle());
@@ -60,6 +63,7 @@ public class TopicController {
      */
     @PutMapping("/{topicId}")
     @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'ENTERPRISE_TEACHER')")
+    @PhaseRequired(SystemPhase.TOPIC_DECLARATION)
     @Operation(summary = "更新课题", description = "更新课题内容，仅创建人可更新")
     public Result<TopicVO> updateTopic(
             @Parameter(description = "课题ID") @PathVariable String topicId,
@@ -122,6 +126,7 @@ public class TopicController {
      */
     @DeleteMapping("/{topicId}")
     @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'ENTERPRISE_TEACHER')")
+    @PhaseRequired(SystemPhase.TOPIC_DECLARATION)
     @Operation(summary = "删除课题", description = "删除课题（仅草稿状态可删除）")
     public Result<Void> deleteTopic(
             @Parameter(description = "课题ID") @PathVariable String topicId) {
@@ -138,6 +143,7 @@ public class TopicController {
      */
     @PostMapping("/submit")
     @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'ENTERPRISE_TEACHER')")
+    @PhaseRequired(SystemPhase.TOPIC_DECLARATION)
     @Operation(summary = "提交课题", description = "提交课题申报（草稿→待预审）")
     public Result<TopicVO> submitTopic(@Valid @RequestBody SubmitTopicDTO submitDTO) {
         log.info("提交课题请求，课题ID: {}", submitDTO.getTopicId());
@@ -153,6 +159,7 @@ public class TopicController {
      */
     @PostMapping("/{topicId}/withdraw")
     @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'ENTERPRISE_TEACHER')")
+    @PhaseRequired(SystemPhase.TOPIC_DECLARATION)
     @Operation(summary = "撤回课题", description = "撤回已提交的课题（仅待预审状态可撤回）")
     public Result<TopicVO> withdrawTopic(
             @Parameter(description = "课题ID") @PathVariable String topicId) {
@@ -169,6 +176,7 @@ public class TopicController {
      */
     @PostMapping("/sign")
     @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'ENTERPRISE_TEACHER', 'ENTERPRISE_LEADER', 'UNIVERSITY_TEACHER')")
+    @PhaseRequired(SystemPhase.TOPIC_DECLARATION)
     @Operation(summary = "课题签名", description = "对课题进行电子签名")
     public Result<TopicVO> signTopic(@Valid @RequestBody TopicSignDTO signDTO) {
         log.info("课题签名请求，课题ID: {}, 签名类型: {}", signDTO.getTopicId(), signDTO.getSignType());

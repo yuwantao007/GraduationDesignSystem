@@ -24,6 +24,15 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     /**
+     * 处理阶段不允许操作异常
+     */
+    @ExceptionHandler(PhaseNotAllowedException.class)
+    public Result<Void> handlePhaseNotAllowedException(PhaseNotAllowedException e) {
+        log.warn("阶段限制: {}", e.getMessage());
+        return Result.error(e.getCode(), e.getMessage());
+    }
+
+    /**
      * 处理业务异常
      */
     @ExceptionHandler(BusinessException.class)

@@ -57,6 +57,8 @@ export const useUserStore = defineStore('user', () => {
       roles.value = []
       permissions.value = []
       clearAuth()
+      // 清除会话级通知标记，确保下次登录可正常弹窗
+      sessionStorage.removeItem('phaseNotificationShown')
     }
   }
 

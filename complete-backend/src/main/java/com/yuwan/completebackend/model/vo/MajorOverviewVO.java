@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 专业概览VO
@@ -32,4 +33,7 @@ public class MajorOverviewVO implements Serializable {
 
     @Schema(description = "学位类型")
     private String degreeType;
+
+    @Schema(description = "该专业关联的企业老师姓名列表")
+    private List<String> teacherNames;
 }

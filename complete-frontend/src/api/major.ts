@@ -11,7 +11,8 @@ import type {
   MajorTreeVO,
   MajorCascadeVO,
   MajorDirectionDTO,
-  MajorDTO
+  MajorDTO,
+  ImportMajorResultVO
 } from '@/types/major'
 
 /**
@@ -140,6 +141,48 @@ export const majorApi = {
   updateMajorStatus(majorId: string, status: number) {
     return request.put(`/major/${majorId}/status`, null, {
       params: { status }
+    })
+  },
+
+  // ==================== 企业老师搜索 ====================
+
+  /**
+   * 搜索企业老师（用于专业关联老师的下拉搜索）
+   * @param keyword - 搜索关键词（姓名或账号，可选）
+   * @param enterpriseId - 企业ID（可选，限定范围）
+   */
+  searchTeachers(keyword?: string, enterpriseId?: string) {
+    return request.get('/major/teachers/search', {
+      params: { keyword, enterpriseId }
+    })
+  },
+
+  // ==================== Excel 导入 ====================
+
+  /**
+   * 下载专业导入 Excel 模板
+   * 返回 Blob 对象，需在调用方处理文件下载
+   */
+  downloadImportTemplate() {
+    return request.get('/major/import/template', {
+      responseType: 'blob'
+    })
+  },
+
+  /**
+   * 通过 Excel 批量导入专业方向、专业及教师关联
+   * @param file         Excel 文件（.xlsx）
+   * @param enterpriseId 企业ID（系统管理员可指定）
+   */
+  importMajors(file: File, enterpriseId?: string) {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (enterpriseId) {
+      formData.append('enterpriseId', enterpriseId)
+    }
+    return request.post<ImportMajorResultVO>('/major/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 60000
     })
   }
 }

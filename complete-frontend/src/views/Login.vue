@@ -238,6 +238,8 @@ const handleLogin = async () => {
     }
     await userStore.login(loginData)
     message.success('登录成功，欢迎回来！')
+    // 每次登录重置通知标记，确保阶段弹窗正常触发
+    sessionStorage.removeItem('phaseNotificationShown')
 
     // 获取重定向地址
     const redirect = (route.query.redirect as string) || '/'

@@ -5,6 +5,7 @@ import com.yuwan.completebackend.model.dto.CreateEnterpriseDTO;
 import com.yuwan.completebackend.model.dto.UpdateEnterpriseDTO;
 import com.yuwan.completebackend.model.vo.EnterpriseQueryVO;
 import com.yuwan.completebackend.model.vo.EnterpriseVO;
+import com.yuwan.completebackend.model.vo.UserVO;
 
 import java.util.List;
 
@@ -81,4 +82,21 @@ public interface IEnterpriseService {
      * @return 企业概览分页结果
      */
     PageResult<com.yuwan.completebackend.model.vo.EnterpriseOverviewVO> getEnterpriseOverview(EnterpriseQueryVO queryVO);
+
+    /**
+     * 根据企业名称自动生成企业编码
+     * 规则：名称英文首字母简写（汉字转拼音首字母）+ 4位随机数，保证唯一性
+     *
+     * @param name 企业名称
+     * @return 生成的企业编码
+     */
+    String generateEnterpriseCode(String name);
+
+    /**
+     * 搜索企业负责人（ENTERPRISE_LEADER 角色用户）
+     *
+     * @param keyword 姓名或账号关键词（为空时返回全部）
+     * @return 企业负责人列表
+     */
+    List<UserVO> searchEnterpriseLeaders(String keyword);
 }

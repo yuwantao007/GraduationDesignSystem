@@ -40,6 +40,11 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
+    // Blob 类型响应（文件下载）直接放行，不做业务 code 判断
+    if (response.config.responseType === 'blob') {
+      return response
+    }
+
     const res = response.data
 
     // 根据业务状态码判断

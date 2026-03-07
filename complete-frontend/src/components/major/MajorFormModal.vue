@@ -91,6 +91,37 @@
           show-count
         />
       </a-form-item>
+
+      <!-- 企业老师（多选，支持搜索） -->
+      <a-form-item label="企业老师" name="teacherIds">
+        <a-select
+          v-model:value="formState.teacherIds"
+          mode="multiple"
+          show-search
+          placeholder="输入姓名或账号搜索企业老师（可选）"
+          :filter-option="false"
+          :not-found-content="teacherSearching ? undefined : '未找到匹配的企业老师'"
+          allow-clear
+          :max-tag-count="3"
+          @search="handleTeacherSearch"
+          @focus="handleTeacherFocus"
+        >
+          <template v-if="teacherSearching" #notFoundContent>
+            <a-spin size="small" />
+          </template>
+          <a-select-option
+            v-for="teacher in teacherOptions"
+            :key="teacher.userId"
+            :value="teacher.userId"
+            :label="teacher.realName"
+          >
+            <div class="teacher-option">
+              <span class="teacher-name">{{ teacher.realName }}</span>
+              <span class="teacher-meta">{{ teacher.userCode || teacher.username }}</span>
+            </div>
+          </a-select-option>
+        </a-select>
+      </a-form-item>
     </a-form>
   </a-modal>
 </template>
@@ -107,6 +138,7 @@ import { message } from 'ant-design-vue'
 import type { FormInstance, Rule } from 'ant-design-vue/es/form'
 import { majorApi } from '@/api/major'
 import type { MajorVO, MajorDTO, MajorDirectionVO } from '@/types/major'
+import type { UserVO } from '@/types/user'
 
 defineOptions({
   name: 'MajorFormModal'
@@ -148,6 +180,11 @@ const submitLoading = ref(false)
 const directionOptions = ref<{ value: string; label: string; directionCode?: string }[]>([])
 const directionLoading = ref(false)
 
+// 企业老师搜索
+const teacherOptions = ref<UserVO[]>([])
+const teacherSearching = ref(false)
+let teacherSearchTimer: ReturnType<typeof setTimeout> | null = null
+
 // 表单数据
 const formState = reactive<MajorDTO>({
   directionId: '',
@@ -156,7 +193,8 @@ const formState = reactive<MajorDTO>({
   degreeType: undefined,
   educationYears: 3,
   sortOrder: 0,
-  description: ''
+  description: '',
+  teacherIds: []
 })
 
 // 当前选中的方向代码（用于生成专业代码）
@@ -245,6 +283,8 @@ const resetForm = () => {
   formState.educationYears = 3
   formState.sortOrder = 0
   formState.description = ''
+  formState.teacherIds = []
+  teacherOptions.value = []
   formRef.value?.clearValidate()
 }
 
@@ -259,6 +299,16 @@ const fillFormData = (data: MajorVO) => {
   formState.educationYears = data.educationYears || 3
   formState.sortOrder = data.sortOrder || 0
   formState.description = data.description || ''
+
+  // 回填企业老师
+  if (data.teachers && data.teachers.length > 0) {
+    formState.teacherIds = data.teachers.map(t => t.userId)
+    // 预置选项以便回显姓名
+    teacherOptions.value = data.teachers
+  } else {
+    formState.teacherIds = []
+    teacherOptions.value = []
+  }
 }
 
 /**
@@ -325,6 +375,43 @@ const handleSubmit = async () => {
 }
 
 /**
+ * 企业老师搜索框获取焦点时（首次加载）
+ */
+const handleTeacherFocus = () => {
+  if (teacherOptions.value.length === 0) {
+    fetchTeachers('')
+  }
+}
+
+/**
+ * 企业老师搜索（防抖 300ms）
+ */
+const handleTeacherSearch = (keyword: string) => {
+  if (teacherSearchTimer) clearTimeout(teacherSearchTimer)
+  teacherSearchTimer = setTimeout(() => fetchTeachers(keyword), 300)
+}
+
+/**
+ * 调用后端搜索企业老师
+ */
+const fetchTeachers = async (keyword: string) => {
+  teacherSearching.value = true
+  try {
+    const res = await majorApi.searchTeachers(keyword || undefined)
+    // 合并：保留已选中但不在结果中的选项，避免回显时丢失标签
+    const existingSelected = teacherOptions.value.filter(
+      t => (formState.teacherIds || []).includes(t.userId) &&
+           !res.data.some((r: UserVO) => r.userId === t.userId)
+    )
+    teacherOptions.value = [...existingSelected, ...(res.data || [])]
+  } catch {
+    // ignore
+  } finally {
+    teacherSearching.value = false
+  }
+}
+
+/**
  * 取消操作
  */
 const handleCancel = () => {
@@ -336,5 +423,21 @@ const handleCancel = () => {
 <style scoped lang="scss">
 .major-form {
   padding-top: 16px;
+}
+
+.teacher-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .teacher-name {
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.88);
+  }
+
+  .teacher-meta {
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 12px;
+  }
 }
 </style>

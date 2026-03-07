@@ -41,6 +41,14 @@ export interface EnterpriseVO {
   enterpriseName: string
   /** 企业编码 */
   enterpriseCode?: string
+  /** 企业负责人用户ID */
+  leaderId?: string
+  /** 企业负责人姓名 */
+  leaderName?: string
+  /** 企业负责人手机 */
+  leaderPhone?: string
+  /** 企业负责人邮箱 */
+  leaderEmail?: string
   /** 联系人 */
   contactPerson?: string
   /** 联系电话 */
@@ -73,6 +81,8 @@ export interface MajorOverviewVO {
   majorCode?: string
   /** 学位类型 */
   degreeType?: string
+  /** 该专业关联的企业老师姓名列表 */
+  teacherNames?: string[]
 }
 
 /**
@@ -155,9 +165,11 @@ export interface EnterpriseQueryVO {
 export interface CreateEnterpriseDTO {
   /** 企业名称 */
   enterpriseName: string
-  /** 企业编码 */
+  /** 企业编码（可自动生成） */
   enterpriseCode?: string
-  /** 联系人 */
+  /** 企业负责人用户ID */
+  leaderId?: string
+  /** 联系人（可由负责人自动填充） */
   contactPerson?: string
   /** 联系电话 */
   contactPhone?: string
@@ -177,7 +189,9 @@ export interface UpdateEnterpriseDTO {
   enterpriseName?: string
   /** 企业编码 */
   enterpriseCode?: string
-  /** 联系人 */
+  /** 企业负责人用户ID */
+  leaderId?: string
+  /** 联系人（可由负责人自动填充） */
   contactPerson?: string
   /** 联系电话 */
   contactPhone?: string

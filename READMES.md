@@ -1539,6 +1539,76 @@ graph TD
   - ✅ 教师课题数量限制（≤18个）
   - ✅ 权限配置脚本（add_topic_review_permissions.sql）
 
+#### 11.1.8 系统阶段管理模块（已完成 ✅）
+
+**功能定位**：系统全局生命周期管控中枢，负责管控毕业设计四大执行阶段的有序推进。管理员通过该模块完成阶段初始化与切换，系统据此控制各业务模块的读写权限，避免跨阶段误操作。
+
+**四大阶段定义**：
+
+| 序号 | 阶段代码 | 阶段名称 | 核心业务 |
+|-----|---------|---------|--------|
+| 1 | TOPIC_DECLARATION | 课题申报阶段 | 课题创建、三级审批流程（预审→初审→终审） |
+| 2 | TOPIC_SELECTION | 课题双选阶段 | 学生选报、教师确认、负责人审查双选结果 |
+| 3 | TOPIC_GUIDANCE | 课题指导阶段 | 项目/论文指导、文档提交、开题/中期答辩 |
+| 4 | GRADUATION_DEFENSE | 毕设答辩阶段 | 答辩资格审查、正式/二次答辩、成绩评定 |
+
+**后端实现**：
+- ✅ **数据库设计**（`system_phase.sql`）
+  - `system_phase_config`：阶段配置表（4条固定数据，只读）
+  - `system_phase_record`：阶段切换记录表（审计追溯，含 `cohort` 毕业届别字段）
+- ✅ **核心枚举**：`SystemPhase`（4个阶段代码常量）
+- ✅ **实体/DTO/VO 层**
+  - `SystemPhaseRecord.java`：切换记录实体（含届别、操作人、切换时间、切换原因）
+  - `PhaseStatusVO.java`：当前阶段状态VO（含进度百分比、阶段列表、届别、是否已初始化）
+  - `PhaseRecordVO.java`：历史记录VO（含届别）
+  - `PhaseItemVO.java`：单个阶段项VO（状态：COMPLETED / ACTIVE / PENDING）
+  - `InitPhaseDTO.java`：初始化参数（届别必填、原因可选）
+  - `SwitchPhaseDTO.java`：切换参数（目标阶段代码、切换原因）
+- ✅ **业务规则**
+  - 阶段只能按序前进（1→2→3→4），不可回滚，已在最终阶段时禁止继续切换
+  - 切换记录的届别（cohort）跟随首次初始化记录，整届共用同一届别
+  - Redis 缓存当前阶段（key：`system:phase:current`），高频读取零查库
+- ✅ **AOP 阶段拦截**
+  - `@PhaseRequired(SystemPhase.XXX)`：自定义注解，标注在 Controller 方法或类上
+  - `PhaseCheckAspect.java`：切面，校验当前阶段，不匹配则抛出 `PhaseNotAllowedException`
+  - 管理员（SYSTEM_ADMIN）豁免阶段限制，可在任意阶段执行写操作
+  - `TopicController` 课题写操作已标注 `@PhaseRequired(TOPIC_DECLARATION)`
+- ✅ **REST API**（`SystemPhaseController`，5 个端点）
+  - `GET  /phase/status`：查询当前阶段状态（含进度、阶段列表，无需特殊权限）
+  - `POST /phase/init`：初始化系统阶段（权限：`phase:init`，仅管理员）
+  - `POST /phase/switch`：切换到下一阶段（权限：`phase:switch`，仅管理员）
+  - `GET  /phase/records`：获取全部切换历史记录（权限：`phase:records`）
+  - `POST /phase/check`：校验是否处于指定阶段（供 AOP 切面调用）
+- ✅ **权限配置**（`add_phase_permissions.sql`，ID 范围 800-861）
+  - 系统管理员：全部权限（init / switch / view / records）
+  - 其他角色（高校教师、企业教师、学生等）：仅 `phase:view`
+
+**前端实现**：
+- ✅ **类型定义**（`types/phase.ts`）：`SystemPhase` 枚举、`PhaseStatusVO`、`PhaseRecordVO`、`PhaseItemVO`、`InitPhaseDTO`、`SwitchPhaseDTO`
+- ✅ **API 封装**（`api/phase.ts`）：5 个方法与后端端点一一对应
+- ✅ **阶段概览页面**（`views/phase/PhaseOverview.vue`）
+  - 4 项统计展示：当前阶段（含序号标签）、毕业届别、切换时间、操作人
+  - 整体进度条（渐变色：蓝→绿→橙，随进度变化）
+  - 阶段步骤条（4 步，进行中步骤带动态旋转图标）
+  - 阶段详情卡片（4 张，含状态标签、描述文字、切换时间）
+  - 初始化弹窗：届别输入（必填，如"2026届"）、原因可选，提交前完整表单校验
+  - 切换阶段弹窗：展示当前/目标阶段对比、切换原因必填、警告提示
+  - 非管理员：隐藏操作按钮，只读浏览
+- ✅ **切换记录页面**（`views/phase/PhaseRecords.vue`）
+  - 时间线视图：切换路径（标签→标签）、操作人、届别、切换原因；当前阶段显示动态图标
+  - 表格视图：8列（序号/当前阶段/上一阶段/毕业届别/操作人/切换原因/切换时间/状态）
+  - 视图模式切换（时间线 / 表格 Radio Button）
+- ✅ **菜单与导航差异化**
+  - 系统管理员：侧边栏显示"阶段管理"二级子菜单（阶段概览 + 切换记录）
+  - 其他角色：直接显示"阶段概览"一级菜单项（无子菜单层级，减少导航复杂度）
+- ✅ **登录通知**（`MainLayout.vue` `onMounted`）
+  - 非管理员角色登录后，右上角弹出 `notification.info` 卡片，显示当前阶段名称、届别、整体进度
+  - 持续 3 秒自动消失，每次登录会话仅弹一次（`sessionStorage` 防重，退出登录时自动清除标记）
+- ✅ **仪表盘阶段进度集成**（`Dashboard.vue`）
+  - 首页顶部新增"当前阶段进度"卡片，所有角色均可见
+  - 卡片内容：3项统计数字（当前阶段/毕业届别/整体进度%）、渐变进度条、4步骤步骤条
+  - 阶段未初始化时展示空状态提示（`a-empty`）
+
 
 ### 11.2 待开发功能模块
 
@@ -1575,10 +1645,10 @@ graph TD
 - ⏳ 微信小程序推送
 
 #### 11.2.7 系统管理功能（待开发 ⏳）
+- ✅ ~~学期初始化管理~~（已在阶段管理模块实现）
 - ⏳ 系统配置管理
 - ⏳ 数据备份与恢复
 - ⏳ 性能监控
-- ⏳ 学期初始化管理
 
 ### 11.3 技术债务与优化方向
 
@@ -1641,8 +1711,35 @@ graph TD
 
 
 
-**文档版本**：V3.1  
-**更新日期**：2026年2月23日  
+**文档版本**：V4.2  
+**更新日期**：2026年3月7日  
+**更新内容**：
+
+### V4.2 更新（2026-03-07）- 系统阶段管理模块开发完成
+- ✅ **系统阶段管理模块（前后端完整实现）**
+  - **功能定位**：全局生命周期管控，控制四大阶段（课题申报→课题双选→课题指导→毕设答辩）的有序推进与业务权限限制
+  - **数据库设计**
+    - `system_phase_config`：阶段配置表（4条只读静态数据）
+    - `system_phase_record`：切换记录表（含 `cohort` 毕业届别字段，索引 `idx_cohort_current`）
+    - 迁移脚本：`ALTER TABLE CHANGE COLUMN semester → cohort`（VARCHAR(50) 缩减至 VARCHAR(20)）
+  - **后端实现**（`SystemPhaseController`，5个API端点）
+    - `GET /phase/status`、`POST /phase/init`、`POST /phase/switch`、`GET /phase/records`、`POST /phase/check`
+    - AOP 阶段拦截：`@PhaseRequired` 注解 + `PhaseCheckAspect` 切面；管理员豁免；`TopicController` 写操作已标注
+    - Redis 缓存当前阶段（key：`system:phase:current`）；自定义异常 `PhaseNotAllowedException` 全局处理
+  - **权限配置**（`add_phase_permissions.sql`，ID 范围 800-861）
+  - **前端实现**
+    - 阶段概览页（4项统计/进度条/步骤条/4张详情卡片/初始化+切换弹窗）
+    - 切换记录页（时间线视图 + 表格视图双模式，8列展示）
+    - 仪表盘首页集成阶段进度卡片（所有角色可见，阶段/届别/进度/步骤条）
+    - 登录通知：非管理员登录后右上角弹出当前阶段信息卡片（3秒自动消失，sessionStorage 防重）
+    - 菜单差异化显示：管理员显示"阶段管理"子菜单（含切换记录）；其他角色仅显示"阶段概览"一级菜单项
+  - **学期 → 届别字段重构**（全链路重命名）
+    - 后端：`SystemPhaseRecord` / `InitPhaseDTO` / `PhaseRecordVO` / `PhaseStatusVO` / `ServiceImpl` / `Controller` 全部 `semester` → `cohort`
+    - 前端：`types/phase.ts` 接口定义、`PhaseOverview.vue`（含表单输入）、`PhaseRecords.vue`（含时间线和表格列）全部更新
+    - 界面文案统一：学期 → 毕业届别，输入格式示例"2026届"
+
+**文档版本**：V4.1  
+**更新日期**：2026年3月1日  
 **更新内容**：
 
 ### V3.2 更新（2026-02-23）- 课题审查子模块开发完成

@@ -6,6 +6,7 @@ import com.yuwan.completebackend.common.PageResult;
 import com.yuwan.completebackend.common.Result;
 import com.yuwan.completebackend.model.dto.CreateSchoolDTO;
 import com.yuwan.completebackend.model.dto.UpdateSchoolDTO;
+import com.yuwan.completebackend.model.vo.SchoolOptionVO;
 import com.yuwan.completebackend.model.vo.SchoolQueryVO;
 import com.yuwan.completebackend.model.vo.SchoolVO;
 import com.yuwan.completebackend.service.ISchoolService;
@@ -103,16 +104,31 @@ public class SchoolController {
     }
 
     /**
-     * 获取全部启用学校（下拉选择用）
+     * 获取全部启用学校（完整版，管理员专用）
      *
      * @return 学校列表
      */
     @GetMapping("/all")
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
-    @Operation(summary = "获取全部启用学校", description = "获取全部启用状态的学校，用于下拉选择")
+    @Operation(summary = "获取全部启用学校", description = "获取全部启用状态的学校，管理员专用")
     public Result<List<SchoolVO>> getAllSchools() {
         log.info("获取全部启用学校");
         List<SchoolVO> result = schoolService.getAllSchools();
+        return Result.success(result);
+    }
+
+    /**
+     * 获取学校下拉选项（精简版，所有登录用户可用）
+     * 仅返回 schoolId 和 schoolName，用于课题创建等场景的下拉选择
+     *
+     * @return 学校选项列表
+     */
+    @GetMapping("/options")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "获取学校下拉选项", description = "获取启用学校的 ID 和名称，所有登录用户可调用")
+    public Result<List<SchoolOptionVO>> getSchoolOptions() {
+        log.info("获取学校下拉选项");
+        List<SchoolOptionVO> result = schoolService.getSchoolOptions();
         return Result.success(result);
     }
 

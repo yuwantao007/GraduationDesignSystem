@@ -8,6 +8,7 @@ import com.yuwan.completebackend.mapper.SchoolMapper;
 import com.yuwan.completebackend.model.dto.CreateSchoolDTO;
 import com.yuwan.completebackend.model.dto.UpdateSchoolDTO;
 import com.yuwan.completebackend.model.entity.School;
+import com.yuwan.completebackend.model.vo.SchoolOptionVO;
 import com.yuwan.completebackend.model.vo.SchoolQueryVO;
 import com.yuwan.completebackend.model.vo.SchoolVO;
 import com.yuwan.completebackend.service.ISchoolService;
@@ -178,6 +179,23 @@ public class SchoolServiceImpl implements ISchoolService {
         List<School> schools = schoolMapper.selectList(wrapper);
         return schools.stream()
                 .map(this::convertToVO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SchoolOptionVO> getSchoolOptions() {
+        LambdaQueryWrapper<School> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(School::getSchoolStatus, 1)
+               .select(School::getSchoolId, School::getSchoolName)
+               .orderByAsc(School::getSchoolName);
+
+        return schoolMapper.selectList(wrapper).stream()
+                .map(school -> {
+                    SchoolOptionVO option = new SchoolOptionVO();
+                    option.setSchoolId(school.getSchoolId());
+                    option.setSchoolName(school.getSchoolName());
+                    return option;
+                })
                 .collect(Collectors.toList());
     }
 

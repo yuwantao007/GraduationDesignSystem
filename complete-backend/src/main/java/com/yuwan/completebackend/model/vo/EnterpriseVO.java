@@ -30,6 +30,18 @@ public class EnterpriseVO implements Serializable {
     @Schema(description = "企业编码")
     private String enterpriseCode;
 
+    @Schema(description = "企业负责人用户ID")
+    private String leaderId;
+
+    @Schema(description = "企业负责人姓名")
+    private String leaderName;
+
+    @Schema(description = "企业负责人手机")
+    private String leaderPhone;
+
+    @Schema(description = "企业负责人邮箱")
+    private String leaderEmail;
+
     @Schema(description = "联系人")
     private String contactPerson;
 
