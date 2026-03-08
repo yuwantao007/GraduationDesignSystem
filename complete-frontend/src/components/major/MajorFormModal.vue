@@ -152,12 +152,15 @@ interface Props {
   majorData?: MajorVO | null
   /** 预选的专业方向ID（新建时使用） */
   preSelectedDirectionId?: string
+  /** 所属企业ID（用于过滤企业老师） */
+  enterpriseId?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   open: false,
   majorData: null,
-  preSelectedDirectionId: ''
+  preSelectedDirectionId: '',
+  enterpriseId: ''
 })
 
 // Emits 定义
@@ -183,6 +186,7 @@ const directionLoading = ref(false)
 // 企业老师搜索
 const teacherOptions = ref<UserVO[]>([])
 const teacherSearching = ref(false)
+const teacherListLoaded = ref(false) // 标记当前弹窗会话是否已加载完整教师列表
 let teacherSearchTimer: ReturnType<typeof setTimeout> | null = null
 
 // 表单数据
@@ -285,6 +289,7 @@ const resetForm = () => {
   formState.description = ''
   formState.teacherIds = []
   teacherOptions.value = []
+  teacherListLoaded.value = false
   formRef.value?.clearValidate()
 }
 
@@ -303,12 +308,13 @@ const fillFormData = (data: MajorVO) => {
   // 回填企业老师
   if (data.teachers && data.teachers.length > 0) {
     formState.teacherIds = data.teachers.map(t => t.userId)
-    // 预置选项以便回显姓名
+    // 预置选项以便回显姓名，但标记列表未加载（等待首次聚焦时拉取完整列表）
     teacherOptions.value = data.teachers
   } else {
     formState.teacherIds = []
     teacherOptions.value = []
   }
+  teacherListLoaded.value = false
 }
 
 /**
@@ -378,7 +384,7 @@ const handleSubmit = async () => {
  * 企业老师搜索框获取焦点时（首次加载）
  */
 const handleTeacherFocus = () => {
-  if (teacherOptions.value.length === 0) {
+  if (!teacherListLoaded.value) {
     fetchTeachers('')
   }
 }
@@ -397,13 +403,17 @@ const handleTeacherSearch = (keyword: string) => {
 const fetchTeachers = async (keyword: string) => {
   teacherSearching.value = true
   try {
-    const res = await majorApi.searchTeachers(keyword || undefined)
+    const res = await majorApi.searchTeachers(keyword || undefined, props.enterpriseId || undefined)
     // 合并：保留已选中但不在结果中的选项，避免回显时丢失标签
     const existingSelected = teacherOptions.value.filter(
       t => (formState.teacherIds || []).includes(t.userId) &&
            !res.data.some((r: UserVO) => r.userId === t.userId)
     )
     teacherOptions.value = [...existingSelected, ...(res.data || [])]
+    // 标记完整列表已加载（无关键词的首次加载视为全量）
+    if (!keyword) {
+      teacherListLoaded.value = true
+    }
   } catch {
     // ignore
   } finally {

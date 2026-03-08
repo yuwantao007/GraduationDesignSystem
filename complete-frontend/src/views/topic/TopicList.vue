@@ -61,6 +61,29 @@
           </a-select>
         </a-form-item>
 
+        <!-- 专业方向筛选（非学生角色可见） -->
+        <a-form-item v-if="!isStudent" label="专业方向">
+          <a-select
+            :value="filterDirectionId"
+            placeholder="请选择"
+            allow-clear
+            style="width: 150px"
+            :loading="filterDirectionLoading"
+            :options="filterDirectionList.map(d => ({ label: d.directionName, value: d.directionId }))"
+            @change="handleFilterDirectionChange"
+          />
+        </a-form-item>
+        <a-form-item v-if="!isStudent && filterDirectionId" label="所属专业">
+          <a-select
+            v-model:value="searchForm.majorId"
+            placeholder="请选择"
+            allow-clear
+            style="width: 150px"
+            :loading="filterMajorLoading"
+            :options="filterMajorList.map(m => ({ label: m.majorName, value: m.majorId }))"
+          />
+        </a-form-item>
+
         <a-form-item>
           <a-space>
             <a-button type="primary" @click="handleSearch">
@@ -258,10 +281,12 @@ import {
 } from '@ant-design/icons-vue'
 import { topicApi } from '@/api/topic'
 import { topicReviewApi } from '@/api/topicReview'
+import { majorApi } from '@/api/major'
 import { useUserStore } from '@/stores/user'
 import type { TopicListVO, TopicQueryVO, GeneralOpinionVO, GeneralOpinionDTO, TeacherPassedCountVO } from '@/types/topic'
 import { TopicCategory, TopicType, TopicReviewStatus, ReviewStage } from '@/types/topic'
 import type { TableProps, FormInstance } from 'ant-design-vue'
+import type { MajorDirectionVO, MajorVO } from '@/types/major'
 
 // 定义组件选项
 defineOptions({
@@ -279,15 +304,26 @@ const isEnterpriseTeacher = computed(() => {
   return userStore.hasAnyRole(['ENTERPRISE_TEACHER'])
 })
 
+// 是否为学生（后端自动注入 majorId，前端不显示专业筛选）
+const isStudent = computed(() => userStore.hasAnyRole(['STUDENT']))
+
 // 搜索表单
 const searchForm = reactive<TopicQueryVO>({
   topicTitle: '',
   topicCategory: undefined,
   topicType: undefined,
   reviewStatus: undefined,
+  majorId: undefined,
   pageNum: 1,
   pageSize: 10
 })
+
+// 专业方向/专业级联筛选数据
+const filterDirectionId = ref<string | undefined>(undefined)
+const filterDirectionList = ref<MajorDirectionVO[]>([])
+const filterMajorList = ref<MajorVO[]>([])
+const filterDirectionLoading = ref(false)
+const filterMajorLoading = ref(false)
 
 // 数据列表
 const topicList = ref<TopicListVO[]>([])
@@ -373,6 +409,40 @@ const statsLoading = ref(false)
 const passedCountStats = ref<TeacherPassedCountVO | null>(null)
 
 /**
+ * 加载筛选用专业方向列表
+ */
+const loadFilterDirectionList = async () => {
+  filterDirectionLoading.value = true
+  try {
+    const res = await majorApi.getDirectionList()
+    filterDirectionList.value = res.data || []
+  } catch (error) {
+    console.error('加载专业方向失败', error)
+  } finally {
+    filterDirectionLoading.value = false
+  }
+}
+
+/**
+ * 筛选专业方向选择变化
+ */
+const handleFilterDirectionChange = async (directionId: string | undefined) => {
+  filterDirectionId.value = directionId
+  filterMajorList.value = []
+  searchForm.majorId = undefined
+  if (!directionId) return
+  filterMajorLoading.value = true
+  try {
+    const res = await majorApi.getMajorList(directionId)
+    filterMajorList.value = res.data || []
+  } catch (error) {
+    console.error('加载专业列表失败', error)
+  } finally {
+    filterMajorLoading.value = false
+  }
+}
+
+/**
  * 获取审查状态颜色
  */
 const getReviewStatusColor = (status?: TopicReviewStatus): string => {
@@ -431,6 +501,9 @@ const handleReset = () => {
   searchForm.topicCategory = undefined
   searchForm.topicType = undefined
   searchForm.reviewStatus = undefined
+  searchForm.majorId = undefined
+  filterDirectionId.value = undefined
+  filterMajorList.value = []
   pagination.current = 1
   getTopicList()
 }
@@ -557,6 +630,10 @@ const showStatsModal = async () => {
 // 页面加载时获取数据
 onMounted(() => {
   getTopicList()
+  // 非学生角色才加载专业方向筛选列表
+  if (!isStudent.value) {
+    loadFilterDirectionList()
+  }
 })
 </script>
 

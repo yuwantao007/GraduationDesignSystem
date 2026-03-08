@@ -60,7 +60,41 @@
             </td>
             <td class="form-table-label" style="width: 100px">专业</td>
             <td class="form-table-value">
-              <a-input v-model:value="formData.guidanceDirection" placeholder="请输入对应的专业" />
+              <template v-if="formData.topicCategory === 1">
+                <a-select
+                  v-model:value="selectedDirectionId"
+                  placeholder="请选择专业方向"
+                  :loading="directionLoading"
+                  :disabled="!formData.enterpriseId"
+                  allow-clear
+                  style="width: 100%; margin-bottom: 4px"
+                  @change="handleDirectionSelectChange"
+                >
+                  <a-select-option
+                    v-for="d in directionList"
+                    :key="d.directionId"
+                    :value="d.directionId"
+                  >{{ d.directionName }}</a-select-option>
+                </a-select>
+                <a-select
+                  v-model:value="formData.majorId"
+                  placeholder="请选择所属专业"
+                  :loading="majorLoading"
+                  :disabled="!selectedDirectionId"
+                  allow-clear
+                  style="width: 100%"
+                  @change="handleMajorSelectChange"
+                >
+                  <a-select-option
+                    v-for="m in majorList"
+                    :key="m.majorId"
+                    :value="m.majorId"
+                  >{{ m.majorName }}</a-select-option>
+                </a-select>
+              </template>
+              <template v-else>
+                <a-input v-model:value="formData.guidanceDirection" placeholder="请输入对应的专业" />
+              </template>
             </td>
             <td class="form-table-label" style="width: 100px">班级</td>
             <td class="form-table-value">
@@ -100,6 +134,7 @@
                     placeholder="请选择归属企业"
                     show-search
                     :filter-option="filterEnterpriseOption"
+                    @change="handleEnterpriseSelectChange"
                   >
                     <a-select-option 
                       v-for="enterprise in enterpriseList" 
@@ -342,10 +377,12 @@ import dayjs, { type Dayjs } from 'dayjs'
 import { topicApi } from '@/api/topic'
 import { enterpriseApi } from '@/api/enterprise'
 import { schoolApi } from '@/api/school'
+import { majorApi } from '@/api/major'
 import { useUserStore } from '@/stores/user'
 import type { CreateTopicDTO } from '@/types/topic'
 import type { EnterpriseVO } from '@/types/enterprise'
 import type { SchoolOptionVO } from '@/types/school'
+import type { MajorDirectionVO, MajorVO } from '@/types/major'
 
 // 定义组件选项
 defineOptions({
@@ -375,6 +412,7 @@ const formData = reactive({
   enterpriseId: '',
   schoolId: '',
   guidanceDirection: '',
+  majorId: '',
   backgroundSignificance: '',
   contentSummary: '',
   professionalTraining: '',
@@ -400,6 +438,13 @@ const enterpriseList = ref<EnterpriseVO[]>([])
 
 // 学校列表
 const schoolList = ref<SchoolOptionVO[]>([])
+
+// 专业方向/专业级联数据
+const selectedDirectionId = ref<string>('')
+const directionList = ref<MajorDirectionVO[]>([])
+const majorList = ref<MajorVO[]>([])
+const directionLoading = ref(false)
+const majorLoading = ref(false)
 
 // 加载状态
 const saving = ref(false)
@@ -430,6 +475,61 @@ const getSchoolList = async () => {
 }
 
 /**
+ * 加载专业方向列表
+ */
+const loadDirectionList = async (enterpriseId: string) => {
+  directionList.value = []
+  majorList.value = []
+  selectedDirectionId.value = ''
+  formData.majorId = ''
+  if (!enterpriseId) return
+  directionLoading.value = true
+  try {
+    const res = await majorApi.getDirectionList(enterpriseId)
+    directionList.value = res.data || []
+  } catch (error) {
+    console.error('加载专业方向失败', error)
+  } finally {
+    directionLoading.value = false
+  }
+}
+
+/**
+ * 专业方向选择变化时加载专业列表
+ */
+const handleDirectionSelectChange = async (directionId: string) => {
+  majorList.value = []
+  formData.majorId = ''
+  if (!directionId) return
+  majorLoading.value = true
+  try {
+    const res = await majorApi.getMajorList(directionId)
+    majorList.value = res.data || []
+  } catch (error) {
+    console.error('加载专业列表失败', error)
+  } finally {
+    majorLoading.value = false
+  }
+}
+
+/**
+ * 专业选择变化时自动填充专业方向文本
+ */
+const handleMajorSelectChange = (majorId: string) => {
+  const major = majorList.value.find(m => m.majorId === majorId)
+  if (major) {
+    formData.guidanceDirection = major.majorName
+  }
+}
+
+/**
+ * 归属企业变化时加载专业方向
+ */
+const handleEnterpriseSelectChange = (enterpriseId: string) => {
+  loadDirectionList(enterpriseId)
+}
+
+/**
  * 课题大类切换处理
  */
 const handleCategoryChange = (value: number) => {
@@ -437,6 +537,11 @@ const handleCategoryChange = (value: number) => {
   formData.enterpriseId = ''
   formData.schoolId = ''
   formData.applicableSchool = ''
+  // 同时清空专业级联
+  directionList.value = []
+  majorList.value = []
+  selectedDirectionId.value = ''
+  formData.majorId = ''
   // 3+1 或实验班时懒加载学校列表
   if ((value === 2 || value === 3) && schoolList.value.length === 0) {
     getSchoolList()
@@ -504,7 +609,7 @@ const getTopicDetail = async (topicId: string) => {
       }
     }
     
-    // 填充表单数据
+    // 填充表单数据（majorId 在级联加载后单独赋值）
     Object.assign(formData, {
       topicTitle: topic.topicTitle,
       topicCategory: topic.topicCategory,
@@ -514,6 +619,7 @@ const getTopicDetail = async (topicId: string) => {
       enterpriseId: topic.enterpriseId,
       schoolId: topic.schoolId,
       guidanceDirection: topic.guidanceDirection,
+      majorId: '',
       backgroundSignificance: topic.backgroundSignificance,
       contentSummary: topic.contentSummary,
       professionalTraining: topic.professionalTraining,
@@ -536,6 +642,25 @@ const getTopicDetail = async (topicId: string) => {
     // 编辑模式下，若课题大类为3+1或实验班，懒加载学校列表
     if (topic.topicCategory === 2 || topic.topicCategory === 3) {
       getSchoolList()
+    }
+    
+    // 编辑模式下，若为高职升本且有企业，预加载专业级联数据
+    if (topic.topicCategory === 1 && topic.enterpriseId) {
+      await loadDirectionList(topic.enterpriseId)
+      if (topic.majorId) {
+        try {
+          const majorDetail = await majorApi.getMajorDetail(topic.majorId)
+          const major = majorDetail.data
+          if (major) {
+            selectedDirectionId.value = major.directionId
+            const majRes = await majorApi.getMajorList(major.directionId)
+            majorList.value = majRes.data || []
+            formData.majorId = topic.majorId
+          }
+        } catch (error) {
+          console.error('加载课题专业信息失败', error)
+        }
+      }
     }
   } catch (error) {
     console.error('获取课题详情失败', error)
@@ -603,6 +728,7 @@ const handleSave = async () => {
       enterpriseId: finalEnterpriseId || undefined,
       schoolId: finalSchoolId || undefined,
       guidanceDirection: formData.guidanceDirection,
+      majorId: formData.majorId || undefined,
       backgroundSignificance: formData.backgroundSignificance,
       contentSummary: formData.contentSummary,
       professionalTraining: formData.professionalTraining,
@@ -700,6 +826,7 @@ const handleSubmit = async () => {
       enterpriseId: finalEnterpriseId || undefined,
       schoolId: finalSchoolId || undefined,
       guidanceDirection: formData.guidanceDirection,
+      majorId: formData.majorId || undefined,
       backgroundSignificance: formData.backgroundSignificance,
       contentSummary: formData.contentSummary,
       professionalTraining: formData.professionalTraining,

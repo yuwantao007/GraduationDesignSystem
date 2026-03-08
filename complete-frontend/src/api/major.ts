@@ -55,6 +55,16 @@ export const majorApi = {
   },
 
   /**
+   * 获取指定专业方向下的专业列表（下拉选择用）
+   * @param directionId - 专业方向ID
+   */
+  getMajorList(directionId?: string) {
+    return request.get<MajorVO[]>('/major/list', {
+      params: { directionId }
+    })
+  },
+
+  /**
    * 获取专业方向详情
    * @param directionId - 专业方向ID
    */

@@ -17,6 +17,11 @@
 14. [课题审查API参数必传问题 — 综合意见列表接口](#课题审查api参数必传问题--综合意见列表接口)
 15. [系统管理员创建专业方向报错问题](#系统管理员创建专业方向报错问题)
 16. [专业代码保存为空问题](#专业代码保存为空问题)
+17. [覆盖检查误报未覆盖 — MyBatis-Plus eq(null)生成IS NULL条件](#覆盖检查误报未覆盖--mybatis-plus-eqnull生成is-null条件)
+18. [专业管理编辑弹窗企业老师下拉框显示跨企业教师问题](#专业管理编辑弹窗企业老师下拉框显示跨企业教师问题)
+19. [企业老师过滤错误导致下拉框为空 — department字段过滤错误](#企业老师过滤错误导致下拉框为空--department字段过滤错误)
+18. [专业管理编辑弹窗企业老师下拉框显示跨企业教师问题](#专业管理编辑弹窗企业老师下拉框显示跨企业教师问题)
+19. [企业老师过滤错误导致下拉框为空 — department字段过滤错误](#企业老师过滤错误导致下拉框为空--department字段过滤错误)
 
 ---
 
@@ -4048,5 +4053,277 @@ const loadData = async () => {
    await new Promise(resolve => setTimeout(resolve, 1000))
    ```
 3. **并发测试**：快速打开关闭弹窗，测试并发场景
+
+---
+
+# 覆盖检查误报未覆盖 — MyBatis-Plus eq(null)生成IS NULL条件
+
+- 日期：2026-03-08
+- 作者：系统维护者
+- 严重程度：高（数据展示完全错误，直接影响业务判断）
+- 状态：已解决
+
+## 一、问题描述
+
+### 问题表现
+
+企业教师"王三泉"已在**精确配对**页签中与高校老师完成配对（状态：启用），但在**覆盖检查**页签中仍显示为"未覆盖"，高校教师栏显示 `-`。
+
+### 影响范围
+
+- 覆盖检查页面（`/teacher-relation` → 覆盖检查 Tab）
+- 覆盖率统计数字（已覆盖 / 未覆盖 count）
+- 不传届别时所有精确配对的企业教师均被误判为未覆盖
+
+## 二、问题根源分析
+
+### 2.1 核心代码位置
+
+`TeacherRelationServiceImpl.java` → 私有方法 `findDirectPair`：
+
+```java
+// ❌ 修复前
+private TeacherRelationship findDirectPair(String enterpriseTeacherId, String cohort) {
+    LambdaQueryWrapper<TeacherRelationship> wrapper = new LambdaQueryWrapper<>();
+    wrapper.eq(TeacherRelationship::getEnterpriseTeacherId, enterpriseTeacherId)
+            .eq(TeacherRelationship::getCohort, cohort)          // ← 问题所在
+            .eq(TeacherRelationship::getRelationType, "DIRECT")
+            .eq(TeacherRelationship::getIsEnabled, 1);
+    return teacherRelationshipMapper.selectOne(wrapper);
+}
+```
+
+### 2.2 MyBatis-Plus eq(null) 行为
+
+MyBatis-Plus 的 `eq(column, value)` 是**无条件**等值匹配：
+
+| value 值 | 生成的 SQL 片段 |
+|----------|----------------|
+| `"2026届"` | `AND cohort = '2026届'` ✅ |
+| `null` | `AND cohort IS NULL` ❌ |
+| `""` (空串) | `AND cohort = ''` ❌ |
+
+当覆盖检查页面**不填届别**时，`cohort` 传入为 `null`，MyBatis-Plus 将其翻译为 `cohort IS NULL`，而数据库中王三泉的配对记录 `cohort = '2026届'`（非 NULL），因此查询结果为空，`findUniversityTeacher` 误判为无配对，覆盖状态被错误设为"未覆盖"。
+
+### 2.3 调用链路
+
+```
+getCoverageList(enterpriseId, cohort=null)
+  └─ findUniversityTeacher(teacherId, directionId, cohort=null)
+       └─ findDirectPair(teacherId, cohort=null)
+            └─ SQL: WHERE enterprise_teacher_id=? AND cohort IS NULL AND ...
+               → 返回 null（找不到记录）
+  └─ univTeacherId = null → coverageVO.setCovered(false) ← 误判!
+```
+
+## 三、解决方案
+
+使用 MyBatis-Plus 的**条件三参数写法** `eq(condition, column, value)`，仅当 `cohort` 有值时才加入该过滤条件：
+
+```java
+// ✅ 修复后
+private TeacherRelationship findDirectPair(String enterpriseTeacherId, String cohort) {
+    LambdaQueryWrapper<TeacherRelationship> wrapper = new LambdaQueryWrapper<>();
+    wrapper.eq(TeacherRelationship::getEnterpriseTeacherId, enterpriseTeacherId)
+            .eq(StringUtils.hasText(cohort), TeacherRelationship::getCohort, cohort)
+            .eq(TeacherRelationship::getRelationType, "DIRECT")
+            .eq(TeacherRelationship::getIsEnabled, 1)
+            .last("LIMIT 1");  // 防止多届配对存在时 selectOne 报 TooManyResultsException
+    return teacherRelationshipMapper.selectOne(wrapper);
+}
+```
+
+**修复效果对比：**
+
+| 调用场景 | 修复前 SQL | 修复后 SQL |
+|----------|-----------|------------|
+| 不传届别 | `cohort IS NULL`（查不到） | 不含 cohort 条件（能查到任意届的配对） |
+| 传 `2026届` | `cohort = '2026届'`（正常） | `cohort = '2026届'`（行为不变） |
+
+## 四、修改的文件
+
+- `complete-backend/.../service/impl/TeacherRelationServiceImpl.java`
+  - 方法：`findDirectPair`
+  - 改 `.eq(CohortField, cohort)` → `.eq(StringUtils.hasText(cohort), CohortField, cohort)` + `.last("LIMIT 1")`
+
+## 五、经验总结
+
+### ⚠️ MyBatis-Plus 使用规范
+
+> **所有可为 null 的查询参数，必须使用条件三参数写法，不得直接 `.eq(column, nullableValue)`**
+
+```java
+// ❌ 错误写法 —— value 为 null 时生成 IS NULL
+wrapper.eq(Entity::getField, value);
+
+// ✅ 正确写法 —— value 为 null / 空时跳过该条件
+wrapper.eq(StringUtils.hasText(value), Entity::getField, value);  // String 类型
+wrapper.eq(value != null, Entity::getField, value);               // 任意类型
+```
+
+### 规范适用场景
+
+- 所有带 `@RequestParam(required = false)` 的可选参数透传至 QueryWrapper 的场景
+- 服务间调用时参数可能为 null 的场景
+- 覆盖检查、统计查询等"不传则查全部"的业务逻辑
+
+---
+
+# 专业管理编辑弹窗企业老师下拉框显示跨企业教师问题
+
+- 日期：2026-03-08
+- 作者：系统维护者
+- 严重程度：中（数据隔离安全问题，同一教师可被多个企业同时选择）
+- 状态：已解决
+
+## 一、问题描述
+
+### 问题表现
+
+展开不同企业的专业进行编辑时，两个企业的专业都可以选择同一名企业老师，导致同一教师同时属于多个企业的错误数据状态。
+
+### 影响范围
+
+- 专业管理 — 编辑专业弹窗中的企业老师多选下拉框
+- 企业A的教师可在企业B的选择列表中出现，反之亦然
+
+## 二、问题根源分析
+
+### 2.1 前端：弹窗缺少 `enterpriseId` prop，API 永远不传企业参数
+
+**`MajorFormModal.vue`** 没有 `enterpriseId` prop，`fetchTeachers` 调用 API 时不传 `enterpriseId`，导致后端永远返回全库教师。
+
+### 2.2 前端：`MajorList.vue` 未更新 `currentEnterpriseId`
+
+- `handleEditMajor`：获取专业详情后没有转存 `response.data.enterpriseId` 到 `currentEnterpriseId`
+- `handleAddMajorToDirection`：新建专业时未通过方向ID反查父级企业ID
+- 模板中 `MajorFormModal` 缺少 `:enterprise-id="currentEnterpriseId"` 绑定
+
+### 2.3 后端：`searchMajorTeachers` 未进行企业隔离
+
+后端在 `enterpriseId` 为空时直接返回所有企业的全局教师列表。
+
+## 三、解决方案
+
+### 3.1 前端 — `MajorFormModal.vue`
+
+新增 `enterpriseId?: string` prop，`fetchTeachers` 调用时将其传入 `majorApi.searchTeachers(keyword, props.enterpriseId)`。
+
+### 3.2 前端 — `MajorList.vue`
+
+- `handleEditMajor`：获取详情后立即赋值 `currentEnterpriseId.value = response.data.enterpriseId`
+- `handleAddMajorToDirection`：新增辅助函数 `findEnterpriseIdForDirection`，通过遍历树节点从方向ID反查父企业ID
+- 模板绑定 `:enterprise-id="currentEnterpriseId"`
+
+### 3.3 后端 — `MajorServiceImpl.java`
+
+当 `enterpriseId` 有值时，按 `major_teacher → major.enterprise_id` 关系链过滤：排除已被其他企业占用的教师。
+
+```java
+// 第一步：取得「其他企业」的所有专业ID
+List<String> otherEnterpriseMajorIds = majorMapper.selectList(
+    new LambdaQueryWrapper<Major>().ne(Major::getEnterpriseId, enterpriseId)
+        .select(Major::getMajorId))
+    .stream().map(Major::getMajorId).collect(Collectors.toList());
+
+// 第二步：找出已被其他企业占用的教师ID
+List<String> occupied = majorTeacherMapper.selectList(
+    new LambdaQueryWrapper<MajorTeacher>()
+        .in(MajorTeacher::getMajorId, otherEnterpriseMajorIds)
+        .select(MajorTeacher::getUserId))
+    .stream().map(MajorTeacher::getUserId).distinct().collect(Collectors.toList());
+
+// 第三步：排除这些教师
+if (!occupied.isEmpty()) {
+    userWrapper.notIn(User::getUserId, occupied);
+}
+```
+
+## 四、业务规则
+
+| 教师状态 | 含义 | 可见范围 |
+|----------|------|---------|
+| `major_teacher` 中无记录 | 未被任何企业占用 | 对所有企业可见 |
+| 记录指向企业X的专业 | 属于企业X | 只对X可见 |
+| 被其他企业Y占用 | 已与Y绑定 | 对X不可见 |
+| 从X的专业中移除后 | 物理删除记录 | 重新对所有企业可见 ✅ |
+
+## 五、修改的文件
+
+- `complete-frontend/.../components/major/MajorFormModal.vue`
+  - 新增 `enterpriseId` prop，`fetchTeachers` 调用时传入该参数
+- `complete-frontend/.../views/major/MajorList.vue`
+  - `handleEditMajor`、`handleAddMajorToDirection` 正确设置 `currentEnterpriseId`
+  - 模板绑定 `:enterprise-id` 到 `MajorFormModal`
+- `complete-backend/.../service/impl/MajorServiceImpl.java`
+  - `searchMajorTeachers` 增加三步排除逻辑
+
+---
+
+# 企业老师过滤错误导致下拉框为空 — department字段过滤错误
+
+- 日期：2026-03-08
+- 作者：系统维护者
+- 严重程度：高（企业老师下拉框完全为空，无法选择任何教师）
+- 状态：已解决
+
+## 一、问题描述
+
+### 问题表现
+
+在修复条目18（企业老师跨企业显示问题）时，后端 `searchMajorTeachers`方法被改为通过 `User.department == enterprise.enterpriseName` 进行过滤。修改后所有企业的编辑/新建专业模态框中，企业老师下拉框变为空，显示"未找到匹配的企业老师"。
+
+### 影响范围
+
+- 专业管理所有编辑/新建专业模态框的企业老师选择功能全部失效
+- 两个企业均无法选取任何教师
+
+## 二、问题根源分析
+
+### 2.1 错误过滤方式
+
+`User.department` 是用户注册时的文本字段，与企业主数据没有强关联：
+
+```java
+// ❌ 错误写法：用 department 匹配企业名称
+Enterprise enterprise = enterpriseMapper.selectById(enterpriseId);
+if (enterprise != null) {
+    userWrapper.eq(User::getDepartment, enterprise.getEnterpriseName());
+}
+```
+
+问题原因：
+- `department` 内容由用户自行填写，存在大小写、全半角、多余空格、简写等差异
+- 测试数据中教师的 `department` 字段值与企业的正式名称不一致
+- 结果：`WHERE department = '企业名'` 匹配 0 条记录 → 空列表
+
+## 三、解决方案
+
+**完全放弃基于 `department` 字段的过滤，改为基于 `major_teacher → major.enterprise_id` 关系链的排除逻辑。**
+
+正确的教师归属判断依据：
+- 不靠 `User.department`（文本字段，不可靠）
+- 靠 `major_teacher.major_id` 关联 `major.enterprise_id`（业务关系表，可靠）
+
+详细实现见条目18第三节后端修改。
+
+## 四、经验总结
+
+### ⚠️ 禁止用文本字段进行实体关联处理
+
+> `User.department`、`User.company` 等第三字段文本字段仅供展示用途，**不得用于实体过滤、归属判断等业务逻辑**。
+
+正确做法：所有实体关联判断必须基于关系表的 ID 字段进行查询。
+
+| 场景 | 错误做法 | 正确做法 |
+|------|---------|----------|
+| 教师属于哪个企业 | `WHERE department = '...'` | `JOIN major_teacher ON major.enterprise_id` |
+| 用户属于哪个部门 | `WHERE department = '...'` | `WHERE department_id = 'xxx'`（ID字段） |
+
+## 五、修改的文件
+
+- `complete-backend/.../service/impl/MajorServiceImpl.java`
+  - 方法：`searchMajorTeachers`
+  - 删除 `department` 字段过滤逻辑，改为 `major_teacher → major.enterprise_id` 三步排除逻辑
 
 ---

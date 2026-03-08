@@ -115,6 +115,41 @@
           :loading="roleLoading"
         />
       </a-form-item>
+
+      <!-- 所属专业（仅学生角色显示） -->
+      <template v-if="isStudentRoleSelected">
+        <a-form-item label="所属企业">
+          <a-select
+            v-model:value="selectedEnterpriseId"
+            placeholder="请选择企业"
+            :options="enterpriseOptions"
+            :loading="enterpriseLoading"
+            allow-clear
+            @change="handleEnterpriseChange"
+          />
+        </a-form-item>
+        <a-form-item label="专业方向">
+          <a-select
+            v-model:value="selectedDirectionId"
+            placeholder="请先选择企业"
+            :options="directionOptions"
+            :loading="directionLoading"
+            :disabled="!selectedEnterpriseId"
+            allow-clear
+            @change="handleDirectionChange"
+          />
+        </a-form-item>
+        <a-form-item label="所属专业">
+          <a-select
+            v-model:value="formState.majorId"
+            placeholder="请先选择专业方向"
+            :options="majorOptions"
+            :loading="majorLoading"
+            :disabled="!selectedDirectionId"
+            allow-clear
+          />
+        </a-form-item>
+      </template>
     </a-form>
   </a-modal>
 </template>
@@ -137,7 +172,11 @@ import {
 } from '@ant-design/icons-vue'
 import { userApi } from '@/api/user'
 import { roleApi } from '@/api/role'
+import { enterpriseApi } from '@/api/enterprise'
+import { majorApi } from '@/api/major'
 import type { UserVO, CreateUserDTO, UpdateUserDTO, RoleInfo } from '@/types/user'
+import type { EnterpriseVO } from '@/types/enterprise'
+import type { MajorDirectionVO, MajorVO } from '@/types/major'
 
 defineOptions({
   name: 'UserFormModal'
@@ -175,6 +214,18 @@ const submitLoading = ref(false)
 // 角色选项
 const roleOptions = ref<Array<{ label: string; value: string }>>([])
 const roleLoading = ref(false)
+// 全部角色数据（用于判断是否含学生角色）
+const allRoles = ref<RoleInfo[]>([])
+
+// 企业/方向/专业级联选项
+const selectedEnterpriseId = ref<string>('')
+const selectedDirectionId = ref<string>('')
+const enterpriseList = ref<EnterpriseVO[]>([])
+const directionList = ref<MajorDirectionVO[]>([])
+const majorList = ref<MajorVO[]>([])
+const enterpriseLoading = ref(false)
+const directionLoading = ref(false)
+const majorLoading = ref(false)
 
 // 表单数据
 const formState = reactive<CreateUserDTO & { userCode?: string }>({
@@ -187,8 +238,25 @@ const formState = reactive<CreateUserDTO & { userCode?: string }>({
   department: '',
   major: '',
   userCode: '',
-  roleIds: []
+  roleIds: [],
+  majorId: ''
 })
+
+// 是否选中了学生角色
+const isStudentRoleSelected = computed(() =>
+  formState.roleIds.some(id => allRoles.value.find(r => r.roleId === id)?.roleCode === 'STUDENT')
+)
+
+// 级联选项数据
+const enterpriseOptions = computed(() =>
+  enterpriseList.value.map(e => ({ label: e.enterpriseName, value: e.enterpriseId }))
+)
+const directionOptions = computed(() =>
+  directionList.value.map(d => ({ label: d.directionName, value: d.directionId }))
+)
+const majorOptions = computed(() =>
+  majorList.value.map(m => ({ label: m.majorName, value: m.majorId }))
+)
 
 // 邮箱格式校验
 const validateEmail = async (_rule: Rule, value: string) => {
@@ -256,7 +324,8 @@ const loadRoleOptions = async () => {
   roleLoading.value = true
   try {
     const response = await roleApi.getAllRoles()
-    roleOptions.value = (response.data || []).map((role: RoleInfo) => ({
+    allRoles.value = response.data || []
+    roleOptions.value = allRoles.value.map((role: RoleInfo) => ({
       label: role.roleName,
       value: role.roleId
     }))
@@ -264,6 +333,59 @@ const loadRoleOptions = async () => {
     console.error('加载角色列表失败:', error)
   } finally {
     roleLoading.value = false
+  }
+}
+
+/**
+ * 加载企业列表
+ */
+const loadEnterpriseList = async () => {
+  enterpriseLoading.value = true
+  try {
+    const res = await enterpriseApi.getAllEnterprises()
+    enterpriseList.value = res.data || []
+  } catch (error) {
+    console.error('加载企业列表失败:', error)
+  } finally {
+    enterpriseLoading.value = false
+  }
+}
+
+/**
+ * 企业选择变化时加载专业方向
+ */
+const handleEnterpriseChange = async (enterpriseId: string) => {
+  directionList.value = []
+  majorList.value = []
+  selectedDirectionId.value = ''
+  formState.majorId = ''
+  if (!enterpriseId) return
+  directionLoading.value = true
+  try {
+    const res = await majorApi.getDirectionList(enterpriseId)
+    directionList.value = res.data || []
+  } catch (error) {
+    console.error('加载专业方向失败:', error)
+  } finally {
+    directionLoading.value = false
+  }
+}
+
+/**
+ * 专业方向选择变化时加载专业
+ */
+const handleDirectionChange = async (directionId: string) => {
+  majorList.value = []
+  formState.majorId = ''
+  if (!directionId) return
+  majorLoading.value = true
+  try {
+    const res = await majorApi.getMajorList(directionId)
+    majorList.value = res.data || []
+  } catch (error) {
+    console.error('加载专业列表失败:', error)
+  } finally {
+    majorLoading.value = false
   }
 }
 
@@ -281,13 +403,18 @@ const resetForm = () => {
   formState.major = ''
   formState.userCode = ''
   formState.roleIds = []
+  formState.majorId = ''
+  selectedEnterpriseId.value = ''
+  selectedDirectionId.value = ''
+  directionList.value = []
+  majorList.value = []
   formRef.value?.clearValidate()
 }
 
 /**
  * 填充编辑数据
  */
-const fillFormData = (user: UserVO) => {
+const fillFormData = async (user: UserVO) => {
   formState.username = user.username
   formState.realName = user.realName
   formState.userEmail = user.userEmail
@@ -297,16 +424,39 @@ const fillFormData = (user: UserVO) => {
   formState.major = user.major || ''
   formState.userCode = user.userCode || ''
   formState.roleIds = (user.roles || []).map(role => role.roleId)
+  formState.majorId = user.majorId || ''
+  // 如果有所属专业，预加载级联数据以便展示
+  if (user.majorId) {
+    try {
+      const res = await majorApi.getMajorDetail(user.majorId)
+      const major = res.data
+      if (major) {
+        selectedEnterpriseId.value = major.enterpriseId
+        selectedDirectionId.value = major.directionId
+        await Promise.all([
+          majorApi.getDirectionList(major.enterpriseId).then(r => {
+            directionList.value = r.data || []
+          }),
+          majorApi.getMajorList(major.directionId).then(r => {
+            majorList.value = r.data || []
+          })
+        ])
+      }
+    } catch (error) {
+      console.error('加载用户专业信息失败:', error)
+    }
+  }
 }
 
 // 监听弹窗状态变化
 watch(
   () => props.open,
-  (newVal) => {
+  async (newVal) => {
     if (newVal) {
       loadRoleOptions()
+      loadEnterpriseList()
       if (props.userData) {
-        fillFormData(props.userData)
+        await fillFormData(props.userData)
       } else {
         resetForm()
       }
@@ -336,7 +486,8 @@ const handleSubmit = async () => {
         department: formState.department,
         major: formState.major,
         userCode: formState.userCode,
-        roleIds: formState.roleIds
+        roleIds: formState.roleIds,
+        majorId: formState.majorId || undefined
       }
       await userApi.updateUser(props.userData.userId, updateData)
       message.success('用户信息更新成功')
@@ -352,7 +503,8 @@ const handleSubmit = async () => {
         department: formState.department,
         major: formState.major,
         userCode: formState.userCode,
-        roleIds: formState.roleIds
+        roleIds: formState.roleIds,
+        majorId: formState.majorId || undefined
       }
       await userApi.createUser(createData)
       message.success('用户创建成功')

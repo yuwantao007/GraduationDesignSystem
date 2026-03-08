@@ -157,6 +157,8 @@ export interface UserVO {
   department?: string
   /** 专业方向 */
   major?: string
+  /** 属学生琒精确专业ID */
+  majorId?: string
   /** 学号/工号 */
   userCode?: string
   /** 简介 */
@@ -213,6 +215,8 @@ export interface CreateUserDTO {
   department?: string
   /** 专业方向 */
   major?: string
+  /** 学生精确专业ID（仅学生角色使用） */
+  majorId?: string
   /** 学号/工号 */
   userCode?: string
   /** 角色ID列表 */
@@ -237,6 +241,8 @@ export interface UpdateUserDTO {
   department?: string
   /** 专业方向 */
   major?: string
+  /** 学生精确专业ID（仅学生角色使用） */
+  majorId?: string
   /** 学号/工号 */
   userCode?: string
   /** 简介 */

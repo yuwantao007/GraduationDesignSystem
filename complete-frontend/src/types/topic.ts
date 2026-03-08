@@ -193,6 +193,10 @@ export interface TopicVO extends Topic {
   enterpriseName?: string
   /** 归属学校名称 */
   schoolName?: string
+  /** 课题所属专业ID */
+  majorId?: string
+  /** 课题所属专业名称 */
+  majorName?: string
   /** 创建人姓名 */
   creatorName?: string
   /** 审查状态描述 */
@@ -223,6 +227,10 @@ export interface TopicListVO {
   enterpriseId?: string
   /** 归属企业名称 */
   enterpriseName?: string
+  /** 课题所属专业ID */
+  majorId?: string
+  /** 课题所属专业名称 */
+  majorName?: string
   /** 归属学校ID */
   schoolId?: string
   /** 归属学校名称 */
@@ -233,6 +241,10 @@ export interface TopicListVO {
   creatorId: string
   /** 创建人姓名 */
   creatorName?: string
+  /** 课题所属专业ID */
+  majorId?: string
+  /** 课题所属专业名称 */
+  majorName?: string
   /** 审查状态 */
   reviewStatus?: TopicReviewStatus
   /** 审查状态描述 */
@@ -349,6 +361,8 @@ export interface TopicQueryVO {
   enterpriseId?: string
   /** 指导方向/专业（模糊查询） */
   guidanceDirection?: string
+  /** 课题所属专业ID（学生角色将由后端自动注入） */
+  majorId?: string
   /** 创建人ID */
   creatorId?: string
   /** 审查状态 */

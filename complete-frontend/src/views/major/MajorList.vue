@@ -201,6 +201,7 @@
       v-model:open="majorModalVisible"
       :major-data="currentMajor"
       :pre-selected-direction-id="preSelectedDirectionId"
+      :enterprise-id="currentEnterpriseId"
       @success="loadMajorTree"
     />
 
@@ -475,6 +476,22 @@ const handleExpandAll = () => {
   expandAll.value = !expandAll.value
 }
 
+/**
+ * 在树数据中通过方向ID查找对应的企业ID
+ */
+const findEnterpriseIdForDirection = (directionId: string): string => {
+  for (const enterpriseNode of treeData.value) {
+    if (enterpriseNode.type === 'enterprise' && enterpriseNode.children) {
+      for (const directionNode of enterpriseNode.children) {
+        if (directionNode.id === directionId && directionNode.type === 'direction') {
+          return enterpriseNode.id
+        }
+      }
+    }
+  }
+  return ''
+}
+
 // ==================== 企业节点操作 ====================
 
 /**
@@ -565,6 +582,7 @@ const handleAddMajor = () => {
 const handleAddMajorToDirection = (record: MajorTreeVO) => {
   currentMajor.value = null
   preSelectedDirectionId.value = record.id
+  currentEnterpriseId.value = findEnterpriseIdForDirection(record.id)
   majorModalVisible.value = true
 }
 
@@ -588,6 +606,7 @@ const handleEditMajor = async (record: MajorTreeVO) => {
   try {
     const response = await majorApi.getMajorDetail(record.id)
     currentMajor.value = response.data
+    currentEnterpriseId.value = response.data.enterpriseId || ''
     majorModalVisible.value = true
   } catch (error) {
     console.error('获取专业详情失败:', error)

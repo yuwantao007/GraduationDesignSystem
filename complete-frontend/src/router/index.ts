@@ -75,6 +75,13 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/school/SchoolList.vue'),
         meta: { title: '学校管理', icon: 'ReadOutlined', permission: 'school:view' }
       },
+      // 教师配对管理路由
+      {
+        path: 'teacher-relation',
+        name: 'TeacherRelation',
+        component: () => import('@/views/teacher-relation/TeacherRelationManagement.vue'),
+        meta: { title: '教师配对', icon: 'UsergroupAddOutlined', permission: 'teacher_relation:manage' }
+      },
       {
         path: 'profile',
         name: 'Profile',
@@ -112,6 +119,19 @@ const routes: RouteRecordRaw[] = [
         name: 'TopicReview',
         component: () => import('@/views/topic/TopicReview.vue'),
         meta: { title: '课题审查', icon: 'AuditOutlined', permission: 'topic:review' }
+      },
+      // 课题选报路由（学生）
+      {
+        path: 'topic-selection/list',
+        name: 'TopicSelectionList',
+        component: () => import('@/views/topic-selection/TopicSelectionList.vue'),
+        meta: { title: '课题选报', icon: 'SelectOutlined', permission: 'selection:available' }
+      },
+      {
+        path: 'topic-selection/my',
+        name: 'MySelections',
+        component: () => import('@/views/topic-selection/MySelections.vue'),
+        meta: { title: '我的选报', icon: 'ProfileOutlined', permission: 'selection:my' }
       },
       // 阶段管理路由
       {

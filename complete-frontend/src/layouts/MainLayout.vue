@@ -21,7 +21,7 @@
           <span>仪表盘</span>
         </a-menu-item>
         
-        <a-sub-menu key="user-mgmt">
+        <a-sub-menu v-if="userStore.hasAnyRole(['SYSTEM_ADMIN'])" key="user-mgmt">
           <template #icon><TeamOutlined /></template>
           <template #title>用户管理</template>
           <a-menu-item key="/user">
@@ -34,7 +34,7 @@
           </a-menu-item>
         </a-sub-menu>
         
-        <a-sub-menu v-if="userStore.hasPermission('enterprise:view') || userStore.hasPermission('enterprise:major:view')" key="enterprise-mgmt">
+        <a-sub-menu v-if="(userStore.hasPermission('enterprise:view') || userStore.hasPermission('enterprise:major:view')) && !userStore.hasAnyRole(['STUDENT'])" key="enterprise-mgmt">
           <template #icon><BankOutlined /></template>
           <template #title>企业管理</template>
           <a-menu-item v-if="userStore.hasPermission('enterprise:view')" key="/enterprise/overview">
@@ -53,6 +53,12 @@
           <span>学校管理</span>
         </a-menu-item>
         
+        <!-- 教师配对管理 -->
+        <a-menu-item v-if="userStore.hasAnyRole(['SYSTEM_ADMIN', 'ENTERPRISE_LEADER', 'UNIVERSITY_TEACHER'])" key="/teacher-relation">
+          <template #icon><UsergroupAddOutlined /></template>
+          <span>教师配对</span>
+        </a-menu-item>
+        
         <!-- 课题管理：根据角色显示不同子菜单 -->
         <a-sub-menu v-if="userStore.hasAnyRole(['ENTERPRISE_TEACHER', 'SYSTEM_ADMIN', 'UNIVERSITY_TEACHER', 'MAJOR_DIRECTOR', 'SUPERVISOR_TEACHER'])" key="topic">
           <template #icon><FileTextOutlined /></template>
@@ -61,6 +67,14 @@
           <a-menu-item v-if="userStore.hasPermission('topic:view') && userStore.hasAnyRole(['ENTERPRISE_TEACHER', 'SYSTEM_ADMIN'])" key="/topic/list">课题列表</a-menu-item>
           <!-- 课题审查：仅审查角色可见（高校教师/专业方向主管/督导教师） -->
           <a-menu-item v-if="userStore.hasPermission('topic:review') && userStore.hasAnyRole(['UNIVERSITY_TEACHER', 'MAJOR_DIRECTOR', 'SUPERVISOR_TEACHER'])" key="/topic/review">课题审查</a-menu-item>
+        </a-sub-menu>
+        
+        <!-- 双选管理：学生角色 -->
+        <a-sub-menu v-if="userStore.hasPermission('selection:manage')" key="selection">
+          <template #icon><SelectOutlined /></template>
+          <template #title>双选管理</template>
+          <a-menu-item v-if="userStore.hasPermission('selection:available')" key="/topic-selection/list">课题选报</a-menu-item>
+          <a-menu-item v-if="userStore.hasPermission('selection:my')" key="/topic-selection/my">我的选报</a-menu-item>
         </a-sub-menu>
         
         <a-sub-menu key="document">
@@ -159,7 +173,9 @@ import {
   LogoutOutlined,
   BankOutlined,
   ReadOutlined,
-  FieldTimeOutlined
+  FieldTimeOutlined,
+  UsergroupAddOutlined,
+  SelectOutlined
 } from '@ant-design/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
@@ -199,10 +215,12 @@ const userInfo = computed(() => userStore.userInfo)
 const getOpenKeys = (path: string): string[] => {
   if (path.startsWith('/user')) return ['user-mgmt']
   if (path.startsWith('/enterprise')) return ['enterprise-mgmt']
+  if (path.startsWith('/topic-selection')) return ['selection']
   if (path.startsWith('/topic')) return ['topic']
   if (path.startsWith('/document')) return ['document']
   if (path.startsWith('/system/phase')) return userStore.hasAnyRole(['SYSTEM_ADMIN']) ? ['phase-mgmt'] : []
   if (path.startsWith('/school')) return []
+  if (path.startsWith('/teacher-relation')) return []
   return []
 }
 
@@ -215,9 +233,12 @@ const updateBreadcrumbs = (path: string) => {
     '/enterprise/list': [{ title: '首页', path: '/' }, { title: '企业管理' }, { title: '企业列表' }],
     '/enterprise/major': [{ title: '首页', path: '/' }, { title: '企业管理' }, { title: '专业管理' }],
     '/school': [{ title: '首页', path: '/' }, { title: '学校管理' }],
+    '/teacher-relation': [{ title: '首页', path: '/' }, { title: '教师配对' }],
     '/profile': [{ title: '首页', path: '/' }, { title: '个人中心' }],
     '/topic/list': [{ title: '首页', path: '/' }, { title: '课题管理' }, { title: '课题列表' }],
     '/topic/review': [{ title: '首页', path: '/' }, { title: '课题管理' }, { title: '课题审查' }],
+    '/topic-selection/list': [{ title: '首页', path: '/' }, { title: '双选管理' }, { title: '课题选报' }],
+    '/topic-selection/my': [{ title: '首页', path: '/' }, { title: '双选管理' }, { title: '我的选报' }],
     '/system/phase/overview': userStore.hasAnyRole(['SYSTEM_ADMIN'])
       ? [{ title: '首页', path: '/' }, { title: '阶段管理' }, { title: '阶段概览' }]
       : [{ title: '首页', path: '/' }, { title: '阶段概览' }],
