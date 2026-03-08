@@ -49,6 +49,9 @@ public class Topic implements Serializable {
     @Schema(description = "归属企业ID（高职升本课题使用）")
     private String enterpriseId;
 
+    @Schema(description = "课题所属专业ID（课题面向的专业）")
+    private String majorId;
+
     @Schema(description = "关联学校ID（3+1/实验班课题使用）")
     private String schoolId;
 

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yuwan.completebackend.mapper.TopicMapper">
 
-    <!-- 分页查询课题列表（包含企业名称、创建人姓名） -->
+    <!-- 分页查询课题列表（包含企业名称、创建人姓名、专业名称） -->
     <select id="selectTopicListPage" resultType="com.yuwan.completebackend.model.vo.TopicListVO">
         SELECT 
             t.topic_id AS topicId,
@@ -27,6 +27,8 @@
                 ELSE '未知'
             END AS topicSourceDesc,
             e.enterprise_name AS enterpriseName,
+            t.major_id AS majorId,
+            mi.major_name AS majorName,
             t.guidance_direction AS guidanceDirection,
             u.real_name AS creatorName,
             t.review_status AS reviewStatus,
@@ -45,6 +47,7 @@
             DATE_FORMAT(t.create_time, '%Y-%m-%d %H:%i:%s') AS createTime
         FROM topic_info t
         LEFT JOIN enterprise_info e ON t.enterprise_id = e.enterprise_id
+        LEFT JOIN major_info mi ON t.major_id = mi.major_id AND mi.deleted = 0
         LEFT JOIN user_info u ON t.creator_id = u.user_id
         WHERE t.deleted = 0
         <if test="query.topicTitle != null and query.topicTitle != ''">
@@ -61,6 +64,9 @@
         </if>
         <if test="query.enterpriseId != null and query.enterpriseId != ''">
             AND t.enterprise_id = #{query.enterpriseId}
+        </if>
+        <if test="query.majorId != null and query.majorId != ''">
+            AND t.major_id = #{query.majorId}
         </if>
         <if test="query.guidanceDirection != null and query.guidanceDirection != ''">
             AND t.guidance_direction LIKE CONCAT('%', #{query.guidanceDirection}, '%')

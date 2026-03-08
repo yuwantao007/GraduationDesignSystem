@@ -160,6 +160,23 @@ public class MajorController {
     }
 
     /**
+     * 获取专业列表（下拉选择用）
+     * 根据专业方向ID获取该方向下的所有启用专业
+     *
+     * @param directionId 专业方向ID
+     * @return 专业列表
+     */
+    @GetMapping("/list")
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'ENTERPRISE_LEADER', 'ENTERPRISE_TEACHER')")
+    @Operation(summary = "获取专业列表", description = "获取指定专业方向下的启用专业列表，用于下拉选择")
+    public Result<List<MajorVO>> getMajorList(
+            @Parameter(description = "专业方向ID") @RequestParam(required = false) String directionId) {
+        log.info("获取专业列表，专业方向ID: {}", directionId);
+        List<MajorVO> result = majorService.getMajorList(directionId);
+        return Result.success(result);
+    }
+
+    /**
      * 切换专业方向状态
      *
      * @param directionId 专业方向ID

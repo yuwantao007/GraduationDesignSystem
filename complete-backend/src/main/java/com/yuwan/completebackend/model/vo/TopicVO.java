@@ -56,6 +56,12 @@ public class TopicVO implements Serializable {
     @Schema(description = "归属企业名称（高职升本课题）")
     private String enterpriseName;
 
+    @Schema(description = "课题所属专业ID")
+    private String majorId;
+
+    @Schema(description = "课题所属专业名称")
+    private String majorName;
+
     @Schema(description = "关联学校ID（3+1/实验班课题）")
     private String schoolId;
 

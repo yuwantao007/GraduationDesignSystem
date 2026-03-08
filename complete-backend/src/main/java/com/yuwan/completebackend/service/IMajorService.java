@@ -136,6 +136,14 @@ public interface IMajorService {
     List<MajorDirectionVO> getDirectionList(String enterpriseId);
 
     /**
+     * 获取指定专业方向下的专业列表（下拉选择用）
+     *
+     * @param directionId 专业方向ID
+     * @return 专业列表
+     */
+    List<MajorVO> getMajorList(String directionId);
+
+    /**
      * 搜索企业老师（ENTERPRISE_TEACHER 角色用户），用于专业关联老师的下拉搜索
      *
      * @param keyword      搜索关键词（姓名或账号，可为空）

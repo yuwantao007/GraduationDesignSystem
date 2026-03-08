@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuwan.completebackend.mapper.TopicSelectionMapper">
+
+    <!-- 查询可选课题列表（终审通过，附带选报人数和当前学生选报状态） -->
+    <select id="selectAvailableTopics" resultType="com.yuwan.completebackend.model.vo.TopicForSelectionVO">
+        SELECT
+            t.topic_id AS topicId,
+            t.topic_title AS topicTitle,
+            t.topic_category AS topicCategory,
+            CASE t.topic_category
+                WHEN 1 THEN '高职升本'
+                WHEN 2 THEN '3+1'
+                WHEN 3 THEN '实验班'
+                ELSE '未知'
+            END AS topicCategoryDesc,
+            t.topic_type AS topicType,
+            CASE t.topic_type
+                WHEN 1 THEN '设计'
+                WHEN 2 THEN '论文'
+                ELSE '未知'
+            END AS topicTypeDesc,
+            t.topic_source AS topicSource,
+            CASE t.topic_source
+                WHEN 1 THEN '校内'
+                WHEN 2 THEN '校外(协同开发)'
+                ELSE '未知'
+            END AS topicSourceDesc,
+            e.enterprise_name AS enterpriseName,
+            t.major_id AS majorId,
+            mi.major_name AS majorName,
+            t.guidance_direction AS guidanceDirection,
+            u.real_name AS creatorName,
+            t.content_summary AS contentSummary,
+            IFNULL(sc.selected_count, 0) AS selectedCount,
+            IF(ms.selection_id IS NOT NULL, TRUE, FALSE) AS alreadyApplied
+        FROM topic_info t
+        LEFT JOIN enterprise_info e ON t.enterprise_id = e.enterprise_id
+        LEFT JOIN major_info mi ON t.major_id = mi.major_id AND mi.deleted = 0
+        LEFT JOIN user_info u ON t.creator_id = u.user_id
+        LEFT JOIN (
+            SELECT topic_id, COUNT(*) AS selected_count
+            FROM topic_selection
+            WHERE deleted = 0 AND selection_status IN (0, 1)
+            GROUP BY topic_id
+        ) sc ON sc.topic_id = t.topic_id
+        LEFT JOIN (
+            SELECT selection_id, topic_id
+            FROM topic_selection
+            WHERE deleted = 0 AND student_id = #{studentId}
+            AND selection_status IN (0, 1)
+        ) ms ON ms.topic_id = t.topic_id
+        WHERE t.deleted = 0
+          AND t.review_status = 6
+        <if test="majorId != null and majorId != ''">
+            AND t.major_id = #{majorId}
+        </if>
+        <if test="topicCategory != null">
+            AND t.topic_category = #{topicCategory}
+        </if>
+        <if test="guidanceDirection != null and guidanceDirection != ''">
+            AND t.guidance_direction LIKE CONCAT('%', #{guidanceDirection}, '%')
+        </if>
+        <if test="topicTitle != null and topicTitle != ''">
+            AND t.topic_title LIKE CONCAT('%', #{topicTitle}, '%')
+        </if>
+        ORDER BY t.create_time DESC
+    </select>
+
+    <!-- 查询学生的选报记录列表 -->
+    <select id="selectMySelections" resultType="com.yuwan.completebackend.model.vo.TopicSelectionVO">
+        SELECT
+            s.selection_id AS selectionId,
+            s.topic_id AS topicId,
+            t.topic_title AS topicTitle,
+            t.topic_category AS topicCategory,
+            CASE t.topic_category
+                WHEN 1 THEN '高职升本'
+                WHEN 2 THEN '3+1'
+                WHEN 3 THEN '实验班'
+                ELSE '未知'
+            END AS topicCategoryDesc,
+            e.enterprise_name AS enterpriseName,
+            t.guidance_direction AS guidanceDirection,
+            u.real_name AS creatorName,
+            s.selection_reason AS selectionReason,
+            s.selection_status AS selectionStatus,
+            CASE s.selection_status
+                WHEN 0 THEN '待确认'
+                WHEN 1 THEN '中选'
+                WHEN 2 THEN '落选'
+                ELSE '未知'
+            END AS selectionStatusDesc,
+            DATE_FORMAT(s.apply_time, '%Y-%m-%d %H:%i:%s') AS applyTime,
+            DATE_FORMAT(s.confirm_time, '%Y-%m-%d %H:%i:%s') AS confirmTime
+        FROM topic_selection s
+        INNER JOIN topic_info t ON s.topic_id = t.topic_id
+        LEFT JOIN enterprise_info e ON t.enterprise_id = e.enterprise_id
+        LEFT JOIN user_info u ON t.creator_id = u.user_id
+        WHERE s.deleted = 0
+          AND s.student_id = #{studentId}
+        ORDER BY s.apply_time DESC
+    </select>
+
+</mapper>

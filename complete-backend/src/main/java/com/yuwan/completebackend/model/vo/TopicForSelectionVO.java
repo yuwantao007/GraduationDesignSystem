@@ -7,16 +7,16 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 课题列表项VO
- * 用于返回课题列表简要信息
+ * 可选课题列表项响应
+ * 面向学生的课题选报浏览列表
  *
  * @author 系统架构师
  * @version 1.0
- * @since 2026-02-21
+ * @since 2026-03-08
  */
 @Data
-@Schema(description = "课题列表项响应")
-public class TopicListVO implements Serializable {
+@Schema(description = "可选课题列表项响应")
+public class TopicForSelectionVO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -24,7 +24,7 @@ public class TopicListVO implements Serializable {
     @Schema(description = "课题ID")
     private String topicId;
 
-    @Schema(description = "课题名称/题目")
+    @Schema(description = "课题名称")
     private String topicTitle;
 
     @Schema(description = "课题大类")
@@ -57,18 +57,15 @@ public class TopicListVO implements Serializable {
     @Schema(description = "指导方向/专业")
     private String guidanceDirection;
 
-    @Schema(description = "创建人姓名")
+    @Schema(description = "企业教师姓名（创建人）")
     private String creatorName;
 
-    @Schema(description = "审查状态")
-    private Integer reviewStatus;
+    @Schema(description = "课题内容简述")
+    private String contentSummary;
 
-    @Schema(description = "审查状态描述")
-    private String reviewStatusDesc;
+    @Schema(description = "已选报人数（待确认+中选）")
+    private Integer selectedCount;
 
-    @Schema(description = "是否已提交")
-    private Integer isSubmitted;
-
-    @Schema(description = "创建时间")
-    private String createTime;
+    @Schema(description = "当前学生是否已选报此课题")
+    private Boolean alreadyApplied;
 }

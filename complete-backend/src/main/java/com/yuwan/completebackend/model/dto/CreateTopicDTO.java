@@ -60,6 +60,9 @@ public class CreateTopicDTO implements Serializable {
     @Schema(description = "指导方向/专业")
     private String guidanceDirection;
 
+    @Schema(description = "课题所属专业ID")
+    private String majorId;
+
     @NotBlank(message = "选题背景与意义不能为空")
     @Size(min = 150, message = "选题背景与意义不少于150字")
     @Schema(description = "选题背景与意义（≥150字）", requiredMode = Schema.RequiredMode.REQUIRED)

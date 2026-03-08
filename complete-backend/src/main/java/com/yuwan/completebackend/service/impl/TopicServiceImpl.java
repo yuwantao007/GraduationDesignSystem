@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yuwan.completebackend.common.PageResult;
 import com.yuwan.completebackend.exception.BusinessException;
 import com.yuwan.completebackend.mapper.EnterpriseMapper;
+import com.yuwan.completebackend.mapper.MajorMapper;
 import com.yuwan.completebackend.mapper.SchoolMapper;
 import com.yuwan.completebackend.mapper.TopicMapper;
 import com.yuwan.completebackend.mapper.UserMapper;
@@ -13,6 +14,7 @@ import com.yuwan.completebackend.model.dto.SubmitTopicDTO;
 import com.yuwan.completebackend.model.dto.TopicSignDTO;
 import com.yuwan.completebackend.model.dto.UpdateTopicDTO;
 import com.yuwan.completebackend.model.entity.Enterprise;
+import com.yuwan.completebackend.model.entity.Major;
 import com.yuwan.completebackend.model.entity.School;
 import com.yuwan.completebackend.model.entity.Topic;
 import com.yuwan.completebackend.model.entity.User;
@@ -52,6 +54,7 @@ public class TopicServiceImpl implements ITopicService {
 
     private final TopicMapper topicMapper;
     private final EnterpriseMapper enterpriseMapper;
+    private final MajorMapper majorMapper;
     private final SchoolMapper schoolMapper;
     private final UserMapper userMapper;
 
@@ -99,6 +102,14 @@ public class TopicServiceImpl implements ITopicService {
         topic.setCreatorId(currentUserId);
         topic.setReviewStatus(TopicReviewStatus.DRAFT.getCode());
         topic.setIsSubmitted(0);
+
+        // 如果指定了 majorId 且 guidanceDirection 为空，自动用专业名称填充
+        if (StringUtils.hasText(createDTO.getMajorId()) && !StringUtils.hasText(createDTO.getGuidanceDirection())) {
+            Major major = majorMapper.selectById(createDTO.getMajorId());
+            if (major != null) {
+                topic.setGuidanceDirection(major.getMajorName());
+            }
+        }
 
         // 保存到数据库
         topicMapper.insert(topic);
@@ -218,6 +229,17 @@ public class TopicServiceImpl implements ITopicService {
 
     @Override
     public PageResult<TopicListVO> getTopicList(TopicQueryVO queryVO) {
+        // 如果当前用户是学生，自动注入其 majorId 作为过滤条件
+        if (SecurityUtil.hasRole("STUDENT")) {
+            String currentUserId = SecurityUtil.getCurrentUserId();
+            if (StringUtils.hasText(currentUserId)) {
+                User currentUser = userMapper.selectById(currentUserId);
+                if (currentUser != null && StringUtils.hasText(currentUser.getMajorId())) {
+                    queryVO.setMajorId(currentUser.getMajorId());
+                }
+            }
+        }
+
         Page<TopicListVO> page = new Page<>(queryVO.getPageNum(), queryVO.getPageSize());
         Page<TopicListVO> result = (Page<TopicListVO>) topicMapper.selectTopicListPage(page, queryVO);
         
@@ -440,6 +462,14 @@ public class TopicServiceImpl implements ITopicService {
             Enterprise enterprise = enterpriseMapper.selectById(topic.getEnterpriseId());
             if (enterprise != null) {
                 vo.setEnterpriseName(enterprise.getEnterpriseName());
+            }
+        }
+
+        // 查询专业名称
+        if (StringUtils.hasText(topic.getMajorId())) {
+            Major major = majorMapper.selectById(topic.getMajorId());
+            if (major != null) {
+                vo.setMajorName(major.getMajorName());
             }
         }
 

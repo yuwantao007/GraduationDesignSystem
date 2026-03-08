@@ -58,6 +58,9 @@ public class User implements Serializable {
     @Schema(description = "所属专业方向ID")
     private String directionId;
 
+    @Schema(description = "所在专业ID（学生精确专业关联）")
+    private String majorId;
+
     @Schema(description = "学号")
     private String studentNo;
 

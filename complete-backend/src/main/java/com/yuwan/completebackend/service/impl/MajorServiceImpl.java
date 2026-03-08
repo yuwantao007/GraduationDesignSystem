@@ -575,6 +575,30 @@ public class MajorServiceImpl implements IMajorService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<MajorVO> getMajorList(String directionId) {
+        LambdaQueryWrapper<Major> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.hasText(directionId)) {
+            wrapper.eq(Major::getDirectionId, directionId);
+        }
+        wrapper.eq(Major::getStatus, 1);
+        wrapper.orderByAsc(Major::getSortOrder);
+        List<Major> majors = majorMapper.selectList(wrapper);
+
+        return majors.stream()
+                .map(major -> {
+                    String dName = "";
+                    if (StringUtils.hasText(major.getDirectionId())) {
+                        MajorDirection dir = majorDirectionMapper.selectById(major.getDirectionId());
+                        if (dir != null) {
+                            dName = dir.getDirectionName();
+                        }
+                    }
+                    return convertToMajorVO(major, dName);
+                })
+                .collect(Collectors.toList());
+    }
+
     // ==================== 専业老师搜索 ====================
 
     @Override
@@ -586,7 +610,7 @@ public class MajorServiceImpl implements IMajorService {
             return new ArrayList<>();
         }
 
-        // 找到持有该角色的所有用户ID
+        // 找到持有该角色的所有启用用户ID
         List<String> userIds = userRoleMapper.selectList(
                         new LambdaQueryWrapper<UserRole>()
                                 .eq(UserRole::getRoleId, teacherRole.getRoleId()))
@@ -598,7 +622,7 @@ public class MajorServiceImpl implements IMajorService {
             return new ArrayList<>();
         }
 
-        // 按关键词和企业过滤
+        // 构建基础查询条件
         LambdaQueryWrapper<User> userWrapper = new LambdaQueryWrapper<User>()
                 .in(User::getUserId, userIds)
                 .eq(User::getUserStatus, 1)
@@ -608,11 +632,40 @@ public class MajorServiceImpl implements IMajorService {
             userWrapper.and(w -> w.like(User::getRealName, keyword).or().like(User::getUsername, keyword));
         }
 
-        // 可选：限定到指定企业（通过 department 字段匹配企业名称）
+        // -------------------------------------------------------
+        // 企业隔离过滤：基于 major_teacher → major.enterprise_id 关系
+        //
+        // 规则：教师归属于哪个企业，通过"该教师当前被哪个企业的专业所引用"来判断。
+        //   - 未被任何专业引用的教师 → 对所有企业可见（可供任意企业选择）
+        //   - 仅被企业X专业引用的教师 → 只对企业X可见
+        //   - 被企业Y专业引用的教师   → 从企业X的下拉列表中排除（已被占用）
+        //   - 从某企业专业中移除后    → major_teacher记录消失 → 重新对所有企业可见
+        // -------------------------------------------------------
         if (StringUtils.hasText(enterpriseId)) {
-            Enterprise enterprise = enterpriseMapper.selectById(enterpriseId);
-            if (enterprise != null) {
-                userWrapper.eq(User::getDepartment, enterprise.getEnterpriseName());
+            // 第一步：取得「其他企业」（非本企业）的所有专业ID
+            List<String> otherEnterpriseMajorIds = majorMapper.selectList(
+                            new LambdaQueryWrapper<Major>()
+                                    .ne(Major::getEnterpriseId, enterpriseId)
+                                    .select(Major::getMajorId))
+                    .stream()
+                    .map(Major::getMajorId)
+                    .collect(Collectors.toList());
+
+            if (!otherEnterpriseMajorIds.isEmpty()) {
+                // 第二步：找出已分配给「其他企业」专业的教师ID
+                List<String> teacherIdsOccupiedByOthers = majorTeacherMapper.selectList(
+                                new LambdaQueryWrapper<MajorTeacher>()
+                                        .in(MajorTeacher::getMajorId, otherEnterpriseMajorIds)
+                                        .select(MajorTeacher::getUserId))
+                        .stream()
+                        .map(MajorTeacher::getUserId)
+                        .distinct()
+                        .collect(Collectors.toList());
+
+                // 第三步：排除这些已被其他企业占用的教师
+                if (!teacherIdsOccupiedByOthers.isEmpty()) {
+                    userWrapper.notIn(User::getUserId, teacherIdsOccupiedByOthers);
+                }
             }
         }
 

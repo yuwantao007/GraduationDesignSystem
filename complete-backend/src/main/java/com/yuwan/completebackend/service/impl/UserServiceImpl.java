@@ -74,6 +74,7 @@ public class UserServiceImpl implements IUserService {
         BeanUtils.copyProperties(createDTO, user);
         user.setPassword(passwordEncoder.encode(createDTO.getPassword()));
         user.setUserStatus(1);
+        // majorId 已通过 BeanUtils.copyProperties 从 DTO 复制
         userMapper.insert(user);
 
         // 批量分配角色（优化：使用批量插入代替循环插入）
@@ -116,6 +117,9 @@ public class UserServiceImpl implements IUserService {
         }
         if (updateDTO.getMajor() != null) {
             user.setMajor(updateDTO.getMajor());
+        }
+        if (updateDTO.getMajorId() != null) {
+            user.setMajorId(updateDTO.getMajorId());
         }
 
         // 处理userCode字段（学号/工号统一字段）
@@ -438,6 +442,8 @@ public class UserServiceImpl implements IUserService {
             return roleVO;
         }).collect(Collectors.toList());
         userVO.setRoles(roleVOList);
+
+        // majorId 已通过 BeanUtils.copyProperties 从实体复制
 
         // 设置userCode字段（合并studentNo和employeeNo，优先返回有值的字段）
         // 如果用户是学生角色，使用studentNo；否则使用employeeNo

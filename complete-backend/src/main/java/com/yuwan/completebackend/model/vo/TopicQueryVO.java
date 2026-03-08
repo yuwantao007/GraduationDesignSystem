@@ -36,6 +36,9 @@ public class TopicQueryVO implements Serializable {
     @Schema(description = "归属企业ID")
     private String enterpriseId;
 
+    @Schema(description = "课题所属专业ID（学生角色将由后端自动注入）")
+    private String majorId;
+
     @Schema(description = "指导方向/专业（模糊查询）")
     private String guidanceDirection;
 
