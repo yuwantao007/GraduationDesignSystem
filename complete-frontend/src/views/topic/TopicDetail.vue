@@ -26,6 +26,13 @@
       </a-space>
     </a-card>
 
+    <!-- 审查流程状态卡片（仅课题已提交时显示） -->
+    <ProcessStatusCard
+      v-if="topicData?.isSubmitted === 1 && topicData?.topicId"
+      :topic-id="topicData.topicId"
+      class="topic-detail__flow-status"
+    />
+
     <!-- 详情内容区 -->
     <a-card v-if="topicData" class="topic-detail__content" :bordered="false" :loading="loading">
       <!-- 文档标题 -->
@@ -153,6 +160,7 @@ import {
 import { topicApi } from '@/api/topic'
 import type { TopicVO } from '@/types/topic'
 import { TopicReviewStatus } from '@/types/topic'
+import ProcessStatusCard from '@/components/workflow/ProcessStatusCard.vue'
 
 // 定义组件选项
 defineOptions({
@@ -282,6 +290,15 @@ onMounted(() => {
 
   &__actions {
     margin-bottom: 16px;
+
+    @media print {
+      display: none;
+    }
+  }
+
+  &__flow-status {
+    max-width: 1000px;
+    margin: 0 auto 16px auto;
 
     @media print {
       display: none;
