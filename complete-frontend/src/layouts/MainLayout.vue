@@ -69,12 +69,33 @@
           <a-menu-item v-if="userStore.hasPermission('topic:review') && userStore.hasAnyRole(['UNIVERSITY_TEACHER', 'MAJOR_DIRECTOR', 'SUPERVISOR_TEACHER'])" key="/topic/review">课题审查</a-menu-item>
         </a-sub-menu>
         
-        <!-- 双选管理：学生角色 -->
-        <a-sub-menu v-if="userStore.hasPermission('selection:manage')" key="selection">
+        <!-- 双选管理：学生选报 -->
+        <a-sub-menu v-if="userStore.hasAnyRole(['STUDENT']) && userStore.hasPermission('selection:manage')" key="selection">
           <template #icon><SelectOutlined /></template>
           <template #title>双选管理</template>
           <a-menu-item v-if="userStore.hasPermission('selection:available')" key="/topic-selection/list">课题选报</a-menu-item>
           <a-menu-item v-if="userStore.hasPermission('selection:my')" key="/topic-selection/my">我的选报</a-menu-item>
+        </a-sub-menu>
+
+        <!-- 双选管理：企业教师确认人选 -->
+        <a-sub-menu v-if="userStore.hasAnyRole(['ENTERPRISE_TEACHER']) && userStore.hasPermission('selection:teacher:list')" key="selection">
+          <template #icon><CheckCircleOutlined /></template>
+          <template #title>双选管理</template>
+          <a-menu-item key="/topic-selection/teacher">选报确认</a-menu-item>
+        </a-sub-menu>
+
+        <!-- 双选管理：企业负责人审核 -->
+        <a-sub-menu v-if="userStore.hasAnyRole(['ENTERPRISE_LEADER']) && userStore.hasPermission('selection:leader:overview')" key="selection">
+          <template #icon><AuditOutlined /></template>
+          <template #title>双选管理</template>
+          <a-menu-item key="/topic-selection/leader">双选审核</a-menu-item>
+        </a-sub-menu>
+
+        <!-- 双选管理：高校教师查看指导学生选题 -->
+        <a-sub-menu v-if="userStore.hasAnyRole(['UNIVERSITY_TEACHER']) && userStore.hasPermission('selection:univ:view')" key="selection">
+          <template #icon><ReadOutlined /></template>
+          <template #title>双选管理</template>
+          <a-menu-item key="/topic-selection/univ-teacher">指导学生选题</a-menu-item>
         </a-sub-menu>
         
         <a-sub-menu key="document">
@@ -100,6 +121,51 @@
           <template #icon><SettingOutlined /></template>
           <span>系统设置</span>
         </a-menu-item>
+
+        <!-- 质量监控：系统管理员和企业负责人可见 -->
+        <a-sub-menu
+          v-if="userStore.hasPermission('monitor:dashboard:view')"
+          key="monitor"
+        >
+          <template #icon><BarChartOutlined /></template>
+          <template #title>质量监控</template>
+          <a-menu-item v-if="userStore.hasPermission('monitor:dashboard:view')" key="/monitor">
+            监控仪表盘
+          </a-menu-item>
+          <a-menu-item v-if="userStore.hasPermission('monitor:alert:view')" key="/monitor/alerts">
+            预警中心
+          </a-menu-item>
+        </a-sub-menu>
+
+        <!-- 工作流（Flowable 审查流程）-->
+        <a-sub-menu
+          v-if="userStore.hasAnyRole(['UNIVERSITY_TEACHER', 'MAJOR_DIRECTOR', 'SUPERVISOR_TEACHER', 'SYSTEM_ADMIN', 'ENTERPRISE_TEACHER'])"
+          key="workflow"
+        >
+          <template #icon><ApartmentOutlined /></template>
+          <template #title>工作流</template>
+          <!-- 待办任务收件箱：审核角色 + 企业教师（修改任务）都可见 -->
+          <a-menu-item
+            v-if="userStore.hasAnyRole(['UNIVERSITY_TEACHER', 'MAJOR_DIRECTOR', 'SUPERVISOR_TEACHER', 'ENTERPRISE_TEACHER'])"
+            key="/workflow/tasks"
+          >
+            待办任务
+          </a-menu-item>
+          <!-- 流程定义：仅系统管理员可查看 -->
+          <a-menu-item
+            v-if="userStore.hasAnyRole(['SYSTEM_ADMIN'])"
+            key="/workflow/definition"
+          >
+            流程定义
+          </a-menu-item>
+          <!-- 流程监控：仅管理员 -->
+          <a-menu-item
+            v-if="userStore.hasPermission('monitor:dashboard:view')"
+            key="/workflow/monitor"
+          >
+            流程监控
+          </a-menu-item>
+        </a-sub-menu>
       </a-menu>
     </a-layout-sider>
 
@@ -175,7 +241,12 @@ import {
   ReadOutlined,
   FieldTimeOutlined,
   UsergroupAddOutlined,
-  SelectOutlined
+  SelectOutlined,
+  CheckCircleOutlined,
+  AuditOutlined,
+  BarChartOutlined,
+  BellOutlined,
+  ApartmentOutlined
 } from '@ant-design/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
@@ -221,6 +292,8 @@ const getOpenKeys = (path: string): string[] => {
   if (path.startsWith('/system/phase')) return userStore.hasAnyRole(['SYSTEM_ADMIN']) ? ['phase-mgmt'] : []
   if (path.startsWith('/school')) return []
   if (path.startsWith('/teacher-relation')) return []
+  if (path.startsWith('/monitor')) return ['monitor']
+  if (path.startsWith('/workflow')) return ['workflow']
   return []
 }
 
@@ -239,13 +312,21 @@ const updateBreadcrumbs = (path: string) => {
     '/topic/review': [{ title: '首页', path: '/' }, { title: '课题管理' }, { title: '课题审查' }],
     '/topic-selection/list': [{ title: '首页', path: '/' }, { title: '双选管理' }, { title: '课题选报' }],
     '/topic-selection/my': [{ title: '首页', path: '/' }, { title: '双选管理' }, { title: '我的选报' }],
+    '/topic-selection/teacher': [{ title: '首页', path: '/' }, { title: '双选管理' }, { title: '选报确认' }],
+    '/topic-selection/leader': [{ title: '首页', path: '/' }, { title: '双选管理' }, { title: '双选审核' }],
+    '/topic-selection/univ-teacher': [{ title: '首页', path: '/' }, { title: '双选管理' }, { title: '指导学生选题' }],
     '/system/phase/overview': userStore.hasAnyRole(['SYSTEM_ADMIN'])
       ? [{ title: '首页', path: '/' }, { title: '阶段管理' }, { title: '阶段概览' }]
       : [{ title: '首页', path: '/' }, { title: '阶段概览' }],
     '/system/phase/records': [{ title: '首页', path: '/' }, { title: '阶段管理' }, { title: '切换记录' }],
     '/document/list': [{ title: '首页', path: '/' }, { title: '文档管理' }, { title: '文档列表' }],
     '/document/upload': [{ title: '首页', path: '/' }, { title: '文档管理' }, { title: '文档上传' }],
-    '/settings': [{ title: '首页', path: '/' }, { title: '系统设置' }]
+    '/settings': [{ title: '首页', path: '/' }, { title: '系统设置' }],
+    '/monitor': [{ title: '首页', path: '/' }, { title: '质量监控' }, { title: '监控仪表盘' }],
+    '/monitor/alerts': [{ title: '首页', path: '/' }, { title: '质量监控' }, { title: '预警中心' }],
+    '/workflow/tasks': [{ title: '首页', path: '/' }, { title: '工作流' }, { title: '待办任务' }],
+    '/workflow/definition': [{ title: '首页', path: '/' }, { title: '工作流' }, { title: '流程定义' }],
+    '/workflow/monitor': [{ title: '首页', path: '/' }, { title: '工作流' }, { title: '流程监控' }]
   }
   
   appStore.setBreadcrumbs(breadcrumbMap[path] || [{ title: '首页' }])

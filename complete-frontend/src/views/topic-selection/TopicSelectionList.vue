@@ -8,6 +8,138 @@
 -->
 <template>
   <div class="topic-selection-list">
+  <!-- 任务书详情抽屉 -->
+  <a-drawer
+    v-model:open="detailDrawerVisible"
+    title="课题任务书"
+    placement="right"
+    :width="760"
+    :body-style="{ padding: '20px' }"
+  >
+    <div v-if="detailLoading" style="text-align:center;padding:60px 0">
+      <a-spin size="large" tip="加载中..." />
+    </div>
+    <template v-else-if="detailData">
+      <!-- 打印按钮 -->
+      <div style="margin-bottom:16px;text-align:right">
+        <a-button @click="handleDetailPrint">
+          <template #icon><PrinterOutlined /></template>
+          打印
+        </a-button>
+      </div>
+
+      <!-- 任务书内容 -->
+      <div id="task-book-print-area">
+        <div class="task-book-title">毕业设计（论文）任务书</div>
+        <table class="task-book-table" cellpadding="0" cellspacing="0">
+          <!-- 题目 -->
+          <tr>
+            <td class="tbl-label" style="width:90px">题目</td>
+            <td class="tbl-value" colspan="5">{{ detailData.topicTitle }}</td>
+          </tr>
+          <!-- 基本信息1 -->
+          <tr>
+            <td class="tbl-label">课题类型</td>
+            <td class="tbl-value">{{ detailData.topicTypeDesc || '-' }}</td>
+            <td class="tbl-label" style="width:80px">课题来源</td>
+            <td class="tbl-value" colspan="3">{{ detailData.topicSourceDesc || '-' }}</td>
+          </tr>
+          <!-- 指导方向 -->
+          <tr>
+            <td class="tbl-label">指导方向</td>
+            <td class="tbl-value" colspan="2">{{ detailData.guidanceDirection || '-' }}</td>
+            <td class="tbl-label" style="width:80px">归属企业</td>
+            <td class="tbl-value" colspan="2">{{ detailData.enterpriseName || '-' }}</td>
+          </tr>
+          <!-- 指导教师 -->
+          <tr>
+            <td class="tbl-label">指导教师</td>
+            <td class="tbl-value" colspan="5">{{ detailData.creatorName || '-' }}</td>
+          </tr>
+          <!-- 选题背景 -->
+          <tr>
+            <td class="tbl-label sec-label">选题背景与意义</td>
+            <td class="tbl-value sec-content" colspan="5">
+              <div class="sec-text">{{ detailData.backgroundSignificance || '-' }}</div>
+            </td>
+          </tr>
+          <!-- 内容简述 -->
+          <tr>
+            <td class="tbl-label sec-label">课题内容简述</td>
+            <td class="tbl-value sec-content" colspan="5">
+              <div class="sec-text">{{ detailData.contentSummary || '-' }}</div>
+            </td>
+          </tr>
+          <!-- 专业知识训练 -->
+          <tr>
+            <td class="tbl-label sec-label">专业知识综合训练</td>
+            <td class="tbl-value sec-content" colspan="5">
+              <div class="sec-text">{{ detailData.professionalTraining || '-' }}</div>
+            </td>
+          </tr>
+          <!-- 开发环境 -->
+          <tr>
+            <td class="tbl-label sec-label">开发环境（工具）</td>
+            <td class="tbl-value sec-content" colspan="5">
+              <div class="sec-text">{{ parsedDevelopmentEnvironment }}</div>
+            </td>
+          </tr>
+          <!-- 工作量 -->
+          <tr>
+            <td class="tbl-label sec-label">工作量（预计周数）</td>
+            <td class="tbl-value sec-content" colspan="5">
+              <div class="sec-text">{{ parsedWorkloadDetail }}</div>
+            </td>
+          </tr>
+          <!-- 任务与进度要求 -->
+          <tr>
+            <td class="tbl-label sec-label">任务与进度要求</td>
+            <td class="tbl-value sec-content" colspan="5">
+              <div class="sec-text">{{ parsedScheduleRequirements }}</div>
+            </td>
+          </tr>
+          <!-- 主要参考文献 -->
+          <tr>
+            <td class="tbl-label sec-label">主要参考文献</td>
+            <td class="tbl-value sec-content" colspan="5">
+              <div class="sec-text">{{ parsedTopicReferences }}</div>
+            </td>
+          </tr>
+          <!-- 起止日期 -->
+          <tr>
+            <td class="tbl-label">起止日期</td>
+            <td class="tbl-value" colspan="5">
+              {{ detailData.startDate && detailData.endDate
+                ? `${detailData.startDate} ~ ${detailData.endDate}`
+                : '-' }}
+            </td>
+          </tr>
+          <!-- 备注 -->
+          <tr>
+            <td class="tbl-label">备注</td>
+            <td class="tbl-value" colspan="5">{{ detailData.remark || '-' }}</td>
+          </tr>
+        </table>
+
+        <!-- 签名栏 -->
+        <div class="task-book-signature">
+          <div class="sig-item">
+            <span class="sig-label">学院负责人</span>
+            <span class="sig-line"></span>
+          </div>
+          <div class="sig-item">
+            <span class="sig-label">企业（负责人）</span>
+            <span class="sig-line"></span>
+          </div>
+          <div class="sig-item">
+            <span class="sig-label">企业指导教师</span>
+            <span class="sig-line"></span>
+          </div>
+        </div>
+      </div>
+    </template>
+    <a-empty v-else description="暂无数据" />
+  </a-drawer>
     <!-- 搜索表单 -->
     <a-card class="topic-selection-list__search" :bordered="false">
       <a-form layout="inline" :model="searchForm">
@@ -84,9 +216,7 @@
         <template #bodyCell="{ column, record }">
           <!-- 课题名称 -->
           <template v-if="column.dataIndex === 'topicTitle'">
-            <a-tooltip :title="record.contentSummary">
-              <span class="topic-title">{{ record.topicTitle }}</span>
-            </a-tooltip>
+            <a class="topic-title" @click="openDetailDrawer(record.topicId)">{{ record.topicTitle }}</a>
           </template>
 
           <!-- 课题大类 -->
@@ -109,14 +239,23 @@
 
           <!-- 操作 -->
           <template v-if="column.dataIndex === 'action'">
-            <a-button
-              type="link"
-              size="small"
-              :disabled="record.alreadyApplied || hasSelected || activeCount >= 3"
-              @click="openApplyModal(record)"
-            >
-              {{ record.alreadyApplied ? '已选报' : '选报' }}
-            </a-button>
+            <a-space>
+              <a-button
+                type="link"
+                size="small"
+                @click="openDetailDrawer(record.topicId)"
+              >
+                详情
+              </a-button>
+              <a-button
+                type="link"
+                size="small"
+                :disabled="record.alreadyApplied || hasSelected || activeCount >= 3"
+                @click="openApplyModal(record)"
+              >
+                {{ record.alreadyApplied ? '已选报' : '选报' }}
+              </a-button>
+            </a-space>
           </template>
         </template>
       </a-table>
@@ -158,10 +297,12 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import { SearchOutlined, ReloadOutlined } from '@ant-design/icons-vue'
+import { SearchOutlined, ReloadOutlined, PrinterOutlined } from '@ant-design/icons-vue'
 import { topicSelectionApi } from '@/api/topicSelection'
+import { topicApi } from '@/api/topic'
 import { useUserStore } from '@/stores/user'
 import type { TopicForSelectionVO, ApplyTopicDTO } from '@/types/topicSelection'
+import type { TopicVO } from '@/types/topic'
 
 const userStore = useUserStore()
 
@@ -173,6 +314,11 @@ const applyModalVisible = ref(false)
 const applyLoading = ref(false)
 const currentTopic = ref<TopicForSelectionVO | null>(null)
 const onlyMyMajor = ref(true)
+
+// 任务书详情抽屉
+const detailDrawerVisible = ref(false)
+const detailLoading = ref(false)
+const detailData = ref<TopicVO | null>(null)
 
 // 搜索表单
 const searchForm = reactive({
@@ -314,6 +460,90 @@ const handleApply = async () => {
   }
 }
 
+// ==================== 任务书详情 ====================
+
+/** 打开任务书详情抽屉 */
+const openDetailDrawer = async (topicId: string) => {
+  detailDrawerVisible.value = true
+  detailData.value = null
+  detailLoading.value = true
+  try {
+    const result = await topicApi.getTopicDetail(topicId)
+    detailData.value = result.data
+  } catch (error) {
+    console.error('获取课题详情失败:', error)
+    message.error('获取课题详情失败')
+  } finally {
+    detailLoading.value = false
+  }
+}
+
+/** 打印任务书 */
+const handleDetailPrint = () => {
+  const el = document.getElementById('task-book-print-area')
+  if (!el) return
+  const win = window.open('', '_blank')
+  if (!win) return
+  win.document.write(`
+    <html><head><title>课题任务书</title>
+    <style>
+      body { font-family: '宋体', serif; margin: 20px; color: #000; }
+      .task-book-title { font-size:22px; font-weight:bold; text-align:center; padding:20px 0; }
+      table { width:100%; border-collapse:collapse; border:2px solid #000; margin-bottom:20px; }
+      td { border:1px solid #000; padding:10px 12px; vertical-align:top; font-size:14px; line-height:1.8; }
+      .tbl-label { font-weight:500; text-align:center; width:100px; vertical-align:middle; }
+      .sec-label { writing-mode:horizontal-tb; text-align:center; font-weight:bold; }
+      .sec-content { padding:15px; }
+      .sec-text { white-space:pre-wrap; word-break:break-word; text-align:justify; line-height:1.8; }
+      .task-book-signature { display:flex; justify-content:space-around; padding:40px 0 20px; margin-top:20px; }
+      .sig-item { display:flex; align-items:center; }
+      .sig-label { margin-right:10px; font-weight:500; }
+      .sig-line { display:inline-block; width:120px; border-bottom:1px solid #000; height:20px; }
+    </style>
+    </head><body>${el.innerHTML}</body></html>
+  `)
+  win.document.close()
+  win.focus()
+  win.print()
+  win.close()
+}
+
+/** 解析开发环境 */
+const parsedDevelopmentEnvironment = computed(() => {
+  const data = detailData.value?.developmentEnvironment
+  if (!data) return '-'
+  if (typeof data === 'string') return data || '-'
+  if ((data as any).content) return (data as any).content
+  return '-'
+})
+
+/** 解析工作量 */
+const parsedWorkloadDetail = computed(() => {
+  const data = detailData.value?.workloadDetail
+  if (!data) return '-'
+  if (typeof data === 'string') return data || '-'
+  if (Array.isArray(data) && (data[0] as any)?.content) return (data[0] as any).content
+  return '-'
+})
+
+/** 解析任务与进度要求 */
+const parsedScheduleRequirements = computed(() => {
+  const data = detailData.value?.scheduleRequirements
+  if (!data) return '-'
+  if (typeof data === 'string') return data || '-'
+  if (Array.isArray(data) && (data[0] as any)?.content) return (data[0] as any).content
+  return '-'
+})
+
+/** 解析主要参考文献 */
+const parsedTopicReferences = computed(() => {
+  const data = detailData.value?.topicReferences
+  if (!data) return '-'
+  if (typeof data === 'string') return data || '-'
+  if (Array.isArray(data) && (data[0] as any)?.content) return (data[0] as any).content
+  return '-'
+})
+
 // ==================== 生命周期 ====================
 
 onMounted(() => {
@@ -329,9 +559,93 @@ onMounted(() => {
 .topic-title {
   color: #1890ff;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .topic-title:hover {
   text-decoration: underline;
+}
+
+/* 任务书样式 */
+.task-book-title {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  padding: 16px 0 20px;
+  color: #000;
+}
+
+.task-book-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid #000;
+  margin-bottom: 20px;
+  table-layout: fixed;
+}
+
+.task-book-table td {
+  border: 1px solid #000;
+  padding: 10px 12px;
+  vertical-align: top;
+  color: #000;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.tbl-label {
+  background-color: #fafafa;
+  font-weight: 500;
+  text-align: center;
+  width: 100px;
+  vertical-align: middle !important;
+}
+
+.tbl-value {
+  background-color: #fff;
+  word-break: break-word;
+}
+
+.sec-label {
+  text-align: center;
+  vertical-align: middle !important;
+  font-weight: bold;
+}
+
+.sec-content {
+  padding: 15px !important;
+}
+
+.sec-text {
+  color: #000;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: justify;
+}
+
+.task-book-signature {
+  display: flex;
+  justify-content: space-around;
+  padding: 40px 0 20px;
+  margin-top: 20px;
+}
+
+.sig-item {
+  display: flex;
+  align-items: center;
+}
+
+.sig-label {
+  color: #000;
+  margin-right: 10px;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.sig-line {
+  display: inline-block;
+  width: 120px;
+  border-bottom: 1px solid #000;
+  height: 20px;
 }
 </style>

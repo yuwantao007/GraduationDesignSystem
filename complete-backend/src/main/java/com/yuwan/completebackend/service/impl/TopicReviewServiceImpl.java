@@ -16,6 +16,7 @@ import com.yuwan.completebackend.model.enums.TopicCategory;
 import com.yuwan.completebackend.model.enums.TopicReviewStatus;
 import com.yuwan.completebackend.model.vo.*;
 import com.yuwan.completebackend.security.SecurityUtil;
+import com.yuwan.completebackend.service.ITopicFlowService;
 import com.yuwan.completebackend.service.ITopicReviewService;
 import com.yuwan.completebackend.service.ITopicService;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +63,7 @@ public class TopicReviewServiceImpl implements ITopicReviewService {
     private final UserMapper userMapper;
     private final EnterpriseMapper enterpriseMapper;
     private final ITopicService topicService;
+    private final ITopicFlowService topicFlowService;
 
     /**
      * 企业教师最大可通过终审的课题数量
@@ -225,6 +227,14 @@ public class TopicReviewServiceImpl implements ITopicReviewService {
         record.setNewStatus(newStatus.getCode());
         record.setIsModified(0);
         reviewRecordMapper.insert(record);
+
+        // 同步推进 Flowable 流程（仅推进任务，不重复写审查记录）
+        String outcome = switch (result) {
+            case PASSED -> "PASS";
+            case NEED_MODIFY -> "NEED_MODIFY";
+            case REJECTED -> "REJECT";
+        };
+        topicFlowService.syncFlowTask(topic.getTopicId(), outcome, currentUserId);
 
         log.info("课题审查完成，课题ID: {}, 审查阶段: {}, 审查结果: {}, 审查人: {}",
                 topic.getTopicId(), stage.getDesc(), result.getDesc(), currentUser.getRealName());

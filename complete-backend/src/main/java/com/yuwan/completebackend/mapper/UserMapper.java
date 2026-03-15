@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.yuwan.completebackend.model.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 /**
@@ -27,4 +28,16 @@ public interface UserMapper extends BaseMapper<User> {
      */
     @Update("UPDATE user_info SET last_login_time = NOW(), last_login_ip = #{loginIp}, update_time = NOW() WHERE user_id = #{userId}")
     int updateLoginInfo(@Param("userId") String userId, @Param("loginIp") String loginIp);
+
+    /**
+     * 统计具有指定角色码的用户数量（用于监控统计）
+     *
+     * @param roleCode 角色码，如 STUDENT / ENTERPRISE_TEACHER
+     * @return 用户数量
+     */
+    @Select("SELECT COUNT(DISTINCT u.user_id) FROM user_info u " +
+            "INNER JOIN user_role ur ON u.user_id = ur.user_id " +
+            "INNER JOIN role_info r ON ur.role_id = r.role_id " +
+            "WHERE r.role_code = #{roleCode} AND u.deleted = 0")
+    long countByRoleCode(@Param("roleCode") String roleCode);
 }

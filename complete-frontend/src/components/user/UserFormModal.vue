@@ -239,7 +239,8 @@ const formState = reactive<CreateUserDTO & { userCode?: string }>({
   major: '',
   userCode: '',
   roleIds: [],
-  majorId: ''
+  majorId: '',
+  enterpriseId: ''
 })
 
 // 是否选中了学生角色
@@ -359,6 +360,8 @@ const handleEnterpriseChange = async (enterpriseId: string) => {
   majorList.value = []
   selectedDirectionId.value = ''
   formState.majorId = ''
+  // 同步设置企业ID到表单数据
+  formState.enterpriseId = enterpriseId || ''
   if (!enterpriseId) return
   directionLoading.value = true
   try {
@@ -404,6 +407,7 @@ const resetForm = () => {
   formState.userCode = ''
   formState.roleIds = []
   formState.majorId = ''
+  formState.enterpriseId = ''
   selectedEnterpriseId.value = ''
   selectedDirectionId.value = ''
   directionList.value = []
@@ -425,6 +429,7 @@ const fillFormData = async (user: UserVO) => {
   formState.userCode = user.userCode || ''
   formState.roleIds = (user.roles || []).map(role => role.roleId)
   formState.majorId = user.majorId || ''
+  formState.enterpriseId = user.enterpriseId || ''
   // 如果有所属专业，预加载级联数据以便展示
   if (user.majorId) {
     try {
@@ -487,7 +492,8 @@ const handleSubmit = async () => {
         major: formState.major,
         userCode: formState.userCode,
         roleIds: formState.roleIds,
-        majorId: formState.majorId || undefined
+        majorId: formState.majorId || undefined,
+        enterpriseId: formState.enterpriseId || undefined
       }
       await userApi.updateUser(props.userData.userId, updateData)
       message.success('用户信息更新成功')
@@ -504,7 +510,8 @@ const handleSubmit = async () => {
         major: formState.major,
         userCode: formState.userCode,
         roleIds: formState.roleIds,
-        majorId: formState.majorId || undefined
+        majorId: formState.majorId || undefined,
+        enterpriseId: formState.enterpriseId || undefined
       }
       await userApi.createUser(createData)
       message.success('用户创建成功')

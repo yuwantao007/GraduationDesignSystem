@@ -369,6 +369,8 @@ watch(
       } else {
         resetForm()
       }
+      // 每次打开弹窗时重新拉取完整负责人列表（确保新增用户可见）
+      fetchLeaders('')
     }
   }
 )

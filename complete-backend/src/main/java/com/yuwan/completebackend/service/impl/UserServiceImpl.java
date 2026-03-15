@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yuwan.completebackend.common.PageResult;
 import com.yuwan.completebackend.exception.BusinessException;
+import com.yuwan.completebackend.mapper.EnterpriseMapper;
+import com.yuwan.completebackend.mapper.PermissionMapper;
 import com.yuwan.completebackend.mapper.RoleMapper;
 import com.yuwan.completebackend.mapper.UserMapper;
 import com.yuwan.completebackend.mapper.UserRoleMapper;
@@ -13,6 +15,8 @@ import com.yuwan.completebackend.model.dto.AssignRoleDTO;
 import com.yuwan.completebackend.model.dto.ChangePasswordDTO;
 import com.yuwan.completebackend.model.dto.CreateUserDTO;
 import com.yuwan.completebackend.model.dto.UpdateUserDTO;
+import com.yuwan.completebackend.model.entity.Enterprise;
+import com.yuwan.completebackend.model.entity.Permission;
 import com.yuwan.completebackend.model.entity.Role;
 import com.yuwan.completebackend.model.entity.User;
 import com.yuwan.completebackend.model.entity.UserRole;
@@ -56,6 +60,8 @@ public class UserServiceImpl implements IUserService {
     private final UserMapper userMapper;
     private final RoleMapper roleMapper;
     private final UserRoleMapper userRoleMapper;
+    private final EnterpriseMapper enterpriseMapper;
+    private final PermissionMapper permissionMapper;
     private final PasswordEncoder passwordEncoder;
     private final RedisUtil redisUtil;
 
@@ -120,6 +126,10 @@ public class UserServiceImpl implements IUserService {
         }
         if (updateDTO.getMajorId() != null) {
             user.setMajorId(updateDTO.getMajorId());
+        }
+        // 处理enterpriseId字段（学生-企业直接关联）
+        if (updateDTO.getEnterpriseId() != null) {
+            user.setEnterpriseId(updateDTO.getEnterpriseId());
         }
 
         // 处理userCode字段（学号/工号统一字段）
@@ -443,7 +453,21 @@ public class UserServiceImpl implements IUserService {
         }).collect(Collectors.toList());
         userVO.setRoles(roleVOList);
 
-        // majorId 已通过 BeanUtils.copyProperties 从实体复制
+        // 查询用户权限码列表（与登录接口保持一致，确保 /user/current 可以正确刷新权限）
+        List<Permission> permissions = permissionMapper.selectPermissionsByUserId(user.getUserId());
+        List<String> permissionCodes = permissions.stream()
+                .map(Permission::getPermissionCode)
+                .collect(Collectors.toList());
+        userVO.setPermissions(permissionCodes);
+
+        // majorId 和 enterpriseId 已通过 BeanUtils.copyProperties 从实体复制
+        // 如果有企业ID，查询企业名称
+        if (StringUtils.hasText(user.getEnterpriseId())) {
+            Enterprise enterprise = enterpriseMapper.selectById(user.getEnterpriseId());
+            if (enterprise != null) {
+                userVO.setEnterpriseName(enterprise.getEnterpriseName());
+            }
+        }
 
         // 设置userCode字段（合并studentNo和employeeNo，优先返回有值的字段）
         // 如果用户是学生角色，使用studentNo；否则使用employeeNo

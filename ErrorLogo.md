@@ -19,9 +19,9 @@
 16. [专业代码保存为空问题](#专业代码保存为空问题)
 17. [覆盖检查误报未覆盖 — MyBatis-Plus eq(null)生成IS NULL条件](#覆盖检查误报未覆盖--mybatis-plus-eqnull生成is-null条件)
 18. [专业管理编辑弹窗企业老师下拉框显示跨企业教师问题](#专业管理编辑弹窗企业老师下拉框显示跨企业教师问题)
-19. [企业老师过滤错误导致下拉框为空 — department字段过滤错误](#企业老师过滤错误导致下拉框为空--department字段过滤错误)
-18. [专业管理编辑弹窗企业老师下拉框显示跨企业教师问题](#专业管理编辑弹窗企业老师下拉框显示跨企业教师问题)
-19. [企业老师过滤错误导致下拉框为空 — department字段过滤错误](#企业老师过滤错误导致下拉框为空--department字段过滤错误)
+19. [企业老师过滤错误导致下拉框为空 — department 字段过滤错误](#企业老师过滤错误导致下拉框为空--department 字段过滤错误)
+20. [企业负责人双选审核 TooManyResultsException 异常](#企业负责人双选审核-too-many-results-exception-异常)
+21. [学生选报课题无法查看任务书详情](#学生选报课题无法查看任务书详情)
 
 ---
 
@@ -4325,5 +4325,494 @@ if (enterprise != null) {
 - `complete-backend/.../service/impl/MajorServiceImpl.java`
   - 方法：`searchMajorTeachers`
   - 删除 `department` 字段过滤逻辑，改为 `major_teacher → major.enterprise_id` 三步排除逻辑
+
+---
+
+# 企业负责人双选审核 TooManyResultsException 异常
+
+> **问题类型：** BUG 修复  
+> **问题日期：** 2026-03-14  
+> **影响范围：** 企业负责人角色登录系统后，访问"双选管理 → 双选审核"功能时报错，无法正常开展课题审核工作
+
+## 一、问题描述
+
+### 用户操作场景
+1. 使用企业负责人账号（`TEST_EL_001` / `李企业负责人`）登录系统
+2. 点击左侧菜单 "双选管理 → 双选审核"
+3. 页面加载失败，前端提示错误信息
+
+### 后端报错信息
+```
+org.apache.ibatis.exceptions.TooManyResultsException: Expected one result (or null) to be returned by selectOne(), but found: 2
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectOne(DefaultSqlSession.java:83)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy.invoke(MybatisMapperProxy.java:67)
+	...
+	at com.yuwan.completebackend.service.impl.TopicSelectionServiceImpl.resolveCurrentUserEnterpriseId(TopicSelectionServiceImpl.java:578)
+	at com.yuwan.completebackend.service.impl.TopicSelectionServiceImpl.getReviewStatistics(TopicSelectionServiceImpl.java:98)
+```
+
+### 前端表现
+- 双选审核页面无法加载统计信息
+- 控制台显示 500 错误
+- 用户无法进行任何审核操作
+
+## 二、问题分析
+
+### 1. 错误定位
+查看 `TopicSelectionServiceImpl.java` 第 578 行代码：
+
+```java
+// 路径 4：enterprise_info.leader_id（企业负责人专用）
+Enterprise enterprise = enterpriseMapper.selectOne(
+        new LambdaQueryWrapper<Enterprise>()
+                .eq(Enterprise::getLeaderId, userId)
+);
+```
+
+### 2. 根本原因
+**同一个用户被设置为多个企业的负责人**，导致查询条件 `leader_id = userId` 返回多条记录：
+- MyBatis-Plus 的 `selectOne()` 方法期望返回 0 或 1 条结果
+- 当返回 2 条及以上时，抛出 `TooManyResultsException`
+
+### 3. 业务场景还原
+在系统测试或实际使用中，可能存在以下情况：
+- 管理员在用户管理中创建了企业负责人用户
+- 在创建企业时，将该负责人同时设为多个企业的 `leader_id`
+- 或者通过多次编辑企业，将同一用户设为不同企业的负责人
+
+### 4. 问题影响
+- 企业负责人无法访问双选审核功能
+- 影响企业方对课题选报过程的审核流程
+- 降低系统可用性和用户体验
+
+## 三、解决方案
+
+### 方案选择
+在 `selectOne()` 查询中添加 `.last("LIMIT 1")` 限制，确保只返回一条记录。
+
+**理由：**
+- 简单直接，最小化代码改动
+- 符合业务逻辑：企业负责人通常只关联一个主要企业
+- 即使关联多个企业，取第一个也满足审核需求
+- 避免修改整体架构和查询逻辑
+
+### 详细实现
+
+**文件：** `complete-backend/src/main/java/com/yuwan/completebackend/service/impl/TopicSelectionServiceImpl.java`
+
+**修改位置：** `resolveCurrentUserEnterpriseId()` 方法，第 575-580 行
+
+```java
+// 路径 4：enterprise_info.leader_id（企业负责人专用）
+Enterprise enterprise = enterpriseMapper.selectOne(
+        new LambdaQueryWrapper<Enterprise>()
+                .eq(Enterprise::getLeaderId, userId)
+                .last("LIMIT 1")  // 修复：防止同一用户关联多企业时 TooManyResultsException
+);
+if (enterprise != null) {
+    return enterprise.getEnterpriseId();
+}
+```
+
+### 其他备选方案（未采用）
+
+| 方案 | 优点 | 缺点 |
+|------|------|------|
+| 使用 `list()` 后取第一条 | 灵活，可处理多条 | 代码冗余，性能略低 |
+| 添加数据库唯一约束 | 从源头防止重复 | 可能影响现有数据，需要数据清洗 |
+| 修改为 `selectList()` + 人工校验 | 可控性强 | 代码复杂，增加维护成本 |
+
+## 四、验证结果
+
+### 测试场景
+1. **单企业负责人**：用户只关联一个企业 → ✅ 正常返回
+2. **多企业负责人**：用户关联两个企业 → ✅ 返回第一个企业，不再报错
+3. **非企业负责人**：用户未关联任何企业 → ✅ 返回 null，继续后续逻辑
+
+### 功能验证
+- 企业负责人可正常访问双选审核页面
+- 统计信息正确显示
+- 审核流程可正常执行
+- 日志中无异常堆栈
+
+## 五、经验总结
+
+### ⚠️ MyBatis-Plus `selectOne()` 潜在风险
+
+> 当查询条件不保证唯一性时，`selectOne()` 可能抛出 `TooManyResultsException`。
+
+**最佳实践：**
+- 如果业务上允许存在多条记录，务必添加 `.last("LIMIT 1")` 
+- 或者改用 `selectList()` 手动处理结果
+- 对于可能重复的关联关系（如一对多），优先使用 `list()` 而非 `one()`
+
+### 数据库设计建议
+- 对于 `leader_id` 这类外键字段，考虑是否需要添加唯一索引
+- 如果允许多个企业共享同一负责人，应在应用层做好结果集处理
+
+## 六、相关文件
+
+- `complete-backend/src/main/java/com/yuwan/completebackend/service/impl/TopicSelectionServiceImpl.java`
+  - 方法：`resolveCurrentUserEnterpriseId()`
+  - 修改：添加 `.last("LIMIT 1")`
+
+---
+
+# 学生选报课题无法查看任务书详情
+
+> **问题类型：** 功能优化  
+> **问题日期：** 2026-03-14  
+> **影响范围：** 学生在"课题选报"页面只能看到课题简介，无法查看完整的任务书格式内容
+
+## 一、问题描述
+
+### 用户反馈
+学生在"双选管理 → 课题选报"页面浏览可选课题时：
+- 鼠标悬停在课题名称上时，只能通过 Tooltip 看到简短的 `contentSummary`（内容简述）
+- 没有入口可以查看完整的任务书内容（选题背景、任务要求、参考文献等）
+- 无法打印任务书进行线下审阅
+
+### 当前表现
+- 课题列表仅展示基本信息（名称、类型、企业、教师等）
+- 缺少"详情"按钮或链接
+- 无法以标准格式预览任务书
+
+### 业务需求
+根据毕业设计全过程管理系统的设计规范：
+- 学生在选报前应能完整审阅课题任务书
+- 任务书应包含：选题背景与意义、课题内容简述、专业知识综合训练、开发环境、工作量、任务与进度要求、主要参考文献等
+- 应支持打印功能，便于学生线下阅读和确认
+
+## 二、问题分析
+
+### 技术层面
+1. **前端组件缺失**
+   - `TopicSelectionList.vue` 只有简单的表格展示
+   - 课题名称使用 `<span>` 标签，无点击交互
+   - 没有任务书详情查看组件（抽屉、弹窗或独立页面）
+
+2. **API 接口已就绪**
+   - 后端已有 `/topic/{topicId}` 接口（`getTopicDetail`）
+   - 返回 `TopicVO` 包含完整的任务书字段
+   - 前端已有 `TopicDetail.vue` 组件（用于教师端查看）
+
+3. **数据结构差异**
+   - 列表接口返回 `TopicForSelectionVO`（简化版，仅含基本信息）
+   - 详情接口返回 `TopicVO`（完整版，含所有任务书字段）
+
+### 用户体验问题
+- 学生无法全面了解课题要求
+- 降低选报决策的科学性
+- 不符合"审慎选报"的业务流程设计
+
+## 三、解决方案
+
+### 方案设计
+在前端 `TopicSelectionList.vue` 中新增任务书详情抽屉，提供两种触发方式：
+1. **点击课题名称**：蓝色超链接样式，点击打开右侧抽屉
+2. **操作列"详情"按钮**：独立的详情按钮，与"选报"按钮并列
+
+### 详细实现
+
+#### 1. 前端模板修改
+
+**文件：** `complete-frontend/src/views/topic-selection/TopicSelectionList.vue`
+
+**修改位置：** Template 部分
+
+**(1) 添加任务书详情抽屉组件**
+```vue
+<!-- 任务书详情抽屉 -->
+<a-drawer
+  v-model:open="detailDrawerVisible"
+  title="课题任务书"
+  placement="right"
+  :width="760"
+  :body-style="{ padding: '20px' }"
+>
+  <div v-if="detailLoading" style="text-align:center;padding:60px 0">
+    <a-spin size="large" tip="加载中..." />
+  </div>
+  <template v-else-if="detailData">
+    <!-- 打印按钮 -->
+    <div style="margin-bottom:16px;text-align:right">
+      <a-button @click="handleDetailPrint">
+        <template #icon><PrinterOutlined /></template>
+        打印
+      </a-button>
+    </div>
+
+    <!-- 任务书内容 -->
+    <div id="task-book-print-area">
+      <div class="task-book-title">毕业设计（论文）任务书</div>
+      <table class="task-book-table" cellpadding="0" cellspacing="0">
+        <!-- 题目、基本信息、各章节内容... -->
+      </table>
+
+      <!-- 签名栏 -->
+      <div class="task-book-signature">
+        <div class="sig-item">
+          <span class="sig-label">学院负责人</span>
+          <span class="sig-line"></span>
+        </div>
+        <!-- ... -->
+      </div>
+    </div>
+  </template>
+</a-drawer>
+```
+
+**(2) 修改课题名称列渲染**
+```vue
+<!-- 课题名称 -->
+<template v-if="column.dataIndex === 'topicTitle'">
+  <a class="topic-title" @click="openDetailDrawer(record.topicId)">
+    {{ record.topicTitle }}
+  </a>
+</template>
+```
+
+**(3) 修改操作列，添加"详情"按钮**
+```vue
+<!-- 操作 -->
+<template v-if="column.dataIndex === 'action'">
+  <a-space>
+    <a-button
+      type="link"
+      size="small"
+      @click="openDetailDrawer(record.topicId)"
+    >
+      详情
+    </a-button>
+    <a-button
+      type="link"
+      size="small"
+      :disabled="record.alreadyApplied || hasSelected || activeCount >= 3"
+      @click="openApplyModal(record)"
+    >
+      {{ record.alreadyApplied ? '已选报' : '选报' }}
+    </a-button>
+  </a-space>
+</template>
+```
+
+#### 2. 前端脚本修改
+
+**(1) 导入依赖**
+```typescript
+import { PrinterOutlined } from '@ant-design/icons-vue'
+import { topicApi } from '@/api/topic'
+import type { TopicVO } from '@/types/topic'
+```
+
+**(2) 新增状态定义**
+```typescript
+// 任务书详情抽屉
+const detailDrawerVisible = ref(false)
+const detailLoading = ref(false)
+const detailData = ref<TopicVO | null>(null)
+```
+
+**(3) 新增事件处理函数**
+```typescript
+/** 打开任务书详情抽屉 */
+const openDetailDrawer = async (topicId: string) => {
+  detailDrawerVisible.value = true
+  detailData.value = null
+  detailLoading.value = true
+  try {
+    const result = await topicApi.getTopicDetail(topicId)
+    detailData.value = result.data
+  } catch (error) {
+    console.error('获取课题详情失败:', error)
+    message.error('获取课题详情失败')
+  } finally {
+    detailLoading.value = false
+  }
+}
+
+/** 打印任务书 */
+const handleDetailPrint = () => {
+  const el = document.getElementById('task-book-print-area')
+  if (!el) return
+  const win = window.open('', '_blank')
+  if (!win) return
+  win.document.write(`
+    <html><head><title>课题任务书</title>
+    <style>...打印样式...</style>
+    </head><body>${el.innerHTML}</body></html>
+  `)
+  win.document.close()
+  win.focus()
+  win.print()
+  win.close()
+}
+```
+
+**(4) 新增计算属性（解析富文本字段）**
+```typescript
+const parsedDevelopmentEnvironment = computed(() => {
+  const data = detailData.value?.developmentEnvironment
+  if (!data) return '-'
+  if (typeof data === 'string') return data || '-'
+  if ((data as any).content) return (data as any).content
+  return '-'
+})
+
+// 类似处理 workloadDetail, scheduleRequirements, topicReferences
+```
+
+#### 3. 样式补充
+
+```scss
+/* 任务书样式 */
+.task-book-title {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  padding: 16px 0 20px;
+  color: #000;
+}
+
+.task-book-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid #000;
+  margin-bottom: 20px;
+  table-layout: fixed;
+}
+
+.task-book-table td {
+  border: 1px solid #000;
+  padding: 10px 12px;
+  vertical-align: top;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.tbl-label {
+  background-color: #fafafa;
+  font-weight: 500;
+  text-align: center;
+  width: 100px;
+  vertical-align: middle !important;
+}
+```
+
+#### 4. 附加修复
+
+**文件：** `complete-frontend/src/api/auth.ts`
+
+**问题：** `UserInfo` 接口缺少 `majorId` 字段，导致 TypeScript 编译报错
+
+**修复：**
+```typescript
+export interface UserInfo {
+  // ... existing fields ...
+  major?: string
+  majorId?: string  // 新增
+  studentNo?: string
+  // ...
+}
+```
+
+## 四、功能效果
+
+### 用户操作流程
+1. 学生访问"课题选报"页面
+2. **方式一**：点击蓝色课题名称链接
+3. **方式二**：点击操作列"详情"按钮
+4. 右侧滑出抽屉，展示完整任务书
+5. 可点击"打印"按钮打印任务书
+
+### 任务书内容展示
+- ✅ 题目、课题类型/来源、指导方向、归属企业、指导教师
+- ✅ 选题背景与意义
+- ✅ 课题内容简述
+- ✅ 专业知识综合训练
+- ✅ 开发环境（工具）
+- ✅ 工作量（预计周数）
+- ✅ 任务与进度要求
+- ✅ 主要参考文献
+- ✅ 起止日期、备注
+- ✅ 签名栏（学院负责人、企业负责人、企业指导教师）
+
+### 交互体验
+- 抽屉宽度 760px，适配桌面端阅读
+- 支持滚动查看所有内容
+- 打印功能独立窗口，不影响当前页面
+- 加载状态有 Spin 提示
+- 错误状态有 Message 提示
+
+## 五、技术亮点
+
+### 1. 组件复用
+- 复用后端已有的 `/topic/{topicId}` 接口
+- 参考 `TopicDetail.vue` 的展示逻辑
+- 保持与教师端一致的任务书格式
+
+### 2. 打印功能
+- 使用 `window.open()` 新开窗口
+- 动态生成 HTML 文档
+- 内联打印样式，确保格式统一
+- 调用 `window.print()` 浏览器原生打印
+
+### 3. 富文本字段解析
+- 兼容字符串和对象两种格式
+- 提取 `content` 属性进行展示
+- 使用 `computed` 自动响应式更新
+
+### 4. 样式隔离
+- 使用 `scoped`  scoped 样式
+- 任务书表格独立命名空间
+- 打印样式特殊处理
+
+## 六、修改的文件
+
+- `complete-frontend/src/views/topic-selection/TopicSelectionList.vue`
+  - 新增：任务书详情抽屉组件
+  - 修改：课题名称列渲染（`<span>` → `<a>`）
+  - 修改：操作列（新增"详情"按钮）
+  - 新增：`openDetailDrawer`、`handleDetailPrint` 等方法
+  - 新增：`parsedDevelopmentEnvironment` 等计算属性
+  - 新增：任务书相关样式
+
+- `complete-frontend/src/api/auth.ts`
+  - 修改：`UserInfo` 接口新增 `majorId?: string` 字段
+
+## 七、经验总结
+
+### 📋 列表页查看详情是常见需求
+> 在列表页提供快捷入口查看完整详情，是提升用户体验的重要手段。
+
+**实现方式对比：**
+
+| 方式 | 适用场景 | 优点 | 缺点 |
+|------|---------|------|------|
+| 抽屉（Drawer） | 中等复杂度内容 | 不离开当前页，上下文保持 | 空间有限 |
+| 弹窗（Modal） | 简单内容 | 快速查看 | 不适合大段文本 |
+| 独立页面 | 复杂内容 | 空间充足，可打印 | 需要路由跳转 |
+| Tooltip | 极简信息 | 轻量 | 无法展示结构化内容 |
+
+本次选择抽屉方案，平衡了**查看体验**和**操作效率**。
+
+### 🖨️ 打印功能的正确实现
+- 使用新窗口打印，避免污染原页面
+- 内联完整 HTML 和 CSS，确保打印效果
+- 调用浏览器原生 `print()` API
+
+### 🔧 细节决定成败
+- 课题名称从 `<span>` 改为 `<a>`，提升可点击感
+- 操作列使用 `a-space` 布局，按钮间距统一
+- 加载状态、错误提示完备
+- 打印按钮放在右上角，符合用户习惯
+
+## 八、后续优化建议
+
+1. **课题名称高亮**：已选报的课题可使用不同颜色区分
+2. **批量打印**：支持一次性打印多个课题任务书
+3. **下载 PDF**：提供任务书 PDF 下载功能
+4. **收藏功能**：学生可收藏感兴趣的课题
+5. **对比功能**：支持同时查看多个课题进行对比
 
 ---

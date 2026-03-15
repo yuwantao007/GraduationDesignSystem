@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  课题审查流程定义
+  支持两条审查路径：
+    路径A（高职升本，topicCategory=1）：
+      预审(高校教师) → 初审(专业方向主管) → 终审(督导教师)
+    路径B（3+1/实验班，topicCategory=2/3）：
+      初审(专业方向主管) → 终审(高校教师)
+
+  任意审查阶段返回"需修改"时，企业教师完成修改任务后重新进入该路径的首个审查节点。
+-->
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             typeLanguage="http://www.w3.org/2001/XMLSchema"
+             expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="http://www.flowable.org/processdef">
+
+  <process id="topic_review" name="课题审查流程" isExecutable="true">
+
+    <!-- ============================================================
+         流程变量说明：
+           topicId        : 课题业务ID
+           topicCategory  : 课题大类（1=高职升本, 2=3+1, 3=实验班）
+           creatorId      : 课题创建者（企业教师）用户ID
+           topicTitle     : 课题标题（方便任务列表展示）
+           preOutcome     : 预审结果变量（PASS | NEED_MODIFY）
+           initOutcome    : 初审结果变量（PASS | NEED_MODIFY）
+           finalOutcome   : 终审结果变量（PASS | REJECT）
+         ============================================================ -->
+
+    <!-- ══════════════════ 开始事件 ══════════════════ -->
+    <startEvent id="startEvent" name="课题提交" />
+
+    <!-- ══════════════════ 课题类型分支网关 ══════════════════ -->
+    <exclusiveGateway id="categoryGateway" name="课题类型判断" />
+
+    <sequenceFlow id="flow_start_to_gateway"
+                  sourceRef="startEvent"
+                  targetRef="categoryGateway" />
+
+    <!-- ════════════════ 路径A：高职升本（topicCategory == 1） ════════════════ -->
+
+    <!-- A1：预审任务（候选组：UNIVERSITY_TEACHER） -->
+    <userTask id="preReviewTask"
+              name="预审"
+              flowable:candidateGroups="UNIVERSITY_TEACHER">
+      <documentation>高校教师对高职升本课题进行预审</documentation>
+      <extensionElements>
+        <flowable:taskListener event="create"
+                               class="com.yuwan.completebackend.workflow.listener.ReviewTaskCreateListener" />
+      </extensionElements>
+    </userTask>
+
+    <sequenceFlow id="flow_upgrade_to_pre"
+                  sourceRef="categoryGateway"
+                  targetRef="preReviewTask">
+      <conditionExpression xsi:type="tFormalExpression">${topicCategory == 1}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- A1 网关：预审结果 -->
+    <exclusiveGateway id="preReviewGateway" name="预审结果判断" />
+    <sequenceFlow id="flow_pre_to_gateway"
+                  sourceRef="preReviewTask"
+                  targetRef="preReviewGateway" />
+
+    <!-- A1 → A2（预审通过） -->
+    <sequenceFlow id="flow_pre_pass"
+                  name="通过"
+                  sourceRef="preReviewGateway"
+                  targetRef="initUpgradeTask">
+      <conditionExpression xsi:type="tFormalExpression">${preOutcome == 'PASS'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- A1 → 预审修改任务（需修改） -->
+    <sequenceFlow id="flow_pre_need_modify"
+                  name="需修改"
+                  sourceRef="preReviewGateway"
+                  targetRef="preModifyTask">
+      <conditionExpression xsi:type="tFormalExpression">${preOutcome == 'NEED_MODIFY'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- 预审修改任务（指定给企业教师） -->
+    <userTask id="preModifyTask"
+              name="预审修改待重提"
+              flowable:assignee="${creatorId}">
+      <documentation>企业教师根据预审意见修改课题后重新提交</documentation>
+    </userTask>
+
+    <!-- 预审修改完成 → 循环回预审任务 -->
+    <sequenceFlow id="flow_pre_modify_resubmit"
+                  name="重新提交"
+                  sourceRef="preModifyTask"
+                  targetRef="preReviewTask" />
+
+    <!-- A2：初审任务 - 高职升本（候选组：MAJOR_DIRECTOR） -->
+    <userTask id="initUpgradeTask"
+              name="初审（升本）"
+              flowable:candidateGroups="MAJOR_DIRECTOR">
+      <documentation>专业方向主管对高职升本课题进行初审</documentation>
+      <extensionElements>
+        <flowable:taskListener event="create"
+                               class="com.yuwan.completebackend.workflow.listener.ReviewTaskCreateListener" />
+      </extensionElements>
+    </userTask>
+
+    <!-- A2 网关：初审结果（高职升本） -->
+    <exclusiveGateway id="initUpgradeGateway" name="初审结果判断（升本）" />
+    <sequenceFlow id="flow_init_upgrade_to_gateway"
+                  sourceRef="initUpgradeTask"
+                  targetRef="initUpgradeGateway" />
+
+    <!-- A2 → A3（初审通过） -->
+    <sequenceFlow id="flow_init_upgrade_pass"
+                  name="通过"
+                  sourceRef="initUpgradeGateway"
+                  targetRef="finalUpgradeTask">
+      <conditionExpression xsi:type="tFormalExpression">${initOutcome == 'PASS'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- A2 → 初审修改任务（需修改） -->
+    <sequenceFlow id="flow_init_upgrade_need_modify"
+                  name="需修改"
+                  sourceRef="initUpgradeGateway"
+                  targetRef="initUpgradeModifyTask">
+      <conditionExpression xsi:type="tFormalExpression">${initOutcome == 'NEED_MODIFY'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- 初审修改任务（高职升本路径） -->
+    <userTask id="initUpgradeModifyTask"
+              name="初审修改待重提（升本）"
+              flowable:assignee="${creatorId}">
+      <documentation>企业教师根据初审意见修改课题后重新提交，返回预审节点</documentation>
+    </userTask>
+
+    <!-- 初审修改完成 → 循环回预审任务（与现有业务一致：从INIT_MODIFY重提后回到PENDING_PRE） -->
+    <sequenceFlow id="flow_init_upgrade_modify_resubmit"
+                  name="重新提交"
+                  sourceRef="initUpgradeModifyTask"
+                  targetRef="preReviewTask" />
+
+    <!-- A3：终审任务（候选组：SUPERVISOR_TEACHER） -->
+    <userTask id="finalUpgradeTask"
+              name="终审（升本）"
+              flowable:candidateGroups="SUPERVISOR_TEACHER">
+      <documentation>督导教师对高职升本课题进行终审</documentation>
+      <extensionElements>
+        <flowable:taskListener event="create"
+                               class="com.yuwan.completebackend.workflow.listener.ReviewTaskCreateListener" />
+      </extensionElements>
+    </userTask>
+
+    <!-- A3 网关：终审结果（高职升本） -->
+    <exclusiveGateway id="finalUpgradeGateway" name="终审结果判断（升本）" />
+    <sequenceFlow id="flow_final_upgrade_to_gateway"
+                  sourceRef="finalUpgradeTask"
+                  targetRef="finalUpgradeGateway" />
+
+    <!-- A3 → 终审通过结束 -->
+    <sequenceFlow id="flow_final_upgrade_pass"
+                  name="终审通过"
+                  sourceRef="finalUpgradeGateway"
+                  targetRef="passedEndEvent">
+      <conditionExpression xsi:type="tFormalExpression">${finalOutcome == 'PASS'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- A3 → 终审不通过结束 -->
+    <sequenceFlow id="flow_final_upgrade_reject"
+                  name="终审不通过"
+                  sourceRef="finalUpgradeGateway"
+                  targetRef="failedEndEvent">
+      <conditionExpression xsi:type="tFormalExpression">${finalOutcome == 'REJECT'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- ════════════════ 路径B：3+1/实验班（topicCategory != 1） ════════════════ -->
+
+    <!-- B1：初审任务（候选组：MAJOR_DIRECTOR） -->
+    <userTask id="initOtherTask"
+              name="初审（实验班/3+1）"
+              flowable:candidateGroups="MAJOR_DIRECTOR">
+      <documentation>专业方向主管对3+1/实验班课题进行初审</documentation>
+      <extensionElements>
+        <flowable:taskListener event="create"
+                               class="com.yuwan.completebackend.workflow.listener.ReviewTaskCreateListener" />
+      </extensionElements>
+    </userTask>
+
+    <sequenceFlow id="flow_other_to_init"
+                  sourceRef="categoryGateway"
+                  targetRef="initOtherTask">
+      <conditionExpression xsi:type="tFormalExpression">${topicCategory != 1}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- B1 网关：初审结果（3+1/实验班） -->
+    <exclusiveGateway id="initOtherGateway" name="初审结果判断（其他）" />
+    <sequenceFlow id="flow_init_other_to_gateway"
+                  sourceRef="initOtherTask"
+                  targetRef="initOtherGateway" />
+
+    <!-- B1 → B2（初审通过） -->
+    <sequenceFlow id="flow_init_other_pass"
+                  name="通过"
+                  sourceRef="initOtherGateway"
+                  targetRef="finalOtherTask">
+      <conditionExpression xsi:type="tFormalExpression">${initOutcome == 'PASS'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- B1 → 初审修改任务（需修改） -->
+    <sequenceFlow id="flow_init_other_need_modify"
+                  name="需修改"
+                  sourceRef="initOtherGateway"
+                  targetRef="initOtherModifyTask">
+      <conditionExpression xsi:type="tFormalExpression">${initOutcome == 'NEED_MODIFY'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- 初审修改任务（3+1/实验班路径） -->
+    <userTask id="initOtherModifyTask"
+              name="初审修改待重提（其他）"
+              flowable:assignee="${creatorId}">
+      <documentation>企业教师根据初审意见修改课题后重新提交，返回初审节点</documentation>
+    </userTask>
+
+    <!-- 初审修改完成 → 循环回初审任务（3+1/实验班从INIT_MODIFY重提后回到初审） -->
+    <sequenceFlow id="flow_init_other_modify_resubmit"
+                  name="重新提交"
+                  sourceRef="initOtherModifyTask"
+                  targetRef="initOtherTask" />
+
+    <!-- B2：终审任务（候选组：UNIVERSITY_TEACHER） -->
+    <userTask id="finalOtherTask"
+              name="终审（实验班/3+1）"
+              flowable:candidateGroups="UNIVERSITY_TEACHER">
+      <documentation>高校教师对3+1/实验班课题进行终审</documentation>
+      <extensionElements>
+        <flowable:taskListener event="create"
+                               class="com.yuwan.completebackend.workflow.listener.ReviewTaskCreateListener" />
+      </extensionElements>
+    </userTask>
+
+    <!-- B2 网关：终审结果（3+1/实验班） -->
+    <exclusiveGateway id="finalOtherGateway" name="终审结果判断（其他）" />
+    <sequenceFlow id="flow_final_other_to_gateway"
+                  sourceRef="finalOtherTask"
+                  targetRef="finalOtherGateway" />
+
+    <!-- B2 → 终审通过结束 -->
+    <sequenceFlow id="flow_final_other_pass"
+                  name="终审通过"
+                  sourceRef="finalOtherGateway"
+                  targetRef="passedEndEvent">
+      <conditionExpression xsi:type="tFormalExpression">${finalOutcome == 'PASS'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- B2 → 终审不通过结束 -->
+    <sequenceFlow id="flow_final_other_reject"
+                  name="终审不通过"
+                  sourceRef="finalOtherGateway"
+                  targetRef="failedEndEvent">
+      <conditionExpression xsi:type="tFormalExpression">${finalOutcome == 'REJECT'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- ══════════════════ 结束事件 ══════════════════ -->
+    <endEvent id="passedEndEvent" name="审查通过" />
+    <endEvent id="failedEndEvent" name="审查不通过" />
+
+  </process>
+
+  <!-- ══════════════════ BPMN 图形布局（DI） ══════════════════ -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_topic_review">
+    <bpmndi:BPMNPlane id="BPMNPlane_topic_review" bpmnElement="topic_review">
+
+      <bpmndi:BPMNShape id="startEvent_di" bpmnElement="startEvent">
+        <omgdc:Bounds x="152" y="252" width="36" height="36" />
+        <bpmndi:BPMNLabel><omgdc:Bounds x="140" y="295" width="60" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="categoryGateway_di" bpmnElement="categoryGateway" isMarkerVisible="true">
+        <omgdc:Bounds x="245" y="245" width="50" height="50" />
+        <bpmndi:BPMNLabel><omgdc:Bounds x="228" y="302" width="84" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- 路径A -->
+      <bpmndi:BPMNShape id="preReviewTask_di" bpmnElement="preReviewTask">
+        <omgdc:Bounds x="360" y="120" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="preReviewGateway_di" bpmnElement="preReviewGateway" isMarkerVisible="true">
+        <omgdc:Bounds x="545" y="125" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="preModifyTask_di" bpmnElement="preModifyTask">
+        <omgdc:Bounds x="530" y="30" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="initUpgradeTask_di" bpmnElement="initUpgradeTask">
+        <omgdc:Bounds x="660" y="120" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="initUpgradeGateway_di" bpmnElement="initUpgradeGateway" isMarkerVisible="true">
+        <omgdc:Bounds x="845" y="125" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="initUpgradeModifyTask_di" bpmnElement="initUpgradeModifyTask">
+        <omgdc:Bounds x="830" y="30" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="finalUpgradeTask_di" bpmnElement="finalUpgradeTask">
+        <omgdc:Bounds x="960" y="120" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="finalUpgradeGateway_di" bpmnElement="finalUpgradeGateway" isMarkerVisible="true">
+        <omgdc:Bounds x="1145" y="125" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <!-- 路径B -->
+      <bpmndi:BPMNShape id="initOtherTask_di" bpmnElement="initOtherTask">
+        <omgdc:Bounds x="360" y="360" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="initOtherGateway_di" bpmnElement="initOtherGateway" isMarkerVisible="true">
+        <omgdc:Bounds x="545" y="365" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="initOtherModifyTask_di" bpmnElement="initOtherModifyTask">
+        <omgdc:Bounds x="530" y="460" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="finalOtherTask_di" bpmnElement="finalOtherTask">
+        <omgdc:Bounds x="660" y="360" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="finalOtherGateway_di" bpmnElement="finalOtherGateway" isMarkerVisible="true">
+        <omgdc:Bounds x="845" y="365" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <!-- 结束事件 -->
+      <bpmndi:BPMNShape id="passedEndEvent_di" bpmnElement="passedEndEvent">
+        <omgdc:Bounds x="1262" y="132" width="36" height="36" />
+        <bpmndi:BPMNLabel><omgdc:Bounds x="1250" y="175" width="60" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="failedEndEvent_di" bpmnElement="failedEndEvent">
+        <omgdc:Bounds x="1262" y="372" width="36" height="36" />
+        <bpmndi:BPMNLabel><omgdc:Bounds x="1246" y="415" width="68" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- 连线 -->
+      <bpmndi:BPMNEdge id="flow_start_to_gateway_di" bpmnElement="flow_start_to_gateway">
+        <omgdi:waypoint x="188" y="270" /><omgdi:waypoint x="245" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_upgrade_to_pre_di" bpmnElement="flow_upgrade_to_pre">
+        <omgdi:waypoint x="270" y="245" /><omgdi:waypoint x="270" y="150" /><omgdi:waypoint x="360" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_pre_to_gateway_di" bpmnElement="flow_pre_to_gateway">
+        <omgdi:waypoint x="480" y="150" /><omgdi:waypoint x="545" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_pre_pass_di" bpmnElement="flow_pre_pass">
+        <omgdi:waypoint x="595" y="150" /><omgdi:waypoint x="660" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_pre_need_modify_di" bpmnElement="flow_pre_need_modify">
+        <omgdi:waypoint x="570" y="125" /><omgdi:waypoint x="570" y="90" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_pre_modify_resubmit_di" bpmnElement="flow_pre_modify_resubmit">
+        <omgdi:waypoint x="530" y="60" /><omgdi:waypoint x="420" y="60" /><omgdi:waypoint x="420" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_init_upgrade_to_gateway_di" bpmnElement="flow_init_upgrade_to_gateway">
+        <omgdi:waypoint x="780" y="150" /><omgdi:waypoint x="845" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_init_upgrade_pass_di" bpmnElement="flow_init_upgrade_pass">
+        <omgdi:waypoint x="895" y="150" /><omgdi:waypoint x="960" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_init_upgrade_need_modify_di" bpmnElement="flow_init_upgrade_need_modify">
+        <omgdi:waypoint x="870" y="125" /><omgdi:waypoint x="870" y="90" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_init_upgrade_modify_resubmit_di" bpmnElement="flow_init_upgrade_modify_resubmit">
+        <omgdi:waypoint x="830" y="60" /><omgdi:waypoint x="420" y="60" /><omgdi:waypoint x="420" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_final_upgrade_to_gateway_di" bpmnElement="flow_final_upgrade_to_gateway">
+        <omgdi:waypoint x="1080" y="150" /><omgdi:waypoint x="1145" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_final_upgrade_pass_di" bpmnElement="flow_final_upgrade_pass">
+        <omgdi:waypoint x="1195" y="150" /><omgdi:waypoint x="1262" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_final_upgrade_reject_di" bpmnElement="flow_final_upgrade_reject">
+        <omgdi:waypoint x="1170" y="175" /><omgdi:waypoint x="1170" y="390" /><omgdi:waypoint x="1262" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_other_to_init_di" bpmnElement="flow_other_to_init">
+        <omgdi:waypoint x="270" y="295" /><omgdi:waypoint x="270" y="390" /><omgdi:waypoint x="360" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_init_other_to_gateway_di" bpmnElement="flow_init_other_to_gateway">
+        <omgdi:waypoint x="480" y="390" /><omgdi:waypoint x="545" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_init_other_pass_di" bpmnElement="flow_init_other_pass">
+        <omgdi:waypoint x="595" y="390" /><omgdi:waypoint x="660" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_init_other_need_modify_di" bpmnElement="flow_init_other_need_modify">
+        <omgdi:waypoint x="570" y="415" /><omgdi:waypoint x="570" y="460" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_init_other_modify_resubmit_di" bpmnElement="flow_init_other_modify_resubmit">
+        <omgdi:waypoint x="530" y="490" /><omgdi:waypoint x="420" y="490" /><omgdi:waypoint x="420" y="420" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_final_other_to_gateway_di" bpmnElement="flow_final_other_to_gateway">
+        <omgdi:waypoint x="780" y="390" /><omgdi:waypoint x="845" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_final_other_pass_di" bpmnElement="flow_final_other_pass">
+        <omgdi:waypoint x="895" y="390" /><omgdi:waypoint x="1280" y="390" /><omgdi:waypoint x="1280" y="408" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_final_other_reject_di" bpmnElement="flow_final_other_reject">
+        <omgdi:waypoint x="870" y="415" /><omgdi:waypoint x="870" y="450" /><omgdi:waypoint x="1280" y="450" /><omgdi:waypoint x="1280" y="408" />
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</definitions>

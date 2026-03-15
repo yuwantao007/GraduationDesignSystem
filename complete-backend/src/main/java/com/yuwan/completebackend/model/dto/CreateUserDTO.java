@@ -58,6 +58,9 @@ public class CreateUserDTO implements Serializable {
     @Schema(description = "所在专业ID（仅学生角色使用）")
     private String majorId;
 
+    @Schema(description = "所属企业ID（仅学生角色使用）")
+    private String enterpriseId;
+
     @Schema(description = "学号")
     private String studentNo;
 

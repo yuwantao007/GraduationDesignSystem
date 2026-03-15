@@ -1033,7 +1033,10 @@ public class MajorServiceImpl implements IMajorService {
 
     /**
      * 获取当前用户所属企业ID
-     * 从用户关联的方向或其他方式获取
+     * 按优先级依次尝试以下路径：
+     * 1. user_info.direction_id → 专业方向表 → 企业
+     * 2. user_info.department  → 企业名称精确匹配
+     * 3. major_teacher 关联表  → 专业 → 企业（管理端通过专业管理分配时写入此表）
      */
     private String getCurrentUserEnterpriseId() {
         String userId = SecurityUtil.getCurrentUserId();
@@ -1052,21 +1055,34 @@ public class MajorServiceImpl implements IMajorService {
             throw new BusinessException("用户不存在");
         }
 
-        // 如果用户有关联的专业方向，通过方向获取企业
+        // 路径1：用户直接关联了专业方向，通过方向获取企业
         if (StringUtils.hasText(user.getDirectionId())) {
             MajorDirection direction = majorDirectionMapper.selectById(user.getDirectionId());
-            if (direction != null) {
+            if (direction != null && StringUtils.hasText(direction.getEnterpriseId())) {
                 return direction.getEnterpriseId();
             }
         }
 
-        // 尝试通过用户department字段查找企业
+        // 路径2：通过 department 字段名称匹配企业
         if (StringUtils.hasText(user.getDepartment())) {
             LambdaQueryWrapper<Enterprise> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(Enterprise::getEnterpriseName, user.getDepartment());
             Enterprise enterprise = enterpriseMapper.selectOne(wrapper);
             if (enterprise != null) {
                 return enterprise.getEnterpriseId();
+            }
+        }
+
+        // 路径3：通过 major_teacher 关联表获取企业
+        // 当管理端在"专业管理"页面为企业教师分配专业时，会向此表写入记录
+        LambdaQueryWrapper<MajorTeacher> teacherWrapper = new LambdaQueryWrapper<>();
+        teacherWrapper.eq(MajorTeacher::getUserId, userId)
+                      .last("LIMIT 1");
+        MajorTeacher majorTeacher = majorTeacherMapper.selectOne(teacherWrapper);
+        if (majorTeacher != null) {
+            Major major = majorMapper.selectById(majorTeacher.getMajorId());
+            if (major != null && StringUtils.hasText(major.getEnterpriseId())) {
+                return major.getEnterpriseId();
             }
         }
 

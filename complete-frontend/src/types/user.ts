@@ -159,6 +159,10 @@ export interface UserVO {
   major?: string
   /** 属学生琒精确专业ID */
   majorId?: string
+  /** 所属企业ID（学生-企业直接关联） */
+  enterpriseId?: string
+  /** 所属企业名称 */
+  enterpriseName?: string
   /** 学号/工号 */
   userCode?: string
   /** 简介 */
@@ -217,6 +221,8 @@ export interface CreateUserDTO {
   major?: string
   /** 学生精确专业ID（仅学生角色使用） */
   majorId?: string
+  /** 所属企业ID（仅学生角色使用） */
+  enterpriseId?: string
   /** 学号/工号 */
   userCode?: string
   /** 角色ID列表 */
@@ -243,6 +249,8 @@ export interface UpdateUserDTO {
   major?: string
   /** 学生精确专业ID（仅学生角色使用） */
   majorId?: string
+  /** 所属企业ID（仅学生角色使用） */
+  enterpriseId?: string
   /** 学号/工号 */
   userCode?: string
   /** 简介 */

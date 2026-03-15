@@ -51,6 +51,12 @@ public class UserVO implements Serializable {
     @Schema(description = "所在专业ID（学生精确专业关联）")
     private String majorId;
 
+    @Schema(description = "所属企业ID（学生-企业直接关联）")
+    private String enterpriseId;
+
+    @Schema(description = "所属企业名称")
+    private String enterpriseName;
+
     @Schema(description = "学号/工号（前端统一使用字段，后端根据角色自动返回studentNo或employeeNo）")
     private String userCode;
 

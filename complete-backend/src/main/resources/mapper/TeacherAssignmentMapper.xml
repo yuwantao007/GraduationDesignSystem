@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuwan.completebackend.mapper.TeacherAssignmentMapper">
+
+    <!-- 查询企业内的指派列表（联表，含学生/课题/教师姓名） -->
+    <select id="selectAssignmentList" resultType="com.yuwan.completebackend.model.vo.TeacherAssignmentVO">
+        SELECT
+            ta.assignment_id       AS assignmentId,
+            ta.student_id          AS studentId,
+            stu.real_name          AS studentName,
+            stu.student_no         AS studentNo,
+            ta.topic_id            AS topicId,
+            t.topic_title          AS topicTitle,
+            t.topic_source         AS topicSource,
+            CASE t.topic_source
+                WHEN 1 THEN '校内'
+                WHEN 2 THEN '校外(协同开发)'
+                ELSE '未知'
+            END                    AS topicSourceDesc,
+            ta.assigned_teacher_id AS assignedTeacherId,
+            tea.real_name          AS assignedTeacherName,
+            ab.real_name           AS assignedByName,
+            DATE_FORMAT(ta.assign_time,  '%Y-%m-%d %H:%i:%s') AS assignTime,
+            DATE_FORMAT(ta.cancel_time,  '%Y-%m-%d %H:%i:%s') AS cancelTime,
+            ta.assign_status       AS assignStatus,
+            CASE ta.assign_status
+                WHEN 1 THEN '已指派'
+                WHEN 0 THEN '已取消'
+                ELSE '未知'
+            END                    AS assignStatusDesc
+        FROM teacher_assignment ta
+        INNER JOIN user_info stu ON ta.student_id          = stu.user_id
+        INNER JOIN topic_info t  ON ta.topic_id            = t.topic_id
+        INNER JOIN user_info tea ON ta.assigned_teacher_id = tea.user_id
+        INNER JOIN user_info ab  ON ta.assigned_by         = ab.user_id
+        WHERE ta.deleted = 0
+          AND t.enterprise_id = #{enterpriseId}
+        ORDER BY ta.assign_time DESC
+    </select>
+
+</mapper>

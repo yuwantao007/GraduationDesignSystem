@@ -1469,6 +1469,12 @@ graph TD
   - 查看个人资料
   - 修改个人信息
   - 修改密码功能
+- ✅ 学生-企业-专业关联功能（2026-03-14新增）
+  - user_info表添加enterprise_id字段（学生-企业直接关联）
+  - 支持企业→专业方向→专业三级级联选择
+  - 创建/编辑学生用户时自动关联企业和专业
+  - UserVO返回企业ID和企业名称
+  - 优化企业下学生查询效率（直接通过enterprise_id查询，无需联表）
 
 #### 11.1.3 角色权限管理（已完成 ✅）
 - ✅ 角色列表管理
@@ -1538,6 +1544,77 @@ graph TD
   - ✅ 审批结果修改（需满足下级未通过条件）
   - ✅ 教师课题数量限制（≤18个）
   - ✅ 权限配置脚本（add_topic_review_permissions.sql）
+
+#### 11.1.9 课题双选模块（已完成 ✅）
+
+**功能定位**：毕设流程第二阶段核心模块，覆盖"学生选报→企业教师确认→企业负责人审核→高校教师查看"全链路双选流程。
+
+**后端实现**：
+- ✅ **数据库设计**
+  - `topic_selection`：学生选报记录表（学生ID、课题ID、选报理由、状态、确认时间、确认人）
+  - `teacher_assignment`：企业指导教师指派表（学生、课题、指派教师、指派人、状态）
+- ✅ **VO 层**
+  - `TopicForSelectionVO`：可选课题列表项（含已选报人数、是否已申请标记）
+  - `TopicSelectionVO`：学生选报记录（学生视角）
+  - `SelectionForTeacherVO`：企业教师视角选报记录（含学生信息）
+  - `SelectionOverviewVO`：双选结果概览（课题维度汇总：选报/确认/待确认/落选人数）
+  - `UnselectedStudentVO`：未选报任何课题的学生信息
+  - `TeacherAssignmentVO`：教师指派记录
+  - `SelectionForUnivTeacherVO`：高校教师视角学生选报结果
+  - `UnivTeacherPairingVO`：高校教师配对信息（含课题/选报统计）
+- ✅ **Service 层**（`ITopicSelectionService` / `TopicSelectionServiceImpl`）
+  - 学生选报：可选课题查询（多条件筛选分页）、选报课题（含手机号/重复/上限校验）、删除落选记录、查询我的选报
+  - 教师确认：查看选报学生列表（状态过滤）、确认人选（联动落选同学生其他待确认记录）、拒绝人选、导出已确认学生 Excel
+  - 双选审核：课题维度双选概览、未选报学生列表、导出选题信息 Excel、指派企业指导教师（仅校外协同课题）、取消指派、指派记录列表
+  - 高校教师：查看配对教师名下学生选报结果、导出选题结果、查询配对关系信息
+- ✅ **Controller 层**（`TopicSelectionController`，13个 API 端点）
+  - `GET  /topic-selection/available`：可选课题列表（学生）
+  - `POST /topic-selection`：选报课题（学生，@PhaseRequired TOPIC_SELECTION）
+  - `DELETE /topic-selection/{id}`：删除落选记录（学生）
+  - `GET  /topic-selection/my`：我的选报（学生）
+  - `GET  /topic-selection/teacher`：选报学生列表（企业教师）
+  - `POST /topic-selection/{id}/confirm`：确认人选（企业教师）
+  - `POST /topic-selection/{id}/reject`：拒绝人选（企业教师）
+  - `GET  /topic-selection/teacher/export`：导出已确认学生 Excel（企业教师）
+  - `GET  /topic-selection/leader/overview`：双选概览（企业负责人）
+  - `GET  /topic-selection/leader/unselected`：未选报学生（企业负责人）
+  - `GET  /topic-selection/leader/export`：导出选题信息 Excel（企业负责人）
+  - `POST /topic-selection/leader/assign`：指派教师（企业负责人）
+  - `DELETE /topic-selection/leader/assign/{id}`：取消指派（企业负责人）
+  - `GET  /topic-selection/leader/assignments`：指派记录列表（企业负责人）
+  - `GET  /topic-selection/univ-teacher/pairings`：配对关系信息（高校教师）
+  - `GET  /topic-selection/univ-teacher`：指导学生选报结果（高校教师）
+  - `GET  /topic-selection/univ-teacher/export`：导出选题结果 Excel（高校教师）
+- ✅ **权限配置**
+  - `add_topic_selection_permissions.sql`：学生选报权限（ID 500-504）
+  - `add_selection_teacher_permissions.sql`：企业教师确认 + 负责人审核权限（ID 505-512）
+  - `add_univ_teacher_selection_permissions.sql`：高校教师查看选题权限（ID 513-514）
+- ✅ **企业 ID 解析（多路径容错）**
+  - 路径1：`user_info.direction_id → major_direction_info.enterprise_id`
+  - 路径2：`user_info.department` 名称匹配 `enterprise_info.enterprise_name`
+  - 路径3：`major_teacher` 关联表 → `major_info.enterprise_id`
+  - 路径4：`enterprise_info.leader_id`（企业负责人专用）
+- ✅ **权限刷新修复**（`UserServiceImpl.buildUserVO`）
+  - `/user/current` 接口返回值新增 `permissions` 字段，与登录接口保持一致，确保权限数据实时刷新
+
+**前端实现**：
+- ✅ **类型定义**（`types/topicSelection.ts`）：完整覆盖全链路 VO/DTO（枚举、颜色映射、8个接口类型）
+- ✅ **API 封装**（`api/topicSelection.ts`）：17个方法与后端端点一一对应
+- ✅ **页面开发**（4个视图）
+  - `TopicSelectionList.vue`（学生）：可选课题列表，多条件筛选分页，一键选报
+  - `MySelections.vue`（学生）：我的选报记录，状态标签，落选删除重选
+  - `TeacherSelectionConfirm.vue`（企业教师）：统计卡片 + Tab 状态过滤 + 确认/拒绝操作 + 导出
+  - `SelectionLeaderOverview.vue`（企业负责人）：双选概览 Tab + 教师指派 Tab（指派弹窗、取消指派）+ 未选报学生预警
+  - `UnivTeacherSelectionView.vue`（高校教师）：配对关系卡片区域（独立接口，无论选报数据是否存在均可展示）+ 选报结果表格 + 精准空状态提示区分"无配对"/"已配对待选报"
+- ✅ **路由与菜单**：4个角色各自新增"双选管理"子菜单项，面包屑同步更新
+- ✅ **路由守卫优化**（`router/index.ts`）：新增 `permissionsRefreshed` 模块级标记，每次页面加载后首次导航强制从服务端拉取最新权限，彻底解决 localStorage 缓存导致的权限失效问题
+
+**关键业务规则**：
+- 学生单届最多选报 3 个课题（状态 0/1 计数），已中选后禁止继续选报
+- 企业教师确认人选时，自动将该学生其他待确认记录置为落选（联动）
+- 企业教师单届指导上限 16 人（确认时实时校验）
+- 仅"校外协同开发"来源课题的中选学生需要企业负责人指派指导教师
+- 高校教师通过 `teacher_relationship` 配对关系查看企业教师名下学生的选报情况
 
 #### 11.1.8 系统阶段管理模块（已完成 ✅）
 
@@ -1612,8 +1689,8 @@ graph TD
 
 ### 11.2 待开发功能模块
 
-#### 11.2.1 课题管理模块（待开发 ⏳）
-- ⏳ 课题双选管理
+#### 11.2.1 课题管理模块（部分完成）
+- ✅ ~~课题双选管理~~（已在课题双选模块完整实现）
 - ⏳ 课题状态跟踪
 
 #### 11.2.2 过程管理模块（待开发 ⏳）
@@ -1628,10 +1705,10 @@ graph TD
 - ⏳ 交叉评阅系统
 - ⏳ 成绩计算与统计
 
-#### 11.2.4 审批流设计模块（待开发 ⏳）
-- ⏳ 可视化审批流设计器
-- ⏳ 流程配置功能
-- ⏳ 流程监控
+#### 11.2.4 审批流设计模块（部分完成）
+- ✅ ~~可视化审批流设计器~~（流程定义可视化页面，BPMN 图展示 + 两条审查路径说明）
+- ✅ ~~流程监控~~（管理员流程实例监控 + BPMN 实例高亮图 + 历史节点时间线）
+- ⏳ 流程配置功能（如需运行时动态修改流程定义，待规划）
 
 #### 11.2.5 质量监控模块（待开发 ⏳）
 - ⏳ 多维数据展现（仪表盘、统计图表）
@@ -1682,7 +1759,7 @@ graph TD
 1. ✅ 课题信息实体设计与数据库表创建
 2. ✅ 课题申报功能开发（前后端）
 3. ✅ 三级审批流程实现（状态机模式：预审→初审→终审）
-4. ⏳ 课题双选功能开发
+4. ✅ 课题双选功能开发（学生选报→教师确认→负责人审核→高校教师查看）
 
 #### 第二阶段：文档管理与过程跟踪（预计3-4周）
 1. MinIO对象存储集成
@@ -1710,6 +1787,64 @@ graph TD
 4. 数据备份与恢复
 
 
+
+**文档版本**：V4.4  
+**更新日期**：2026年3月15日  
+**更新内容**：
+
+### V4.4 更新（2026-03-15）- 流程引擎可视化功能完成
+
+#### 阶段A — 流程定义可视化页面
+- ✅ **后端**：新增 `GET /flow/definition/diagram` 接口（`TopicFlowController`），从 Flowable 部署中查询最新版 `topic_review` 流程定义 BPMN XML 返回
+- ✅ **服务层**：`ITopicFlowService.getProcessDefinitionDiagramXml()` + `TopicFlowServiceImpl` 实现
+- ✅ **前端页面**：新建 `views/workflow/ProcessDefinition.vue`
+  - 上方两路径说明卡片（路径A：高职升本 3 级审查；路径B：3+1/实验班 2 级审查）
+  - 图例说明（活跃橙色 / 已完成绿色）
+  - 下方 `BpmnViewer` 渲染完整 BPMN 图，高度 540px
+- ✅ **路由**：新增 `/workflow/definition` → `ProcessDefinition`
+- ✅ **菜单**：工作流子菜单新增"流程定义"项（所有已登录用户可见）
+- ✅ **面包屑**：补充 `/workflow/tasks`、`/workflow/definition`、`/workflow/monitor` 三条面包屑映射
+
+#### 阶段B — 课题详情页集成流程状态卡片
+- ✅ **`TopicDetail.vue`**：在操作按钮区和内容区之间嵌入 `ProcessStatusCard` 组件
+  - 条件显示：`topicData.isSubmitted === 1`（仅课题已提交后显示）
+  - 打印时自动隐藏（`@media print { display: none }`）
+  - 展示内容：当前审查状态标签 + 等待角色 + 历史节点时间线
+
+#### 阶段C — 流程监控联调验证
+- ✅ **`ProcessMonitor.vue`**：已验证"查看流程图"弹窗逻辑完整
+  - 并发请求 BPMN XML 和历史节点，正确区分活跃（橙色高亮）和已完成（绿色）节点
+  - 流程信息描述 + BPMN 图 + 历史时间线三段式布局
+
+#### 其他
+- ✅ **`ReviewTaskCreateListener.java`** 编译错误修复：`getCandidateGroups()` → `getCandidates()`
+- ✅ **`TopicFlowServiceImpl.java`** 运行时逻辑修复：identity links 查询移至任务完成之前，新增 `getRoleCodeFromTaskKey()` 辅助方法
+- ✅ **后端全量编译验证**：`mvn compile → BUILD SUCCESS`（204 个文件）
+
+**文档版本**：V4.3  
+**更新日期**：2026年3月14日  
+**更新内容**：
+
+### V4.3 更新（2026-03-14）- 课题双选模块开发完成
+- ✅ **课题双选模块（前后端完整实现）**
+  - **功能定位**：覆盖"学生选报 → 企业教师确认 → 企业负责人审核 → 高校教师查看"全链路双选流程
+  - **数据库设计**
+    - `topic_selection`：学生选报记录表（状态枚举：0-待确认/1-已中选/2-落选）
+    - `teacher_assignment`：企业指导教师指派表（仅校外协同课题中选学生适用）
+  - **后端实现**（`TopicSelectionController`，17个 API 端点）
+    - 学生端：可选课题查询、选报、删除落选记录、查看我的选报
+    - 企业教师端：选报学生列表查看（含状态过滤）、确认/拒绝人选（确认联动落选其余待确认记录）、导出已确认学生 Excel
+    - 企业负责人端：双选概览（课题维度）、未选报学生列表、导出选题信息 Excel、指派/取消指派教师（含记录查询）
+    - 高校教师端：查看配对关系信息（`teacher_relationship`）、查看指导学生选报结果、导出选题结果 Excel
+  - **企业 ID 多路径容错解析**：4条路径兜底（direction_id → 名称匹配 → major_teacher 关联 → leader_id）
+  - **权限配置**（3个 SQL 脚本，ID 范围 500-514）
+  - **权限刷新修复**：`/user/current` 接口补全 `permissions` 字段 + 路由守卫首次导航强制拉取最新权限
+  - **前端实现**
+    - 类型定义：8个 VO/DTO 接口 + 枚举映射（`topicSelection.ts`）
+    - API 封装：17个方法对应全部后端端点（`api/topicSelection.ts`）
+    - 视图页面：5个视图（学生选报列表 / 我的选报 / 企业教师确认 / 企业负责人审核 / 高校教师查看）
+    - 菜单差异化：4个角色各自新增"双选管理"子菜单，面包屑同步
+    - 路由守卫：`permissionsRefreshed` 标记确保权限每次页面刷新后强制从服务端重载
 
 **文档版本**：V4.2  
 **更新日期**：2026年3月7日  

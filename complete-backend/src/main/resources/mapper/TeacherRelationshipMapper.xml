@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuwan.completebackend.mapper.TeacherRelationshipMapper">
+
+    <!--
+        查询高校教师的配对关系信息
+        包含：企业教师信息、企业信息、专业方向（可选）、终审课题数、选报课题数、中选学生数
+        注意：该查询与是否有选报数据无关，配对存在即可查到。
+    -->
+    <select id="selectPairingsByUnivTeacher" resultType="com.yuwan.completebackend.model.vo.UnivTeacherPairingVO">
+        SELECT
+            tr.relation_id                   AS relationId,
+            et.user_id                       AS enterpriseTeacherId,
+            et.real_name                     AS enterpriseTeacherName,
+            et.employee_no                   AS enterpriseTeacherEmployeeNo,
+            e.enterprise_id                  AS enterpriseId,
+            e.enterprise_name                AS enterpriseName,
+            tr.direction_id                  AS directionId,
+            md.direction_name                AS directionName,
+            tr.cohort                        AS cohort,
+            tr.relation_type                 AS relationType,
+            CASE tr.relation_type
+                WHEN 'DIRECT' THEN '直接配对'
+                WHEN 'ASSIST' THEN '辅助支持'
+                ELSE tr.relation_type
+            END                              AS relationTypeDesc,
+            tr.is_enabled                    AS isEnabled,
+            IFNULL(approved.cnt, 0)          AS approvedTopicCount,
+            IFNULL(sel_topic.cnt, 0)         AS selectionTopicCount,
+            IFNULL(confirmed.cnt, 0)         AS confirmedStudentCount
+        FROM teacher_relationship tr
+        INNER JOIN user_info et              ON tr.enterprise_teacher_id = et.user_id AND et.deleted = 0
+        LEFT  JOIN enterprise_info e         ON tr.enterprise_id = e.enterprise_id
+        LEFT  JOIN major_direction_info md   ON tr.direction_id = md.direction_id AND md.deleted = 0
+        /* 终审通过课题数 */
+        LEFT  JOIN (
+            SELECT creator_id, COUNT(*) AS cnt
+            FROM topic_info
+            WHERE deleted = 0 AND review_status = 6
+            GROUP BY creator_id
+        ) approved ON approved.creator_id = tr.enterprise_teacher_id
+        /* 有选报记录的课题数（不限状态） */
+        LEFT  JOIN (
+            SELECT t.creator_id, COUNT(DISTINCT t.topic_id) AS cnt
+            FROM topic_info t
+            INNER JOIN topic_selection s ON s.topic_id = t.topic_id AND s.deleted = 0
+            WHERE t.deleted = 0
+            GROUP BY t.creator_id
+        ) sel_topic ON sel_topic.creator_id = tr.enterprise_teacher_id
+        /* 已中选学生数 */
+        LEFT  JOIN (
+            SELECT t.creator_id, COUNT(*) AS cnt
+            FROM topic_info t
+            INNER JOIN topic_selection s ON s.topic_id = t.topic_id AND s.deleted = 0 AND s.selection_status = 1
+            WHERE t.deleted = 0
+            GROUP BY t.creator_id
+        ) confirmed ON confirmed.creator_id = tr.enterprise_teacher_id
+        WHERE tr.univ_teacher_id = #{univTeacherId}
+          AND tr.deleted = 0
+        ORDER BY tr.is_enabled DESC, tr.create_time DESC
+    </select>
+
+</mapper>

@@ -161,6 +161,13 @@
             <version>1.24.0</version>
         </dependency>
         
+        <!-- Flowable 流程引擎（仅 Process 模块，禁用 DMN/Form/Content） -->
+        <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-spring-boot-starter-process</artifactId>
+            <version>7.0.0</version>
+        </dependency>
+
         <!-- Spring Boot Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

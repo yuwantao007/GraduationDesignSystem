@@ -51,6 +51,9 @@ public class UpdateUserDTO implements Serializable {
     @Schema(description = "所在专业ID（仅学生角色使用）")
     private String majorId;
 
+    @Schema(description = "所属企业ID（仅学生角色使用）")
+    private String enterpriseId;
+
     @Schema(description = "学号/工号（统一字段，后端会根据角色自动判断更新studentNo或employeeNo）")
     private String userCode;
 

@@ -136,6 +136,27 @@ logging:
     max-size: 10MB
     max-history: 30
 
+# Flowable 流程引擎配置
+flowable:
+  # 自动创建/更新 ACT_* 表（首次启动自动建表，后续比对升级）
+  database-schema-update: true
+  # 异步作业执行器（暂不启用，按需开启）
+  async-executor-activate: false
+  # 历史数据级别：full 记录所有节点流转历史
+  history-level: full
+  # 禁用不需要的子引擎，减少启动耗时
+  dmn:
+    enabled: false
+  form:
+    enabled: false
+  content:
+    enabled: false
+  app:
+    enabled: false
+  # IDM 引擎：保留 false，本项目用自定义 Spring Security 鉴权，不使用 Flowable IDM
+  idm:
+    enabled: false
+
 # 服务器配置
 server:
   port: 8080

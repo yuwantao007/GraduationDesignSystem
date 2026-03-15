@@ -42,6 +42,7 @@ export interface UserInfo {
   gender?: number
   department?: string
   major?: string
+  majorId?: string
   studentNo?: string
   employeeNo?: string
   title?: string

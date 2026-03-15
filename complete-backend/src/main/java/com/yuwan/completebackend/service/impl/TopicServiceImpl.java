@@ -27,6 +27,7 @@ import com.yuwan.completebackend.model.enums.TopicSource;
 import com.yuwan.completebackend.model.enums.TopicType;
 import com.yuwan.completebackend.model.vo.TopicVO;
 import com.yuwan.completebackend.security.SecurityUtil;
+import com.yuwan.completebackend.service.ITopicFlowService;
 import com.yuwan.completebackend.service.ITopicService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,7 @@ public class TopicServiceImpl implements ITopicService {
     private final MajorMapper majorMapper;
     private final SchoolMapper schoolMapper;
     private final UserMapper userMapper;
+    private final ITopicFlowService topicFlowService;
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final SimpleDateFormat DATE_ONLY_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
@@ -297,9 +299,28 @@ public class TopicServiceImpl implements ITopicService {
         validateTopicForSubmit(topic);
 
         // 更新状态为待预审
+        boolean isFirstSubmit = (status == TopicReviewStatus.DRAFT);
         topic.setReviewStatus(TopicReviewStatus.PENDING_PRE.getCode());
         topic.setIsSubmitted(1);
         topicMapper.updateById(topic);
+
+        // 集成 Flowable：首次提交启动流程，修改后重提则完成修改任务
+        if (isFirstSubmit) {
+            topicFlowService.startProcess(
+                    topic.getTopicId(),
+                    topic.getCreatorId(),
+                    topic.getTopicCategory(),
+                    topic.getTopicTitle());
+        } else {
+            // PRE_MODIFY(3) 或 INIT_MODIFY(5) 重提，完成当前修改任务，流程自动路由回审查节点
+            try {
+                topicFlowService.completeModifyTask(topic.getTopicId());
+            } catch (Exception e) {
+                // 流程任务异常时不影响业务状态变更，仅记录日志
+                log.warn("完成修改任务异常（课题ID: {}），流程可能未正常推进: {}",
+                        topic.getTopicId(), e.getMessage());
+            }
+        }
 
         log.info("提交课题成功，课题ID: {}", submitDTO.getTopicId());
         return getTopicDetail(submitDTO.getTopicId());
