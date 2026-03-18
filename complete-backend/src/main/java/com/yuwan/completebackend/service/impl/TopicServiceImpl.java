@@ -67,6 +67,10 @@ public class TopicServiceImpl implements ITopicService {
     public TopicVO createTopic(CreateTopicDTO createDTO) {
         // 获取当前用户
         String currentUserId = SecurityUtil.getCurrentUserId();
+        User currentUser = userMapper.selectById(currentUserId);
+        if (currentUser == null) {
+            throw new BusinessException("当前用户不存在");
+        }
 
         // 验证课题名称唯一性
         if (isTopicTitleExists(createDTO.getTopicTitle(), null)) {
@@ -80,9 +84,25 @@ public class TopicServiceImpl implements ITopicService {
             if (!StringUtils.hasText(createDTO.getEnterpriseId())) {
                 throw new BusinessException("高职升本课题必须选择归属企业");
             }
+            if (SecurityUtil.hasRole("ENTERPRISE_TEACHER")
+                    && StringUtils.hasText(currentUser.getEnterpriseId())
+                    && !createDTO.getEnterpriseId().equals(currentUser.getEnterpriseId())) {
+                throw new BusinessException("企业教师只能创建本企业课题");
+            }
             Enterprise enterprise = enterpriseMapper.selectById(createDTO.getEnterpriseId());
             if (enterprise == null) {
                 throw new BusinessException("归属企业不存在");
+            }
+
+            // 若选择了所属专业，必须与课题归属企业一致
+            if (StringUtils.hasText(createDTO.getMajorId())) {
+                Major major = majorMapper.selectById(createDTO.getMajorId());
+                if (major == null) {
+                    throw new BusinessException("所选专业不存在");
+                }
+                if (!createDTO.getEnterpriseId().equals(major.getEnterpriseId())) {
+                    throw new BusinessException("所选专业不属于当前归属企业");
+                }
             }
         } else if (category == TopicCategory.THREE_PLUS_ONE || category == TopicCategory.EXPERIMENTAL) {
             // 3+1/实验班：验证学校

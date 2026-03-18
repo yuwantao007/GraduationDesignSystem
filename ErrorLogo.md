@@ -4816,3 +4816,118 @@ export interface UserInfo {
 5. **对比功能**：支持同时查看多个课题进行对比
 
 ---
+
+# 指导记录管理模块 - 问题记录
+
+## 问题一：MySQL 不支持 `NULLS LAST` 语法
+
+**发生位置**：`GuidanceRecordMapper.xml` - `selectStudentsByTeacher` 查询
+
+**错误信息**：
+```
+SQLSyntaxErrorException: You have an error in your SQL syntax; 
+check the manual ... near 'NULLS LAST, stu.real_name ASC'
+```
+
+**问题原因**：
+`NULLS LAST` 是 PostgreSQL / Oracle 的专有语法，MySQL 不支持该写法。
+
+**错误写法**：
+```sql
+ORDER BY stat.last_date DESC NULLS LAST, stu.real_name ASC
+```
+
+**正确写法**：
+```sql
+ORDER BY ISNULL(stat.last_date), stat.last_date DESC, stu.real_name ASC
+```
+
+**解决原理**：`ISNULL(col)` 在值为 NULL 时返回 1，非 NULL 时返回 0。升序排列后，0（有值）排前，1（NULL）排后，等效于 `NULLS LAST`。
+
+---
+
+## 问题二：前端 `less` 预处理器缺失导致页面白屏
+
+**发生位置**：`LeaderGuidanceOverview.vue` 使用了 `<style scoped lang="less">`
+
+**错误信息**：
+```
+[plugin:vite:css] Preprocessor dependency "less" not found. 
+Did you install it? Try `npm install -D less`.
+```
+
+**问题原因**：
+Vue 文件中使用了 `lang="less"` 的 scoped 样式，但项目未安装 less 编译依赖。
+
+**解决方案**：
+```bash
+npm install -D less
+```
+
+---
+
+## 问题三：前端 API 返回值未取 `.data` 字段导致 loading 一直转圈
+
+**发生位置**：`TeacherGuidanceList.vue` - `loadStudentList` / `handleViewRecords` / `handleDeleteRecord`
+
+**问题原因**：
+`request.get()` 封装返回的是 `ApiResponse<T>` 对象（`{code, message, data}`），而代码直接将整个响应赋值给了数组类型的 ref：
+```javascript
+// 错误写法
+studentList.value = await guidanceApi.getMyStudents()
+```
+导致 `studentList` 变成对象而非数组，`studentList.length` 为 undefined，空状态无法显示，a-table 渲染异常。
+
+**正确写法**：
+```javascript
+const res = await guidanceApi.getMyStudents()
+studentList.value = res.data || []
+```
+
+**修复原则**：所有通过封装 `request` 发出的请求，取数组/对象数据时必须访问 `.data` 属性，并提供默认值防止 null。
+
+---
+
+## 问题四：指导日期选择后仍提示"请选择指导日期"
+
+**发生位置**：`GuidanceFormModal.vue` - 指导日期表单项
+
+**问题原因**：
+`a-date-picker` 绑定的是独立的 `guidanceDateValue`（Dayjs 对象），而表单校验规则绑定的是 `formData.guidanceDate`（字符串）。两者是两个独立变量，选择日期后 `formData.guidanceDate` 不会自动更新，导致表单校验始终失败。
+
+**解决方案**：
+在 `a-date-picker` 添加 `@change` 事件，手动同步：
+```javascript
+const handleDateChange = (date: Dayjs | null) => {
+  formData.guidanceDate = date ? date.format('YYYY-MM-DD') : ''
+  formRef.value?.validateFields(['guidanceDate'])
+}
+```
+
+**规律总结**：当 `a-date-picker` 的 v-model 绑定的是 Dayjs 对象，而表单 `:model` 中对应字段是字符串时，必须通过 `@change` 手动同步。
+
+---
+
+## 问题五：企业教师用户 `enterprise_id` 为 null 导致指导记录总览报错
+
+**发生位置**：`GuidanceRecordServiceImpl.getLeaderGuidanceOverview`
+
+**错误信息**：
+```
+业务异常: 未找到您所属的企业信息
+```
+
+**问题原因**：
+拥有 `ENTERPRISE_LEADER` 角色的测试用户，其 `user_info.enterprise_id` 字段为 `null`，未关联具体企业。后端查企业总览时以 `enterprise_id` 为条件，值为 null 则抛出业务异常。
+
+**解决方案**：
+执行 SQL 补充该用户的企业关联（根据该用户创建课题所属企业确定）：
+```sql
+UPDATE user_info 
+SET enterprise_id = 'E001' 
+WHERE user_id = '2024759015287861249';
+```
+
+**规律总结**：企业相关角色（`ENTERPRISE_TEACHER`、`ENTERPRISE_LEADER`）的用户必须确保 `enterprise_id` 字段不为 null，否则所有依赖企业 ID 的接口都会报错。创建测试用户时需同步设置 `enterprise_id`。
+
+---

@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuwan.completebackend.mapper.GuidanceRecordMapper">
+
+    <!-- 指导记录详情（含关联信息） -->
+    <select id="selectRecordDetail" resultType="com.yuwan.completebackend.model.vo.GuidanceRecordVO">
+        SELECT
+            gr.record_id       AS recordId,
+            gr.student_id      AS studentId,
+            stu.real_name      AS studentName,
+            stu.username       AS studentNo,
+            gr.teacher_id      AS teacherId,
+            tea.real_name      AS teacherName,
+            gr.topic_id        AS topicId,
+            t.topic_title      AS topicTitle,
+            gr.guidance_type   AS guidanceType,
+            CASE gr.guidance_type
+                WHEN 1 THEN '项目指导'
+                WHEN 2 THEN '论文指导'
+                ELSE '未知'
+            END AS guidanceTypeDesc,
+            DATE_FORMAT(gr.guidance_date, '%Y-%m-%d') AS guidanceDate,
+            gr.guidance_content AS guidanceContent,
+            gr.guidance_method  AS guidanceMethod,
+            gr.duration_hours   AS durationHours,
+            DATE_FORMAT(gr.create_time, '%Y-%m-%d %H:%i:%s') AS createTime,
+            DATE_FORMAT(gr.update_time, '%Y-%m-%d %H:%i:%s') AS updateTime
+        FROM guidance_record gr
+        LEFT JOIN user_info stu ON gr.student_id = stu.user_id
+        LEFT JOIN user_info tea ON gr.teacher_id = tea.user_id
+        LEFT JOIN topic_info t ON gr.topic_id = t.topic_id
+        WHERE gr.record_id = #{recordId}
+          AND gr.deleted = 0
+    </select>
+
+    <!-- 查询某学生的全部指导记录 -->
+    <select id="selectByStudentId" resultType="com.yuwan.completebackend.model.vo.GuidanceListVO">
+        SELECT
+            gr.record_id       AS recordId,
+            gr.student_id      AS studentId,
+            stu.real_name      AS studentName,
+            stu.username       AS studentNo,
+            stu.user_phone     AS studentPhone,
+            stu.user_email     AS studentEmail,
+            gr.teacher_id      AS teacherId,
+            tea.real_name      AS teacherName,
+            gr.topic_id        AS topicId,
+            t.topic_title      AS topicTitle,
+            gr.guidance_type   AS guidanceType,
+            CASE gr.guidance_type
+                WHEN 1 THEN '项目指导'
+                WHEN 2 THEN '论文指导'
+                ELSE '未知'
+            END AS guidanceTypeDesc,
+            DATE_FORMAT(gr.guidance_date, '%Y-%m-%d') AS guidanceDate,
+            gr.guidance_method  AS guidanceMethod,
+            gr.duration_hours   AS durationHours,
+            LEFT(gr.guidance_content, 100) AS contentSummary,
+            DATE_FORMAT(gr.create_time, '%Y-%m-%d %H:%i:%s') AS createTime
+        FROM guidance_record gr
+        LEFT JOIN user_info stu ON gr.student_id = stu.user_id
+        LEFT JOIN user_info tea ON gr.teacher_id = tea.user_id
+        LEFT JOIN topic_info t ON gr.topic_id = t.topic_id
+        WHERE gr.student_id = #{studentId}
+          AND gr.deleted = 0
+          <if test="guidanceType != null">
+              AND gr.guidance_type = #{guidanceType}
+          </if>
+        ORDER BY gr.guidance_date DESC, gr.create_time DESC
+    </select>
+
+    <!-- 教师视角的学生列表（含最新指导时间和统计） -->
+    <select id="selectStudentsByTeacher" resultType="com.yuwan.completebackend.model.vo.GuidanceStudentVO">
+        SELECT
+            ts.student_id      AS studentId,
+            stu.real_name      AS studentName,
+            stu.username       AS studentNo,
+            stu.user_phone     AS studentPhone,
+            stu.user_email     AS studentEmail,
+            ts.topic_id        AS topicId,
+            t.topic_title      AS topicTitle,
+            IFNULL(stat.record_count, 0) AS recordCount,
+            DATE_FORMAT(stat.last_date, '%Y-%m-%d') AS lastGuidanceDate,
+            IFNULL(CAST(stat.total_hours AS CHAR), '0') AS totalHours
+        FROM topic_selection ts
+        INNER JOIN topic_info t ON ts.topic_id = t.topic_id
+        INNER JOIN user_info stu ON ts.student_id = stu.user_id
+        LEFT JOIN (
+            SELECT
+                student_id,
+                COUNT(*) AS record_count,
+                MAX(guidance_date) AS last_date,
+                SUM(IFNULL(duration_hours, 0)) AS total_hours
+            FROM guidance_record
+            WHERE teacher_id = #{teacherId}
+              AND deleted = 0
+              <if test="guidanceType != null">
+                  AND guidance_type = #{guidanceType}
+              </if>
+            GROUP BY student_id
+        ) stat ON ts.student_id = stat.student_id
+        WHERE t.creator_id = #{teacherId}
+          AND ts.selection_status = 1
+          AND ts.deleted = 0
+        ORDER BY ISNULL(stat.last_date), stat.last_date DESC, stu.real_name ASC
+    </select>
+
+    <!-- 企业负责人视角的指导记录总览 -->
+    <select id="selectByEnterprise" resultType="com.yuwan.completebackend.model.vo.GuidanceListVO">
+        SELECT
+            gr.record_id       AS recordId,
+            gr.student_id      AS studentId,
+            stu.real_name      AS studentName,
+            stu.username       AS studentNo,
+            stu.user_phone     AS studentPhone,
+            stu.user_email     AS studentEmail,
+            gr.teacher_id      AS teacherId,
+            tea.real_name      AS teacherName,
+            gr.topic_id        AS topicId,
+            t.topic_title      AS topicTitle,
+            gr.guidance_type   AS guidanceType,
+            CASE gr.guidance_type
+                WHEN 1 THEN '项目指导'
+                WHEN 2 THEN '论文指导'
+                ELSE '未知'
+            END AS guidanceTypeDesc,
+            DATE_FORMAT(gr.guidance_date, '%Y-%m-%d') AS guidanceDate,
+            gr.guidance_method  AS guidanceMethod,
+            gr.duration_hours   AS durationHours,
+            LEFT(gr.guidance_content, 100) AS contentSummary,
+            DATE_FORMAT(gr.create_time, '%Y-%m-%d %H:%i:%s') AS createTime
+        FROM guidance_record gr
+        INNER JOIN topic_info t ON gr.topic_id = t.topic_id
+        LEFT JOIN user_info stu ON gr.student_id = stu.user_id
+        LEFT JOIN user_info tea ON gr.teacher_id = tea.user_id
+        WHERE t.enterprise_id = #{enterpriseId}
+          AND gr.deleted = 0
+          <if test="studentName != null and studentName != ''">
+              AND stu.real_name LIKE CONCAT('%', #{studentName}, '%')
+          </if>
+          <if test="teacherId != null and teacherId != ''">
+              AND gr.teacher_id = #{teacherId}
+          </if>
+          <if test="guidanceType != null">
+              AND gr.guidance_type = #{guidanceType}
+          </if>
+          <if test="startDate != null and startDate != ''">
+              AND gr.guidance_date >= #{startDate}
+          </if>
+          <if test="endDate != null and endDate != ''">
+              AND gr.guidance_date &lt;= #{endDate}
+          </if>
+        ORDER BY gr.guidance_date DESC, gr.create_time DESC
+    </select>
+
+    <!-- 统计企业内指导记录数量 -->
+    <select id="countByEnterprise" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM guidance_record gr
+        INNER JOIN topic_info t ON gr.topic_id = t.topic_id
+        WHERE t.enterprise_id = #{enterpriseId}
+          AND gr.deleted = 0
+    </select>
+
+    <!-- 高校教师查询配对企业教师名下学生的指导记录 -->
+    <select id="selectByUnivTeacher" resultType="com.yuwan.completebackend.model.vo.GuidanceListVO">
+        SELECT
+            gr.record_id       AS recordId,
+            gr.student_id      AS studentId,
+            stu.real_name      AS studentName,
+            stu.username       AS studentNo,
+            stu.user_phone     AS studentPhone,
+            stu.user_email     AS studentEmail,
+            gr.teacher_id      AS teacherId,
+            tea.real_name      AS teacherName,
+            gr.topic_id        AS topicId,
+            t.topic_title      AS topicTitle,
+            gr.guidance_type   AS guidanceType,
+            CASE gr.guidance_type
+                WHEN 1 THEN '项目指导'
+                WHEN 2 THEN '论文指导'
+                ELSE '未知'
+            END AS guidanceTypeDesc,
+            DATE_FORMAT(gr.guidance_date, '%Y-%m-%d') AS guidanceDate,
+            gr.guidance_method  AS guidanceMethod,
+            gr.duration_hours   AS durationHours,
+            LEFT(gr.guidance_content, 100) AS contentSummary,
+            DATE_FORMAT(gr.create_time, '%Y-%m-%d %H:%i:%s') AS createTime
+        FROM guidance_record gr
+        INNER JOIN topic_info t ON gr.topic_id = t.topic_id
+        INNER JOIN teacher_relationship tr ON t.creator_id = tr.enterprise_teacher_id
+        LEFT JOIN user_info stu ON gr.student_id = stu.user_id
+        LEFT JOIN user_info tea ON gr.teacher_id = tea.user_id
+        WHERE tr.univ_teacher_id = #{univTeacherId}
+          AND tr.is_enabled = 1
+          AND tr.deleted = 0
+          AND gr.deleted = 0
+          <if test="guidanceType != null">
+              AND gr.guidance_type = #{guidanceType}
+          </if>
+        ORDER BY gr.guidance_date DESC, gr.create_time DESC
+    </select>
+
+</mapper>

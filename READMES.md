@@ -1693,8 +1693,8 @@ graph TD
 - ✅ ~~课题双选管理~~（已在课题双选模块完整实现）
 - ⏳ 课题状态跟踪
 
-#### 11.2.2 过程管理模块（待开发 ⏳）
-- ⏳ 文档管理功能（上传、下载、在线预览、在线编辑）
+#### 11.2.2 过程管理模块（部分完成）
+- ✅ 文档管理功能（上传、下载、在线预览、删除、版本管理）
 - ⏳ 答辩管理功能
 - ⏳ 指导记录管理
 - ⏳ 进度跟踪
@@ -1788,9 +1788,55 @@ graph TD
 
 
 
-**文档版本**：V4.4  
+**文档版本**：V4.5  
 **更新日期**：2026年3月15日  
 **更新内容**：
+
+### V4.5 更新（2026-03-15）- 文档管理功能模块开发完成
+
+#### 过程管理模块 - 文档管理功能（完整实现）
+- ✅ **数据库设计**
+  - `document_info`：文档信息表（文档ID、学生ID、课题ID、文档类型、文件名、存储路径、版本号、是否最新版本等）
+  - `document_access_log`：文档访问日志表（访问类型：上传/下载/预览/删除）
+  - SQL脚本：`complete-backend/docs/sql/document_info.sql`
+- ✅ **后端实现**（`DocumentController`，9个API端点）
+  - `POST /document/upload`：学生上传文档（权限：document:upload）
+  - `POST /document/upload/teacher`：教师上传批注文档（权限：document:upload:teacher）
+  - `GET /document/student/{studentId}`：查看学生文档列表（权限：document:view）
+  - `GET /document/my`：我的文档列表（权限：document:student）
+  - `GET /document/{documentId}/preview`：获取文档预览URL（权限：document:view）
+  - `GET /document/{documentId}/download`：下载文档（权限：document:download）
+  - `DELETE /document/{documentId}`：删除文档（权限：document:delete）
+  - `PUT /document/{documentId}/latest`：设为最新版本（权限：document:upload）
+  - `GET /document/topic/{topicId}`：课题文档总览（权限：document:view）
+- ✅ **MinIO 对象存储集成**
+  - `MinioConfig.java`：MinIO客户端配置类
+  - `MinioService.java`：封装上传/下载/删除/预签名URL操作
+  - 文件存储路径格式：`documents/{studentId}/{documentType}/{timestamp}_{filename}`
+- ✅ **文档类型枚举**（`DocumentType`）
+  - PROJECT_CODE(1)：项目代码
+  - THESIS_DOCUMENT(2)：论文文档
+  - OPENING_REPORT(3)：开题报告
+  - MIDTERM_CHECK(4)：中期检查表
+  - TEACHER_ANNOTATION(5)：教师批注文档
+- ✅ **权限配置**（`add_document_permissions.sql`，ID范围920-939）
+  - 学生：上传/查看/下载/删除自己的文档
+  - 企业教师：查看/下载学生文档、上传批注文档
+  - 高校教师：查看/下载学生文档、上传批注文档
+  - 企业负责人：查看/下载学生文档
+- ✅ **前端实现**
+  - 类型定义：`types/document.ts`（DocumentInfoVO、DocumentType枚举、颜色映射等）
+  - API封装：`api/document.ts`（9个方法与后端端点对应）
+  - 组件：`DocumentUploadModal.vue`（文档上传弹窗）、`DocumentPreviewModal.vue`（文档预览弹窗）
+  - 页面：`StudentDocumentCenter.vue`（学生文档中心）、`TeacherDocumentView.vue`（教师文档查看）
+  - 路由：`/document/student`（学生）、`/document/teacher`（教师）
+  - 菜单：按角色差异化显示（学生显示"我的文档"，教师显示"学生文档"）
+- ✅ **功能特性**
+  - 按文档类型分组展示（Tab切换）
+  - 版本管理：同类型文档支持多版本，可设置最新版本
+  - 文档预览：支持PDF、Office文档预览（通过MinIO预签名URL）
+  - 文档下载：直接下载文件
+  - 访问日志：记录所有文档操作（上传/下载/预览/删除）
 
 ### V4.4 更新（2026-03-15）- 流程引擎可视化功能完成
 

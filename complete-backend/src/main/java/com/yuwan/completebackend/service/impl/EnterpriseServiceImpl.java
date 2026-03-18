@@ -1,6 +1,7 @@
 package com.yuwan.completebackend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yuwan.completebackend.common.PageResult;
 import com.yuwan.completebackend.exception.BusinessException;
@@ -306,6 +307,9 @@ public class EnterpriseServiceImpl implements IEnterpriseService {
                 
                 // 转换为专业概览VO，并填充每个专业关联的教师姓名
                 Set<String> directionTeacherIds = new HashSet<>();
+                List<String> majorIds = majors.stream()
+                    .map(Major::getMajorId)
+                    .collect(Collectors.toList());
                 List<MajorOverviewVO> majorVOs = new ArrayList<>();
                 for (Major major : majors) {
                     MajorOverviewVO majorVO = new MajorOverviewVO();
@@ -341,10 +345,21 @@ public class EnterpriseServiceImpl implements IEnterpriseService {
                 directionVO.setTeacherCount(teacherCount);
                 totalTeacherCount += teacherCount;
                 
-                // 统计该方向下的学生数量
-                LambdaQueryWrapper<User> studentWrapper = new LambdaQueryWrapper<>();
-                studentWrapper.eq(User::getDirectionId, direction.getDirectionId());
-                studentWrapper.isNotNull(User::getStudentNo); // 学生有学号
+                // 统计该方向下的学生数量：优先按 major_id 聚合，兼容旧数据按 direction_id 聚合
+                QueryWrapper<User> studentWrapper = new QueryWrapper<>();
+                studentWrapper.inSql("user_id",
+                        "SELECT ur.user_id FROM user_role ur " +
+                                "INNER JOIN role_info r ON ur.role_id = r.role_id " +
+                                "WHERE r.role_code = 'STUDENT' AND r.deleted = 0");
+                studentWrapper.and(wrapper -> {
+                    if (!majorIds.isEmpty()) {
+                        wrapper.in("major_id", majorIds)
+                                .or()
+                                .eq("direction_id", direction.getDirectionId());
+                    } else {
+                        wrapper.eq("direction_id", direction.getDirectionId());
+                    }
+                });
                 int studentCount = Math.toIntExact(userMapper.selectCount(studentWrapper));
                 directionVO.setStudentCount(studentCount);
                 totalStudentCount += studentCount;

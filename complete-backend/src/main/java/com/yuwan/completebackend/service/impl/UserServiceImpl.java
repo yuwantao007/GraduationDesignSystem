@@ -24,6 +24,7 @@ import com.yuwan.completebackend.model.vo.RoleVO;
 import com.yuwan.completebackend.model.vo.UserQueryVO;
 import com.yuwan.completebackend.model.vo.UserVO;
 import com.yuwan.completebackend.service.IUserService;
+import com.yuwan.completebackend.service.minio.MinioService;
 import com.yuwan.completebackend.utils.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +65,7 @@ public class UserServiceImpl implements IUserService {
     private final PermissionMapper permissionMapper;
     private final PasswordEncoder passwordEncoder;
     private final RedisUtil redisUtil;
+    private final MinioService minioService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -435,6 +437,17 @@ public class UserServiceImpl implements IUserService {
     private UserVO buildUserVO(User user) {
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
+
+        // 兼容历史数据：数据库保存 objectName 时，返回临时可访问 URL；已是完整 URL 则保持原值。
+        if (StringUtils.hasText(userVO.getAvatar())
+                && !userVO.getAvatar().startsWith("http://")
+                && !userVO.getAvatar().startsWith("https://")) {
+            try {
+                userVO.setAvatar(minioService.getPresignedUrl(userVO.getAvatar()));
+            } catch (Exception e) {
+                log.warn("头像URL转换失败，使用原始路径: userId={}, avatar={}", user.getUserId(), userVO.getAvatar());
+            }
+        }
 
         // 格式化时间
         if (user.getLastLoginTime() != null) {

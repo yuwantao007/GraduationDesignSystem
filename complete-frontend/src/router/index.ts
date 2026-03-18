@@ -198,6 +198,88 @@ const routes: RouteRecordRaw[] = [
         name: 'ProcessMonitor',
         component: () => import('@/views/workflow/ProcessMonitor.vue'),
         meta: { title: '流程监控', icon: 'ApartmentOutlined', permission: 'monitor:dashboard:view' }
+      },
+      // 过程管理 - 指导记录
+      {
+        path: 'guidance/teacher',
+        name: 'TeacherGuidanceList',
+        component: () => import('@/views/guidance/TeacherGuidanceList.vue'),
+        meta: { title: '学生指导', icon: 'SolutionOutlined', permission: 'guidance:teacher' }
+      },
+      {
+        path: 'guidance/student',
+        name: 'StudentGuidanceView',
+        component: () => import('@/views/guidance/StudentGuidanceView.vue'),
+        meta: { title: '我的指导记录', icon: 'BookOutlined', permission: 'guidance:student' }
+      },
+      {
+        path: 'guidance/leader',
+        name: 'LeaderGuidanceOverview',
+        component: () => import('@/views/guidance/LeaderGuidanceOverview.vue'),
+        meta: { title: '指导记录总览', icon: 'FundViewOutlined', permission: 'guidance:leader' }
+      },
+      // 过程管理 - 文档管理
+      {
+        path: 'document/student',
+        name: 'StudentDocumentCenter',
+        component: () => import('@/views/document/StudentDocumentCenter.vue'),
+        meta: { title: '我的文档', icon: 'FolderOutlined', permission: 'document:student' }
+      },
+      {
+        path: 'document/teacher',
+        name: 'TeacherDocumentView',
+        component: () => import('@/views/document/TeacherDocumentView.vue'),
+        meta: { title: '学生文档', icon: 'FileSearchOutlined', permission: 'document:teacher' }
+      },
+      // 过程管理 - 开题答辩管理
+      {
+        path: 'defense/arrangement',
+        name: 'DefenseArrangementList',
+        component: () => import('@/views/defense/ArrangementList.vue'),
+        meta: { title: '答辩安排', icon: 'CalendarOutlined', permission: 'defense:arrangement:list' }
+      },
+      {
+        path: 'defense/taskbook',
+        name: 'DefenseTaskBookList',
+        component: () => import('@/views/defense/TaskBookList.vue'),
+        meta: { title: '任务书管理', icon: 'FormOutlined', permission: 'defense:taskbook:save' }
+      },
+      {
+        path: 'defense/report',
+        name: 'DefenseReportList',
+        component: () => import('@/views/defense/ReportList.vue'),
+        meta: { title: '开题报告审查', icon: 'AuditOutlined', permission: 'defense:report:list' }
+      },
+      {
+        path: 'defense/my-report',
+        name: 'MyOpeningReport',
+        component: () => import('@/views/defense/MyReport.vue'),
+        meta: { title: '我的开题报告', icon: 'FileTextOutlined', permission: 'defense:report:my' }
+      },
+      {
+        path: 'defense/my-taskbook',
+        name: 'MyTaskBook',
+        component: () => import('@/views/defense/MyTaskBook.vue'),
+        meta: { title: '我的任务书', icon: 'ReadOutlined', permission: 'defense:taskbook:detail' }
+      },
+      // 过程管理 - 中期检查
+      {
+        path: 'midterm/enterprise',
+        name: 'MidtermCheckForm',
+        component: () => import('@/views/midterm/MidtermCheckForm.vue'),
+        meta: { title: '中期检查填写', icon: 'FormOutlined', permission: 'midterm:enterprise:list' }
+      },
+      {
+        path: 'midterm/univ',
+        name: 'MidtermCheckReview',
+        component: () => import('@/views/midterm/MidtermCheckReview.vue'),
+        meta: { title: '中期检查审查', icon: 'AuditOutlined', permission: 'midterm:univ:list' }
+      },
+      {
+        path: 'midterm/student',
+        name: 'MidtermStudentView',
+        component: () => import('@/views/midterm/MidtermStudentView.vue'),
+        meta: { title: '我的中期检查', icon: 'FileTextOutlined', permission: 'midterm:student:view' }
       }
     ]
   },

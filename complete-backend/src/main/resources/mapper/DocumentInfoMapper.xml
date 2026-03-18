@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuwan.completebackend.mapper.DocumentInfoMapper">
+
+    <!-- 通用结果映射 -->
+    <resultMap id="DocumentInfoVOMap" type="com.yuwan.completebackend.model.vo.DocumentInfoVO">
+        <id column="document_id" property="documentId"/>
+        <result column="student_id" property="studentId"/>
+        <result column="student_name" property="studentName"/>
+        <result column="topic_id" property="topicId"/>
+        <result column="topic_title" property="topicTitle"/>
+        <result column="document_type" property="documentType"/>
+        <result column="file_name" property="fileName"/>
+        <result column="file_path" property="filePath"/>
+        <result column="file_size" property="fileSize"/>
+        <result column="file_suffix" property="fileSuffix"/>
+        <result column="uploader_id" property="uploaderId"/>
+        <result column="uploader_name" property="uploaderName"/>
+        <result column="version" property="version"/>
+        <result column="is_latest" property="isLatest"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 查询某学生的文档列表 -->
+    <select id="selectByStudentId" resultMap="DocumentInfoVOMap">
+        SELECT
+            d.document_id,
+            d.student_id,
+            stu.real_name AS student_name,
+            d.topic_id,
+            t.topic_title,
+            d.document_type,
+            d.file_name,
+            d.file_path,
+            d.file_size,
+            d.file_suffix,
+            d.uploader_id,
+            uploader.real_name AS uploader_name,
+            d.version,
+            d.is_latest,
+            d.remark,
+            d.create_time,
+            d.update_time
+        FROM document_info d
+        LEFT JOIN user_info stu ON d.student_id = stu.user_id
+        LEFT JOIN topic t ON d.topic_id = t.topic_id
+        LEFT JOIN user_info uploader ON d.uploader_id = uploader.user_id
+        WHERE d.student_id = #{studentId}
+          AND d.is_deleted = 0
+        <if test="documentType != null">
+            AND d.document_type = #{documentType}
+        </if>
+        <if test="latestOnly != null and latestOnly == true">
+            AND d.is_latest = 1
+        </if>
+        ORDER BY d.document_type ASC, d.version DESC
+    </select>
+
+    <!-- 查询某课题的文档列表 -->
+    <select id="selectByTopicId" resultMap="DocumentInfoVOMap">
+        SELECT
+            d.document_id,
+            d.student_id,
+            stu.real_name AS student_name,
+            d.topic_id,
+            t.topic_title,
+            d.document_type,
+            d.file_name,
+            d.file_path,
+            d.file_size,
+            d.file_suffix,
+            d.uploader_id,
+            uploader.real_name AS uploader_name,
+            d.version,
+            d.is_latest,
+            d.remark,
+            d.create_time,
+            d.update_time
+        FROM document_info d
+        LEFT JOIN user_info stu ON d.student_id = stu.user_id
+        LEFT JOIN topic t ON d.topic_id = t.topic_id
+        LEFT JOIN user_info uploader ON d.uploader_id = uploader.user_id
+        WHERE d.topic_id = #{topicId}
+          AND d.is_deleted = 0
+        <if test="documentType != null">
+            AND d.document_type = #{documentType}
+        </if>
+        ORDER BY d.document_type ASC, d.version DESC
+    </select>
+
+    <!-- 获取文档详情 -->
+    <select id="selectDocumentDetail" resultMap="DocumentInfoVOMap">
+        SELECT
+            d.document_id,
+            d.student_id,
+            stu.real_name AS student_name,
+            d.topic_id,
+            t.topic_title,
+            d.document_type,
+            d.file_name,
+            d.file_path,
+            d.file_size,
+            d.file_suffix,
+            d.uploader_id,
+            uploader.real_name AS uploader_name,
+            d.version,
+            d.is_latest,
+            d.remark,
+            d.create_time,
+            d.update_time
+        FROM document_info d
+        LEFT JOIN user_info stu ON d.student_id = stu.user_id
+        LEFT JOIN topic t ON d.topic_id = t.topic_id
+        LEFT JOIN user_info uploader ON d.uploader_id = uploader.user_id
+        WHERE d.document_id = #{documentId}
+          AND d.is_deleted = 0
+    </select>
+
+    <!-- 获取同类型文档的最大版本号 -->
+    <select id="selectMaxVersion" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(version), 0)
+        FROM document_info
+        WHERE student_id = #{studentId}
+          AND document_type = #{documentType}
+          AND is_deleted = 0
+    </select>
+
+    <!-- 更新同类型文档的最新版本标识为非最新 -->
+    <update id="updateNotLatest">
+        UPDATE document_info
+        SET is_latest = 0,
+            update_time = NOW()
+        WHERE student_id = #{studentId}
+          AND document_type = #{documentType}
+          AND is_deleted = 0
+        <if test="excludeDocId != null">
+            AND document_id != #{excludeDocId}
+        </if>
+    </update>
+
+</mapper>

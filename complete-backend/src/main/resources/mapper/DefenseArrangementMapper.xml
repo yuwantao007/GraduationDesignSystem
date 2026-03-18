@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuwan.completebackend.mapper.DefenseArrangementMapper">
+
+    <!-- 答辩安排VO结果映射 -->
+    <resultMap id="arrangementVOMap" type="com.yuwan.completebackend.model.vo.defense.DefenseArrangementVO">
+        <id property="arrangementId" column="arrangement_id"/>
+        <result property="defenseType" column="defense_type"/>
+        <result property="topicCategory" column="topic_category"/>
+        <result property="defenseTime" column="defense_time"/>
+        <result property="defenseLocation" column="defense_location"/>
+        <result property="panelTeachers" column="panel_teachers"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result property="deadline" column="deadline"/>
+        <result property="cohort" column="cohort"/>
+        <result property="enterpriseId" column="enterprise_id"/>
+        <result property="enterpriseName" column="enterprise_name"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="creatorName" column="creator_name"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 分页查询答辩安排列表 -->
+    <select id="selectArrangementPage" resultMap="arrangementVOMap">
+        SELECT
+            da.arrangement_id,
+            da.defense_type,
+            da.topic_category,
+            da.defense_time,
+            da.defense_location,
+            da.panel_teachers,
+            da.deadline,
+            da.cohort,
+            da.enterprise_id,
+            e.enterprise_name,
+            da.creator_id,
+            u.real_name AS creator_name,
+            da.status,
+            da.remark,
+            da.create_time,
+            da.update_time
+        FROM defense_arrangement da
+        LEFT JOIN enterprise_info e ON da.enterprise_id = e.enterprise_id
+        LEFT JOIN user_info u ON da.creator_id = u.user_id
+        WHERE da.is_deleted = 0
+        <if test="enterpriseId != null and enterpriseId != ''">
+            AND da.enterprise_id = #{enterpriseId}
+        </if>
+        <if test="defenseType != null">
+            AND da.defense_type = #{defenseType}
+        </if>
+        <if test="topicCategory != null and topicCategory != ''">
+            AND da.topic_category = #{topicCategory}
+        </if>
+        <if test="cohort != null and cohort != ''">
+            AND da.cohort = #{cohort}
+        </if>
+        <if test="status != null">
+            AND da.status = #{status}
+        </if>
+        ORDER BY da.defense_time DESC
+    </select>
+
+    <!-- 根据ID查询答辩安排详情 -->
+    <select id="selectArrangementById" resultMap="arrangementVOMap">
+        SELECT
+            da.arrangement_id,
+            da.defense_type,
+            da.topic_category,
+            da.defense_time,
+            da.defense_location,
+            da.panel_teachers,
+            da.deadline,
+            da.cohort,
+            da.enterprise_id,
+            e.enterprise_name,
+            da.creator_id,
+            u.real_name AS creator_name,
+            da.status,
+            da.remark,
+            da.create_time,
+            da.update_time
+        FROM defense_arrangement da
+        LEFT JOIN enterprise_info e ON da.enterprise_id = e.enterprise_id
+        LEFT JOIN user_info u ON da.creator_id = u.user_id
+        WHERE da.is_deleted = 0
+        AND da.arrangement_id = #{arrangementId}
+    </select>
+
+</mapper>

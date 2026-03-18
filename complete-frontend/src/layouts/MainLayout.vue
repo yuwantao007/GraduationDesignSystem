@@ -69,40 +69,18 @@
           <a-menu-item v-if="userStore.hasPermission('topic:review') && userStore.hasAnyRole(['UNIVERSITY_TEACHER', 'MAJOR_DIRECTOR', 'SUPERVISOR_TEACHER'])" key="/topic/review">课题审查</a-menu-item>
         </a-sub-menu>
         
-        <!-- 双选管理：学生选报 -->
-        <a-sub-menu v-if="userStore.hasAnyRole(['STUDENT']) && userStore.hasPermission('selection:manage')" key="selection">
+        <!-- 双选管理：统一菜单，按权限显示子项，避免多角色时重复渲染 -->
+        <a-sub-menu
+          v-if="!userStore.hasAnyRole(['SYSTEM_ADMIN']) && (userStore.hasPermission('selection:available') || userStore.hasPermission('selection:my') || userStore.hasPermission('selection:teacher:list') || userStore.hasPermission('selection:leader:overview') || userStore.hasPermission('selection:univ:view'))"
+          key="selection"
+        >
           <template #icon><SelectOutlined /></template>
           <template #title>双选管理</template>
           <a-menu-item v-if="userStore.hasPermission('selection:available')" key="/topic-selection/list">课题选报</a-menu-item>
           <a-menu-item v-if="userStore.hasPermission('selection:my')" key="/topic-selection/my">我的选报</a-menu-item>
-        </a-sub-menu>
-
-        <!-- 双选管理：企业教师确认人选 -->
-        <a-sub-menu v-if="userStore.hasAnyRole(['ENTERPRISE_TEACHER']) && userStore.hasPermission('selection:teacher:list')" key="selection">
-          <template #icon><CheckCircleOutlined /></template>
-          <template #title>双选管理</template>
-          <a-menu-item key="/topic-selection/teacher">选报确认</a-menu-item>
-        </a-sub-menu>
-
-        <!-- 双选管理：企业负责人审核 -->
-        <a-sub-menu v-if="userStore.hasAnyRole(['ENTERPRISE_LEADER']) && userStore.hasPermission('selection:leader:overview')" key="selection">
-          <template #icon><AuditOutlined /></template>
-          <template #title>双选管理</template>
-          <a-menu-item key="/topic-selection/leader">双选审核</a-menu-item>
-        </a-sub-menu>
-
-        <!-- 双选管理：高校教师查看指导学生选题 -->
-        <a-sub-menu v-if="userStore.hasAnyRole(['UNIVERSITY_TEACHER']) && userStore.hasPermission('selection:univ:view')" key="selection">
-          <template #icon><ReadOutlined /></template>
-          <template #title>双选管理</template>
-          <a-menu-item key="/topic-selection/univ-teacher">指导学生选题</a-menu-item>
-        </a-sub-menu>
-        
-        <a-sub-menu key="document">
-          <template #icon><FolderOutlined /></template>
-          <template #title>文档管理</template>
-          <a-menu-item key="/document/list">文档列表</a-menu-item>
-          <a-menu-item key="/document/upload">文档上传</a-menu-item>
+          <a-menu-item v-if="userStore.hasPermission('selection:teacher:list')" key="/topic-selection/teacher">选报确认</a-menu-item>
+          <a-menu-item v-if="userStore.hasPermission('selection:leader:overview')" key="/topic-selection/leader">双选审核</a-menu-item>
+          <a-menu-item v-if="userStore.hasPermission('selection:univ:view')" key="/topic-selection/univ-teacher">指导学生选题</a-menu-item>
         </a-sub-menu>
         
         <!-- 阶段管理：管理员显示含切换记录的子菜单，其他角色直接显示阶段概览 -->
@@ -166,6 +144,83 @@
             流程监控
           </a-menu-item>
         </a-sub-menu>
+
+        <!-- 过程管理：指导记录 -->
+        <!-- 企业教师/高校教师：学生指导 -->
+        <a-menu-item v-if="userStore.hasPermission('guidance:teacher') && userStore.hasAnyRole(['ENTERPRISE_TEACHER', 'UNIVERSITY_TEACHER'])" key="/guidance/teacher">
+          <template #icon><SolutionOutlined /></template>
+          <span>学生指导</span>
+        </a-menu-item>
+
+        <!-- 学生：我的指导记录 -->
+        <a-menu-item v-if="userStore.hasPermission('guidance:student') && userStore.hasAnyRole(['STUDENT'])" key="/guidance/student">
+          <template #icon><BookOutlined /></template>
+          <span>我的指导记录</span>
+        </a-menu-item>
+
+        <!-- 企业负责人：指导记录总览 -->
+        <a-menu-item v-if="userStore.hasPermission('guidance:leader') && userStore.hasAnyRole(['ENTERPRISE_LEADER'])" key="/guidance/leader">
+          <template #icon><FundViewOutlined /></template>
+          <span>指导记录总览</span>
+        </a-menu-item>
+
+        <!-- 过程管理：文档管理 -->
+        <!-- 学生：我的文档 -->
+        <a-menu-item v-if="userStore.hasPermission('document:student') && userStore.hasAnyRole(['STUDENT'])" key="/document/student">
+          <template #icon><FolderOutlined /></template>
+          <span>我的文档</span>
+        </a-menu-item>
+
+        <!-- 教师/管理员：学生文档 -->
+        <a-menu-item v-if="userStore.hasPermission('document:teacher') && userStore.hasAnyRole(['ENTERPRISE_TEACHER', 'UNIVERSITY_TEACHER', 'ENTERPRISE_LEADER', 'SYSTEM_ADMIN'])" key="/document/teacher">
+          <template #icon><FileSearchOutlined /></template>
+          <span>学生文档</span>
+        </a-menu-item>
+
+        <!-- 过程管理：开题答辩管理 -->
+        <a-sub-menu
+          v-if="userStore.hasPermission('defense:arrangement:list') || userStore.hasPermission('defense:taskbook:save') || userStore.hasPermission('defense:report:list') || userStore.hasPermission('defense:report:my') || userStore.hasPermission('defense:taskbook:detail')"
+          key="defense"
+        >
+          <template #icon><CalendarOutlined /></template>
+          <template #title>开题答辩</template>
+          <a-menu-item v-if="userStore.hasPermission('defense:arrangement:list')" key="/defense/arrangement">
+            答辩安排
+          </a-menu-item>
+          <a-menu-item v-if="userStore.hasPermission('defense:taskbook:save')" key="/defense/taskbook">
+            任务书管理
+          </a-menu-item>
+          <a-menu-item v-if="userStore.hasPermission('defense:report:list')" key="/defense/report">
+            开题报告审查
+          </a-menu-item>
+          <a-menu-item v-if="userStore.hasPermission('defense:report:my')" key="/defense/my-report">
+            我的开题报告
+          </a-menu-item>
+          <a-menu-item v-if="userStore.hasPermission('defense:taskbook:detail')" key="/defense/my-taskbook">
+            我的任务书
+          </a-menu-item>
+        </a-sub-menu>
+
+        <!-- 过程管理：中期答辩管理 -->
+        <a-sub-menu
+          v-if="userStore.hasPermission('midterm:enterprise:list') || userStore.hasPermission('midterm:univ:list') || userStore.hasPermission('midterm:student:view') || userStore.hasPermission('midterm:admin:list')"
+          key="midterm"
+        >
+          <template #icon><FormOutlined /></template>
+          <template #title>中期答辩</template>
+          <a-menu-item v-if="userStore.hasPermission('midterm:enterprise:list')" key="/midterm/enterprise">
+            中期检查填写
+          </a-menu-item>
+          <a-menu-item v-if="userStore.hasPermission('midterm:univ:list')" key="/midterm/univ">
+            中期检查审查
+          </a-menu-item>
+          <a-menu-item v-if="userStore.hasPermission('midterm:student:view')" key="/midterm/student">
+            我的中期检查
+          </a-menu-item>
+          <a-menu-item v-if="userStore.hasPermission('midterm:admin:list') && !userStore.hasPermission('midterm:enterprise:list') && !userStore.hasPermission('midterm:univ:list')" key="/midterm/admin">
+            检查表总览
+          </a-menu-item>
+        </a-sub-menu>
       </a-menu>
     </a-layout-sider>
 
@@ -185,7 +240,7 @@
         <div style="padding-right: 24px">
           <a-dropdown>
             <a class="ant-dropdown-link" @click.prevent>
-              <a-avatar :size="32" style="background-color: #1890ff">
+              <a-avatar :size="32" :src="userInfo?.avatar" style="background-color: #1890ff">
                 {{ userInfo?.realName?.charAt(0) || 'U' }}
               </a-avatar>
               <span style="margin-left: 8px">{{ userInfo?.realName || '用户' }}</span>
@@ -246,7 +301,13 @@ import {
   AuditOutlined,
   BarChartOutlined,
   BellOutlined,
-  ApartmentOutlined
+  ApartmentOutlined,
+  SolutionOutlined,
+  BookOutlined,
+  FundViewOutlined,
+  FileSearchOutlined,
+  CalendarOutlined,
+  FormOutlined
 } from '@ant-design/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
@@ -294,6 +355,9 @@ const getOpenKeys = (path: string): string[] => {
   if (path.startsWith('/teacher-relation')) return []
   if (path.startsWith('/monitor')) return ['monitor']
   if (path.startsWith('/workflow')) return ['workflow']
+  if (path.startsWith('/guidance')) return []
+  if (path.startsWith('/defense')) return ['defense']
+  if (path.startsWith('/midterm')) return ['midterm']
   return []
 }
 
@@ -319,14 +383,26 @@ const updateBreadcrumbs = (path: string) => {
       ? [{ title: '首页', path: '/' }, { title: '阶段管理' }, { title: '阶段概览' }]
       : [{ title: '首页', path: '/' }, { title: '阶段概览' }],
     '/system/phase/records': [{ title: '首页', path: '/' }, { title: '阶段管理' }, { title: '切换记录' }],
-    '/document/list': [{ title: '首页', path: '/' }, { title: '文档管理' }, { title: '文档列表' }],
-    '/document/upload': [{ title: '首页', path: '/' }, { title: '文档管理' }, { title: '文档上传' }],
     '/settings': [{ title: '首页', path: '/' }, { title: '系统设置' }],
     '/monitor': [{ title: '首页', path: '/' }, { title: '质量监控' }, { title: '监控仪表盘' }],
     '/monitor/alerts': [{ title: '首页', path: '/' }, { title: '质量监控' }, { title: '预警中心' }],
     '/workflow/tasks': [{ title: '首页', path: '/' }, { title: '工作流' }, { title: '待办任务' }],
     '/workflow/definition': [{ title: '首页', path: '/' }, { title: '工作流' }, { title: '流程定义' }],
-    '/workflow/monitor': [{ title: '首页', path: '/' }, { title: '工作流' }, { title: '流程监控' }]
+    '/workflow/monitor': [{ title: '首页', path: '/' }, { title: '工作流' }, { title: '流程监控' }],
+    '/guidance/teacher': [{ title: '首页', path: '/' }, { title: '过程管理' }, { title: '学生指导' }],
+    '/guidance/student': [{ title: '首页', path: '/' }, { title: '过程管理' }, { title: '我的指导记录' }],
+    '/guidance/leader': [{ title: '首页', path: '/' }, { title: '过程管理' }, { title: '指导记录总览' }],
+    '/document/student': [{ title: '首页', path: '/' }, { title: '过程管理' }, { title: '我的文档' }],
+    '/document/teacher': [{ title: '首页', path: '/' }, { title: '过程管理' }, { title: '学生文档' }],
+    '/defense/arrangement': [{ title: '首页', path: '/' }, { title: '开题答辩' }, { title: '答辩安排' }],
+    '/defense/taskbook': [{ title: '首页', path: '/' }, { title: '开题答辩' }, { title: '任务书管理' }],
+    '/defense/report': [{ title: '首页', path: '/' }, { title: '开题答辩' }, { title: '开题报告审查' }],
+    '/defense/my-report': [{ title: '首页', path: '/' }, { title: '开题答辩' }, { title: '我的开题报告' }],
+    '/defense/my-taskbook': [{ title: '首页', path: '/' }, { title: '开题答辩' }, { title: '我的任务书' }],
+    '/midterm/enterprise': [{ title: '首页', path: '/' }, { title: '中期答辩' }, { title: '中期检查填写' }],
+    '/midterm/univ': [{ title: '首页', path: '/' }, { title: '中期答辩' }, { title: '中期检查审查' }],
+    '/midterm/student': [{ title: '首页', path: '/' }, { title: '中期答辩' }, { title: '我的中期检查' }],
+    '/midterm/admin': [{ title: '首页', path: '/' }, { title: '中期答辩' }, { title: '检查表总览' }]
   }
   
   appStore.setBreadcrumbs(breadcrumbMap[path] || [{ title: '首页' }])

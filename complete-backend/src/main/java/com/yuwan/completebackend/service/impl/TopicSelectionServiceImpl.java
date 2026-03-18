@@ -97,8 +97,16 @@ public class TopicSelectionServiceImpl implements ITopicSelectionService {
             throw new BusinessException("用户未登录");
         }
 
+        User student = userMapper.selectById(studentId);
+        if (student == null) {
+            throw new BusinessException("学生信息不存在");
+        }
+        String enterpriseId = student.getEnterpriseId();
+        // 专业过滤以当前登录学生在数据库中的实时专业为准，避免前端缓存旧 majorId 导致筛选错误。
+        String effectiveMajorId = StringUtils.hasText(majorId) ? student.getMajorId() : null;
+
         List<TopicForSelectionVO> allTopics = topicSelectionMapper.selectAvailableTopics(
-                majorId, topicCategory, guidanceDirection, topicTitle, studentId
+            effectiveMajorId, enterpriseId, topicCategory, guidanceDirection, topicTitle, studentId
         );
 
         long total = allTopics.size();
@@ -159,6 +167,12 @@ public class TopicSelectionServiceImpl implements ITopicSelectionService {
         }
         if (topic.getReviewStatus() != TopicReviewStatus.FINAL_PASSED.getCode()) {
             throw new BusinessException("该课题尚未通过终审，无法选报");
+        }
+
+        // 课题归属企业与学生所属企业必须一致，防止跨企业误选
+        if (StringUtils.hasText(topic.getEnterpriseId())
+                && !topic.getEnterpriseId().equals(student.getEnterpriseId())) {
+            throw new BusinessException("仅可选报所属企业的课题");
         }
 
         TopicSelection selection = new TopicSelection();

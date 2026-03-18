@@ -16,8 +16,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import com.yuwan.completebackend.service.minio.MinioService;
 
 /**
  * 用户管理Controller
@@ -35,6 +43,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final IUserService userService;
+    private final MinioService minioService;
 
     @PostMapping("/create")
     @Operation(summary = "创建用户", description = "管理员创建新用户")
@@ -120,6 +129,47 @@ public class UserController {
         String userId = SecurityUtil.getCurrentUserId();
         UserVO userVO = userService.getCurrentUserInfo(userId);
         return Result.success(userVO);
+    }
+
+    @PutMapping("/profile")
+    @Operation(summary = "更新个人信息", description = "当前登录用户更新自己的个人信息")
+    public Result<UserVO> updateProfile(@RequestBody @Valid UpdateUserDTO updateDTO) {
+        String userId = SecurityUtil.getCurrentUserId();
+        UserVO userVO = userService.updateUser(userId, updateDTO);
+        return Result.success("更新个人信息成功", userVO);
+    }
+
+    @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "上传头像", description = "当前登录用户上传头像，返回可直接访问的头像URL")
+    public Result<Map<String, String>> uploadAvatar(@RequestParam("file") MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return Result.error("请选择要上传的头像文件");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            return Result.error("只能上传图片文件");
+        }
+
+        String userId = SecurityUtil.getCurrentUserId();
+        String originalName = file.getOriginalFilename();
+        String suffix = ".jpg";
+        if (originalName != null && originalName.lastIndexOf('.') >= 0) {
+            suffix = originalName.substring(originalName.lastIndexOf('.'));
+        }
+
+        String objectName = "avatar/" + userId + "/" + UUID.randomUUID() + suffix;
+        minioService.uploadFile(file, objectName);
+
+        UpdateUserDTO updateDTO = new UpdateUserDTO();
+        updateDTO.setAvatar(objectName);
+        userService.updateUser(userId, updateDTO);
+
+        String accessUrl = minioService.getPresignedUrl(objectName);
+        Map<String, String> data = new HashMap<>();
+        data.put("url", accessUrl);
+        data.put("path", objectName);
+        return Result.success("头像上传成功", data);
     }
 
     @GetMapping("/leaders")

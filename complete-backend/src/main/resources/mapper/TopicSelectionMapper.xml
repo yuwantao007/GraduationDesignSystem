@@ -52,8 +52,11 @@
         ) ms ON ms.topic_id = t.topic_id
         WHERE t.deleted = 0
           AND t.review_status = 6
+        <if test="enterpriseId != null and enterpriseId != ''">
+            AND t.enterprise_id = #{enterpriseId}
+        </if>
         <if test="majorId != null and majorId != ''">
-            AND t.major_id = #{majorId}
+            AND (t.major_id = #{majorId} OR t.major_id IS NULL OR t.major_id = '')
         </if>
         <if test="topicCategory != null">
             AND t.topic_category = #{topicCategory}
@@ -136,6 +139,7 @@
         INNER JOIN user_info stu ON s.student_id  = stu.user_id
         WHERE s.deleted = 0
           AND t.creator_id = #{teacherId}
+                    AND (t.enterprise_id IS NULL OR stu.enterprise_id = t.enterprise_id)
         <if test="selectionStatus != null">
             AND s.selection_status = #{selectionStatus}
         </if>

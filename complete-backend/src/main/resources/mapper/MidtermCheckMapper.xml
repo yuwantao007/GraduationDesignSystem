@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuwan.completebackend.mapper.MidtermCheckMapper">
+
+    <!-- 详情结果映射 -->
+    <resultMap id="DetailResultMap" type="com.yuwan.completebackend.model.vo.MidtermCheckVO">
+        <id property="checkId" column="check_id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="studentName" column="student_name"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="topicId" column="topic_id"/>
+        <result property="topicName" column="topic_name"/>
+        <result property="arrangementId" column="arrangement_id"/>
+        <result property="enterpriseTeacherId" column="enterprise_teacher_id"/>
+        <result property="enterpriseTeacherName" column="enterprise_teacher_name"/>
+        <result property="completionStatus" column="completion_status"/>
+        <result property="existingProblems" column="existing_problems"/>
+        <result property="nextPlan" column="next_plan"/>
+        <result property="documentId" column="document_id"/>
+        <result property="documentFileName" column="document_file_name"/>
+        <result property="submitStatus" column="submit_status"/>
+        <result property="reviewStatus" column="review_status"/>
+        <result property="reviewComment" column="review_comment"/>
+        <result property="reviewerId" column="reviewer_id"/>
+        <result property="reviewerName" column="reviewer_name"/>
+        <result property="reviewTime" column="review_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 列表结果映射 -->
+    <resultMap id="ListResultMap" type="com.yuwan.completebackend.model.vo.MidtermCheckListVO">
+        <id property="checkId" column="check_id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="studentName" column="student_name"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="topicName" column="topic_name"/>
+        <result property="enterpriseTeacherName" column="enterprise_teacher_name"/>
+        <result property="submitStatus" column="submit_status"/>
+        <result property="reviewStatus" column="review_status"/>
+        <result property="reviewerName" column="reviewer_name"/>
+        <result property="reviewTime" column="review_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 通用列 -->
+    <sql id="Detail_Columns">
+        mc.check_id, mc.student_id, mc.topic_id, mc.arrangement_id, mc.enterprise_teacher_id,
+        mc.completion_status, mc.existing_problems, mc.next_plan, mc.document_id,
+        mc.submit_status, mc.review_status, mc.review_comment, mc.reviewer_id, mc.review_time,
+        mc.create_time, mc.update_time,
+        su.real_name AS student_name, su.student_no AS student_no,
+        t.topic_name AS topic_name,
+        et.real_name AS enterprise_teacher_name,
+        rv.real_name AS reviewer_name,
+        d.file_name AS document_file_name
+    </sql>
+
+    <sql id="List_Columns">
+        mc.check_id, mc.student_id, mc.submit_status, mc.review_status, mc.review_time,
+        mc.create_time, mc.update_time,
+        su.real_name AS student_name, su.student_no AS student_no,
+        t.topic_name AS topic_name,
+        et.real_name AS enterprise_teacher_name,
+        rv.real_name AS reviewer_name
+    </sql>
+
+    <!-- 通用JOIN -->
+    <sql id="Detail_Joins">
+        LEFT JOIN user_info su ON mc.student_id = su.user_id
+        LEFT JOIN topic_info t ON mc.topic_id = t.topic_id
+        LEFT JOIN user_info et ON mc.enterprise_teacher_id = et.user_id
+        LEFT JOIN user_info rv ON mc.reviewer_id = rv.user_id
+        LEFT JOIN document_info d ON mc.document_id = d.document_id
+    </sql>
+
+    <sql id="List_Joins">
+        LEFT JOIN user_info su ON mc.student_id = su.user_id
+        LEFT JOIN topic_info t ON mc.topic_id = t.topic_id
+        LEFT JOIN user_info et ON mc.enterprise_teacher_id = et.user_id
+        LEFT JOIN user_info rv ON mc.reviewer_id = rv.user_id
+    </sql>
+
+    <!-- 通用WHERE条件 -->
+    <sql id="Query_Conditions">
+        <where>
+            mc.is_deleted = 0
+            <if test="query.studentName != null and query.studentName != ''">
+                AND su.real_name LIKE CONCAT('%', #{query.studentName}, '%')
+            </if>
+            <if test="query.submitStatus != null">
+                AND mc.submit_status = #{query.submitStatus}
+            </if>
+            <if test="query.reviewStatus != null">
+                AND mc.review_status = #{query.reviewStatus}
+            </if>
+            <if test="query.arrangementId != null and query.arrangementId != ''">
+                AND mc.arrangement_id = #{query.arrangementId}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 根据ID查询详情 -->
+    <select id="selectDetailById" resultMap="DetailResultMap">
+        SELECT <include refid="Detail_Columns"/>
+        FROM midterm_check mc
+        <include refid="Detail_Joins"/>
+        WHERE mc.check_id = #{checkId} AND mc.is_deleted = 0
+    </select>
+
+    <!-- 根据学生ID查询 -->
+    <select id="selectByStudentId" resultMap="DetailResultMap">
+        SELECT <include refid="Detail_Columns"/>
+        FROM midterm_check mc
+        <include refid="Detail_Joins"/>
+        WHERE mc.student_id = #{studentId} AND mc.is_deleted = 0
+    </select>
+
+    <!-- 条件查询列表 -->
+    <select id="selectListByCondition" resultMap="ListResultMap">
+        SELECT <include refid="List_Columns"/>
+        FROM midterm_check mc
+        <include refid="List_Joins"/>
+        <include refid="Query_Conditions"/>
+        ORDER BY mc.create_time DESC
+        LIMIT #{query.pageSize} OFFSET #{query.pageNum} * #{query.pageSize} - #{query.pageSize}
+    </select>
+
+    <!-- 统计条件查询数量 -->
+    <select id="countByCondition" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM midterm_check mc
+        <include refid="List_Joins"/>
+        <include refid="Query_Conditions"/>
+    </select>
+
+    <!-- 企业教师查询列表 -->
+    <select id="selectByEnterpriseTeacher" resultMap="ListResultMap">
+        SELECT <include refid="List_Columns"/>
+        FROM midterm_check mc
+        <include refid="List_Joins"/>
+        <where>
+            mc.is_deleted = 0
+            AND mc.enterprise_teacher_id = #{teacherId}
+            <if test="query.studentName != null and query.studentName != ''">
+                AND su.real_name LIKE CONCAT('%', #{query.studentName}, '%')
+            </if>
+            <if test="query.submitStatus != null">
+                AND mc.submit_status = #{query.submitStatus}
+            </if>
+            <if test="query.reviewStatus != null">
+                AND mc.review_status = #{query.reviewStatus}
+            </if>
+        </where>
+        ORDER BY mc.create_time DESC
+        LIMIT #{query.pageSize} OFFSET #{query.pageNum} * #{query.pageSize} - #{query.pageSize}
+    </select>
+
+    <!-- 企业教师统计数量 -->
+    <select id="countByEnterpriseTeacher" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM midterm_check mc
+        <include refid="List_Joins"/>
+        <where>
+            mc.is_deleted = 0
+            AND mc.enterprise_teacher_id = #{teacherId}
+            <if test="query.studentName != null and query.studentName != ''">
+                AND su.real_name LIKE CONCAT('%', #{query.studentName}, '%')
+            </if>
+            <if test="query.submitStatus != null">
+                AND mc.submit_status = #{query.submitStatus}
+            </if>
+            <if test="query.reviewStatus != null">
+                AND mc.review_status = #{query.reviewStatus}
+            </if>
+        </where>
+    </select>
+
+    <!-- 高校教师查询列表（通过teacher_relation查找负责的学生） -->
+    <select id="selectByUnivTeacher" resultMap="ListResultMap">
+        SELECT <include refid="List_Columns"/>
+        FROM midterm_check mc
+        <include refid="List_Joins"/>
+        INNER JOIN teacher_relation tr ON mc.student_id = tr.student_id AND tr.univ_teacher_id = #{teacherId} AND tr.is_deleted = 0
+        <where>
+            mc.is_deleted = 0
+            AND mc.submit_status = 1
+            <if test="query.studentName != null and query.studentName != ''">
+                AND su.real_name LIKE CONCAT('%', #{query.studentName}, '%')
+            </if>
+            <if test="query.reviewStatus != null">
+                AND mc.review_status = #{query.reviewStatus}
+            </if>
+        </where>
+        ORDER BY mc.create_time DESC
+        LIMIT #{query.pageSize} OFFSET #{query.pageNum} * #{query.pageSize} - #{query.pageSize}
+    </select>
+
+    <!-- 高校教师统计数量 -->
+    <select id="countByUnivTeacher" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM midterm_check mc
+        <include refid="List_Joins"/>
+        INNER JOIN teacher_relation tr ON mc.student_id = tr.student_id AND tr.univ_teacher_id = #{teacherId} AND tr.is_deleted = 0
+        <where>
+            mc.is_deleted = 0
+            AND mc.submit_status = 1
+            <if test="query.studentName != null and query.studentName != ''">
+                AND su.real_name LIKE CONCAT('%', #{query.studentName}, '%')
+            </if>
+            <if test="query.reviewStatus != null">
+                AND mc.review_status = #{query.reviewStatus}
+            </if>
+        </where>
+    </select>
+
+</mapper>

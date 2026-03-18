@@ -36,6 +36,7 @@ public interface TopicSelectionMapper extends BaseMapper<TopicSelection> {
      */
     List<TopicForSelectionVO> selectAvailableTopics(
             @Param("majorId") String majorId,
+            @Param("enterpriseId") String enterpriseId,
             @Param("topicCategory") Integer topicCategory,
             @Param("guidanceDirection") String guidanceDirection,
             @Param("topicTitle") String topicTitle,

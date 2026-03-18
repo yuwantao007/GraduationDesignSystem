@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuwan.completebackend.mapper.OpeningReportMapper">
+
+    <!-- 开题报告VO结果映射 -->
+    <resultMap id="reportVOMap" type="com.yuwan.completebackend.model.vo.defense.OpeningReportVO">
+        <id property="reportId" column="report_id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="studentName" column="student_name"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="topicId" column="topic_id"/>
+        <result property="topicName" column="topic_name"/>
+        <result property="arrangementId" column="arrangement_id"/>
+        <result property="documentId" column="document_id"/>
+        <result property="documentName" column="document_name"/>
+        <result property="submitTime" column="submit_time"/>
+        <result property="reviewStatus" column="review_status"/>
+        <result property="reviewComment" column="review_comment"/>
+        <result property="reviewerId" column="reviewer_id"/>
+        <result property="reviewerName" column="reviewer_name"/>
+        <result property="reviewTime" column="review_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 分页查询开题报告列表 -->
+    <select id="selectReportPage" resultMap="reportVOMap">
+        SELECT
+            r.report_id,
+            r.student_id,
+            u.real_name AS student_name,
+            u.student_no,
+            r.topic_id,
+            t.topic_name,
+            r.arrangement_id,
+            r.document_id,
+            d.file_name AS document_name,
+            r.submit_time,
+            r.review_status,
+            r.review_comment,
+            r.reviewer_id,
+            ru.real_name AS reviewer_name,
+            r.review_time,
+            r.create_time,
+            r.update_time
+        FROM opening_report r
+        LEFT JOIN user_info u ON r.student_id = u.user_id
+        LEFT JOIN topic_info t ON r.topic_id = t.topic_id
+        LEFT JOIN document_info d ON r.document_id = d.document_id
+        LEFT JOIN user_info ru ON r.reviewer_id = ru.user_id
+        WHERE r.is_deleted = 0
+        <if test="enterpriseId != null and enterpriseId != ''">
+            AND u.enterprise_id = #{enterpriseId}
+        </if>
+        <if test="studentName != null and studentName != ''">
+            AND u.real_name LIKE CONCAT('%', #{studentName}, '%')
+        </if>
+        <if test="reviewStatus != null">
+            AND r.review_status = #{reviewStatus}
+        </if>
+        <if test="arrangementId != null and arrangementId != ''">
+            AND r.arrangement_id = #{arrangementId}
+        </if>
+        ORDER BY r.create_time DESC
+    </select>
+
+    <!-- 根据ID查询开题报告详情 -->
+    <select id="selectReportById" resultMap="reportVOMap">
+        SELECT
+            r.report_id,
+            r.student_id,
+            u.real_name AS student_name,
+            u.student_no,
+            r.topic_id,
+            t.topic_name,
+            r.arrangement_id,
+            r.document_id,
+            d.file_name AS document_name,
+            r.submit_time,
+            r.review_status,
+            r.review_comment,
+            r.reviewer_id,
+            ru.real_name AS reviewer_name,
+            r.review_time,
+            r.create_time,
+            r.update_time
+        FROM opening_report r
+        LEFT JOIN user_info u ON r.student_id = u.user_id
+        LEFT JOIN topic_info t ON r.topic_id = t.topic_id
+        LEFT JOIN document_info d ON r.document_id = d.document_id
+        LEFT JOIN user_info ru ON r.reviewer_id = ru.user_id
+        WHERE r.is_deleted = 0
+        AND r.report_id = #{reportId}
+    </select>
+
+    <!-- 根据学生ID查询开题报告 -->
+    <select id="selectReportByStudentId" resultMap="reportVOMap">
+        SELECT
+            r.report_id,
+            r.student_id,
+            u.real_name AS student_name,
+            u.student_no,
+            r.topic_id,
+            t.topic_name,
+            r.arrangement_id,
+            r.document_id,
+            d.file_name AS document_name,
+            r.submit_time,
+            r.review_status,
+            r.review_comment,
+            r.reviewer_id,
+            ru.real_name AS reviewer_name,
+            r.review_time,
+            r.create_time,
+            r.update_time
+        FROM opening_report r
+        LEFT JOIN user_info u ON r.student_id = u.user_id
+        LEFT JOIN topic_info t ON r.topic_id = t.topic_id
+        LEFT JOIN document_info d ON r.document_id = d.document_id
+        LEFT JOIN user_info ru ON r.reviewer_id = ru.user_id
+        WHERE r.is_deleted = 0
+        AND r.student_id = #{studentId}
+    </select>
+
+</mapper>
