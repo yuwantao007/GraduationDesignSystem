@@ -401,10 +401,10 @@ const handleAvatarUpload = async (options: any) => {
   formData.append('file', options.file)
 
   try {
-    const response = await userApi.uploadAvatar(formData)
-    if (userInfo.value) {
-      userInfo.value.avatar = response.data.url
-    }
+    await userApi.uploadAvatar(formData)
+    // 上传成功后拉取一次最新用户信息，确保右上角、首页等全局头像同步刷新
+    const latestUser = await userStore.getUserInfoData()
+    userInfo.value = latestUser
     message.success('头像上传成功')
   } catch (error) {
     message.error('头像上传失败')
