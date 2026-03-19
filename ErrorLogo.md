@@ -22,6 +22,7 @@
 19. [企业老师过滤错误导致下拉框为空 — department 字段过滤错误](#企业老师过滤错误导致下拉框为空--department 字段过滤错误)
 20. [企业负责人双选审核 TooManyResultsException 异常](#企业负责人双选审核-too-many-results-exception-异常)
 21. [学生选报课题无法查看任务书详情](#学生选报课题无法查看任务书详情)
+22. [答辩安排创建后报系统错误 — MySQL 排序规则冲突](#答辩安排创建后报系统错误--mysql-排序规则冲突)
 
 ---
 
@@ -4929,5 +4930,94 @@ WHERE user_id = '2024759015287861249';
 ```
 
 **规律总结**：企业相关角色（`ENTERPRISE_TEACHER`、`ENTERPRISE_LEADER`）的用户必须确保 `enterprise_id` 字段不为 null，否则所有依赖企业 ID 的接口都会报错。创建测试用户时需同步设置 `enterprise_id`。
+
+---
+
+# 答辩安排创建后报系统错误 — MySQL 排序规则冲突
+
+- 日期：2026-03-19
+- 作者：系统维护者
+- 严重程度：高（创建后列表刷新失败，用户感知为“创建失败”）
+- 状态：已修复（代码热修 + 数据库迁移脚本）
+
+## 一、问题描述
+
+### 问题表现
+
+- 企业负责人在“新建答辩安排”点击保存后，前端提示系统错误。
+- 后端日志报错：
+  `Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_unicode_ci,IMPLICIT) for operation '='`
+
+### 关键现象
+
+- 创建动作本身已成功写入。
+- 报错发生在创建后自动刷新列表的分页查询阶段。
+
+## 二、问题根源分析（核心）
+
+### 2.1 触发 SQL
+
+答辩安排分页查询中存在跨表关联：
+
+- `da.enterprise_id = e.enterprise_id`
+- `da.creator_id = u.user_id`
+
+对应文件：`complete-backend/src/main/resources/mapper/DefenseArrangementMapper.xml`
+
+### 2.2 根因
+
+- `defense_arrangement`（以及 opening_report/opening_task_book）建表脚本使用了 `utf8mb4_general_ci`。
+- 系统核心表（如 `user_info`、`enterprise_info`）主要是 `utf8mb4_unicode_ci`。
+- 当 JOIN 条件比较不同排序规则字段时，MySQL 直接抛错 1267。
+
+对应脚本：`complete-backend/docs/sql/defense_arrangement.sql`
+
+## 三、修复方案
+
+### 3.1 代码热修（立即止血）
+
+在 Mapper 的 JOIN 条件上显式统一排序规则：
+
+```xml
+LEFT JOIN enterprise_info e
+  ON da.enterprise_id COLLATE utf8mb4_unicode_ci = e.enterprise_id COLLATE utf8mb4_unicode_ci
+LEFT JOIN user_info u
+  ON da.creator_id COLLATE utf8mb4_unicode_ci = u.user_id COLLATE utf8mb4_unicode_ci
+```
+
+已修改文件：
+
+- `complete-backend/src/main/resources/mapper/DefenseArrangementMapper.xml`
+
+### 3.2 数据库修复（长期稳定）
+
+新增迁移脚本，统一 defense 模块三张表为 `utf8mb4_unicode_ci`：
+
+- `complete-backend/docs/sql/fix_defense_collation.sql`
+
+核心 SQL：
+
+```sql
+ALTER TABLE defense_arrangement CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE opening_report CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE opening_task_book CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+同时，已将模块建表脚本中的默认排序规则改为 `utf8mb4_unicode_ci`，避免新环境再次引入冲突。
+
+## 四、验证步骤
+
+1. 执行迁移脚本：`complete-backend/docs/sql/fix_defense_collation.sql`
+2. 重启后端服务
+3. 使用企业负责人重新测试“新建答辩安排”
+4. 观察结果：
+   - 创建成功后不再报系统错误
+   - 列表自动刷新正常
+
+## 五、经验总结
+
+- 新模块建表必须与主库统一字符集与排序规则，禁止混用 `utf8mb4_general_ci` 与 `utf8mb4_unicode_ci`。
+- 对跨表 JOIN 频繁的 ID 字段（如 `enterprise_id`、`creator_id`、`user_id`），应优先保证表结构层面排序规则一致。
+- 热修可通过 SQL `COLLATE` 快速止血，但根治应通过表结构统一。
 
 ---

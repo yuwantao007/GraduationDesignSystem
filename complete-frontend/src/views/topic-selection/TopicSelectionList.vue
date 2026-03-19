@@ -174,10 +174,6 @@
           />
         </a-form-item>
 
-        <a-form-item label="只看本专业">
-          <a-switch v-model:checked="onlyMyMajor" @change="handleSearch" />
-        </a-form-item>
-
         <a-form-item>
           <a-space>
             <a-button type="primary" @click="handleSearch">
@@ -313,7 +309,6 @@ const topicList = ref<TopicForSelectionVO[]>([])
 const applyModalVisible = ref(false)
 const applyLoading = ref(false)
 const currentTopic = ref<TopicForSelectionVO | null>(null)
-const onlyMyMajor = ref(true)
 
 // 任务书详情抽屉
 const detailDrawerVisible = ref(false)
@@ -355,7 +350,7 @@ const activeCount = computed(() => {
 
 /** 选报提示信息 */
 const selectionTip = computed(() => {
-  return `您最多可选报 3 个课题。当前可选课题均为终审通过课题。${onlyMyMajor.value ? '（已开启本专业过滤）' : ''}`
+  return '您最多可选报 3 个课题。当前可选课题均为终审通过课题。'
 })
 
 // ==================== 表格列配置 ====================
@@ -385,12 +380,10 @@ const getCategoryColor = (category: number): string => {
 const loadTopics = async () => {
   loading.value = true
   try {
-    const majorId = onlyMyMajor.value ? (userStore.userInfo?.majorId || undefined) : undefined
     const response = await topicSelectionApi.getAvailableTopics({
       topicTitle: searchForm.topicTitle || undefined,
       topicCategory: searchForm.topicCategory,
       guidanceDirection: searchForm.guidanceDirection || undefined,
-      majorId,
       pageNum: pagination.current,
       pageSize: pagination.pageSize
     })
@@ -415,7 +408,6 @@ const handleReset = () => {
   searchForm.topicTitle = ''
   searchForm.topicCategory = undefined
   searchForm.guidanceDirection = ''
-  onlyMyMajor.value = true
   handleSearch()
 }
 

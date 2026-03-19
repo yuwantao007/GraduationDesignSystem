@@ -59,6 +59,8 @@ export interface DefenseArrangementVO {
   defenseType: DefenseType
   defenseTypeName: string
   topicCategory: string
+  majorId: string
+  majorName?: string
   defenseTime: string
   defenseLocation: string
   panelTeachers: string[]
@@ -79,6 +81,7 @@ export interface DefenseArrangementVO {
 export interface CreateArrangementDTO {
   defenseType: DefenseType
   topicCategory: string
+  majorId: string
   defenseTime: string
   defenseLocation: string
   panelTeachers: string[]
@@ -96,6 +99,7 @@ export interface UpdateArrangementDTO extends CreateArrangementDTO {
 export interface ArrangementQueryDTO {
   defenseType?: DefenseType
   topicCategory?: string
+  majorId?: string
   cohort?: string
   status?: number
   pageNum?: number

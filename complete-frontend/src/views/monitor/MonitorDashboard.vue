@@ -91,7 +91,7 @@
     <!-- 图表区域：4 张图排两行，每张高度紧凑 -->
     <a-row :gutter="8" class="chart-row">
       <a-col :xs="24" :lg="12">
-        <a-card title="课题审查状态分布" size="small" :loading="loading">
+        <a-card title="课题审查状态趋势" size="small" :loading="loading">
           <div v-if="topicStatusDist.length > 0" ref="pieChartRef" class="chart-container"></div>
           <a-empty v-else description="暂无课题数据" class="chart-empty" />
         </a-card>
@@ -112,9 +112,9 @@
         </a-card>
       </a-col>
       <a-col :xs="24" :lg="12">
-        <a-card title="学生选报覆盖率" size="small" :loading="loading">
+        <a-card title="学生选报覆盖趋势" size="small" :loading="loading">
           <div v-if="selectionStats && selectionStats.totalStudents > 0" class="student-coverage-row">
-            <div ref="pieStudentRef" class="chart-container chart-container--half"></div>
+            <div ref="pieStudentRef" class="chart-container"></div>
             <div class="coverage-stats">
               <a-statistic title="已选报" :value="selectionStats.studentsWithSelection" suffix="人"
                 :value-style="{ fontSize: '18px', color: '#52c41a' }" />
@@ -217,24 +217,36 @@ const renderCharts = () => {
   renderStudentPieChart()
 }
 
-/** 课题状态分布饼图 */
+/** 课题状态分布折线图 */
 const renderPieChart = () => {
   if (!pieChartRef.value) return
   if (!pieChart) pieChart = echarts.init(pieChartRef.value)
+  const xData = topicStatusDist.value.map(item => item.statusName)
+  const yData = topicStatusDist.value.map(item => item.count)
   pieChart.setOption({
-    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-    legend: { orient: 'vertical', left: 'left', type: 'scroll' },
+    tooltip: { trigger: 'axis' },
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: xData,
+      axisLabel: { interval: 0, rotate: 20 }
+    },
+    yAxis: {
+      type: 'value',
+      minInterval: 1,
+      name: '课题数'
+    },
     series: [{
-      type: 'pie',
-      radius: ['40%', '70%'],
-      avoidLabelOverlap: false,
-      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
-      label: { show: false, position: 'center' },
-      emphasis: { label: { show: true, fontSize: 14, fontWeight: 'bold' } },
-      data: topicStatusDist.value.map(item => ({
-        name: item.statusName,
-        value: item.count
-      }))
+      name: '课题数',
+      type: 'line',
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 8,
+      data: yData,
+      lineStyle: { width: 3, color: '#1677ff' },
+      itemStyle: { color: '#1677ff' },
+      areaStyle: { color: 'rgba(22,119,255,0.15)' },
+      label: { show: true, position: 'top' }
     }]
   })
 }
@@ -280,22 +292,39 @@ const renderFunnelChart = () => {
   })
 }
 
-/** 学生覆盖率圆环图 */
+/** 学生覆盖率折线图 */
 const renderStudentPieChart = () => {
   if (!pieStudentRef.value || !selectionStats.value) return
   if (!pieStudentChart) pieStudentChart = echarts.init(pieStudentRef.value)
   const s = selectionStats.value
   const notSelected = s.totalStudents - s.studentsWithSelection
   pieStudentChart.setOption({
-    tooltip: { trigger: 'item', formatter: '{b}: {c} 人 ({d}%)' },
+    tooltip: { trigger: 'axis' },
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: ['已选报', '未选报'],
+      axisLabel: { interval: 0 }
+    },
+    yAxis: {
+      type: 'value',
+      minInterval: 1,
+      name: '人数'
+    },
     series: [{
-      type: 'pie',
-      radius: ['50%', '70%'],
+      name: '学生人数',
+      type: 'line',
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 8,
       data: [
-        { name: '已选报', value: s.studentsWithSelection, itemStyle: { color: '#52c41a' } },
-        { name: '未选报', value: notSelected > 0 ? notSelected : 0, itemStyle: { color: '#ff4d4f' } }
+        s.studentsWithSelection,
+        notSelected > 0 ? notSelected : 0
       ],
-      label: { formatter: '{b}\n{d}%' }
+      lineStyle: { width: 3, color: '#13c2c2' },
+      itemStyle: { color: '#13c2c2' },
+      areaStyle: { color: 'rgba(19,194,194,0.15)' },
+      label: { show: true, position: 'top' }
     }]
   })
 }
@@ -437,17 +466,12 @@ onUnmounted(() => {
 /* ── 学生覆盖率：图+统计数字左右并排 ── */
 .student-coverage-row {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 12px;
 }
 
-.chart-container--half {
-  flex: 0 0 55%;
-  height: 210px;
-}
-
 .coverage-stats {
-  flex: 1;
+  flex: 0 0 180px;
   display: flex;
   flex-direction: column;
   justify-content: center;

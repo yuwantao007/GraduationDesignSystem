@@ -11,10 +11,11 @@
           </a-select>
         </a-form-item>
         <a-form-item label="课题类别">
-          <a-input v-model:value="queryParams.topicCategory" placeholder="请输入" allow-clear style="width: 140px" />
-        </a-form-item>
-        <a-form-item label="毕业届别">
-          <a-input v-model:value="queryParams.cohort" placeholder="如：2026届" allow-clear style="width: 140px" />
+          <a-select v-model:value="queryParams.topicCategory" placeholder="请选择" allow-clear style="width: 140px">
+            <a-select-option v-for="item in topicCategoryOptions" :key="item" :value="item">
+              {{ item }}
+            </a-select-option>
+          </a-select>
         </a-form-item>
         <a-form-item>
           <a-space>
@@ -26,7 +27,7 @@
 
       <!-- 操作栏 -->
       <div class="table-operations">
-        <a-button type="primary" @click="handleCreate">
+        <a-button type="primary" @click="handleCreate" html-type="button">
           <template #icon><PlusOutlined /></template>
           新建答辩安排
         </a-button>
@@ -48,17 +49,13 @@
             </a-tag>
           </template>
           <template v-if="column.key === 'panelTeachers'">
-            <span v-for="(teacher, index) in record.panelTeacherInfos" :key="teacher.userId">
-              {{ teacher.realName }}<span v-if="index < record.panelTeacherInfos.length - 1">、</span>
-            </span>
+            {{ formatPanelTeacherText(record.panelTeacherInfos || []) }}
           </template>
           <template v-if="column.key === 'action'">
             <a-space>
-              <a-button type="link" size="small" @click="handleView(record)">详情</a-button>
-              <a-button type="link" size="small" @click="handleEdit(record)">编辑</a-button>
-              <a-popconfirm title="确定删除该安排？" @confirm="handleDelete(record.arrangementId)">
-                <a-button type="link" size="small" danger>删除</a-button>
-              </a-popconfirm>
+              <a-button type="link" size="small" @click.stop="handleView(record)">详情</a-button>
+              <a-button type="link" size="small" @click.stop="handleEdit(record)">编辑</a-button>
+              <a-button type="link" size="small" danger @click.stop="handleDeleteClick(record.arrangementId)">删除</a-button>
             </a-space>
           </template>
         </template>
@@ -67,9 +64,12 @@
 
     <!-- 创建/编辑弹窗 -->
     <a-modal
-      v-model:open="modalVisible"
+      :open="modalVisible"
       :title="isEdit ? '编辑答辩安排' : '新建答辩安排'"
       :confirm-loading="submitLoading"
+      :mask-closable="false"
+      @update:open="(val) => (modalVisible = val)"
+      @cancel="() => (modalVisible = false)"
       @ok="handleSubmit"
       width="600px"
     >
@@ -82,10 +82,21 @@
           </a-select>
         </a-form-item>
         <a-form-item label="课题类别" name="topicCategory">
-          <a-input v-model:value="formData.topicCategory" placeholder="如：高职升本、3+1、实验班" />
+          <a-select v-model:value="formData.topicCategory" placeholder="请选择课题类别">
+            <a-select-option v-for="item in topicCategoryOptions" :key="item" :value="item">
+              {{ item }}
+            </a-select-option>
+          </a-select>
         </a-form-item>
-        <a-form-item label="毕业届别" name="cohort">
-          <a-input v-model:value="formData.cohort" placeholder="如：2026届" />
+        <a-form-item label="对应专业" name="majorId">
+          <a-select
+            v-model:value="formData.majorId"
+            placeholder="请选择对应专业"
+            :options="majorOptions"
+            :loading="majorOptionsLoading"
+            show-search
+            :filter-option="filterSelectOption"
+          />
         </a-form-item>
         <a-form-item label="答辩时间" name="defenseTime">
           <a-date-picker v-model:value="formData.defenseTime" show-time placeholder="请选择答辩时间" style="width: 100%" />
@@ -96,12 +107,25 @@
         <a-form-item label="报告截止时间" name="deadline">
           <a-date-picker v-model:value="formData.deadline" show-time placeholder="请选择截止时间（可选）" style="width: 100%" />
         </a-form-item>
-        <a-form-item label="答辩小组教师" name="panelTeachers">
+        <a-form-item label="答辩组长" name="panelLeader">
           <a-select
-            v-model:value="formData.panelTeachers"
-            mode="multiple"
-            placeholder="请选择答辩小组教师"
+            v-model:value="formData.panelLeader"
+            placeholder="请选择答辩组长"
             :options="teacherOptions"
+            :loading="teacherOptionsLoading"
+            show-search
+            :filter-option="filterSelectOption"
+          />
+        </a-form-item>
+        <a-form-item label="答辩老师" name="panelMembers">
+          <a-select
+            v-model:value="formData.panelMembers"
+            mode="multiple"
+            placeholder="请选择2位答辩老师"
+            :options="teacherOptions"
+            :loading="teacherOptionsLoading"
+            show-search
+            :filter-option="filterSelectOption"
           />
         </a-form-item>
         <a-form-item label="备注" name="remark">
@@ -109,16 +133,48 @@
         </a-form-item>
       </a-form>
     </a-modal>
+
+    <!-- 详情弹窗 -->
+    <a-modal
+      :open="detailVisible"
+      title="答辩安排详情"
+      :footer="null"
+      @update:open="(val) => (detailVisible = val)"
+      @cancel="() => (detailVisible = false)"
+      width="640px"
+    >
+      <div v-if="detailLoading" style="text-align: center; padding: 24px 0">
+        <a-spin tip="加载中..." />
+      </div>
+      <a-descriptions v-else-if="detailData" :column="2" bordered size="small">
+        <a-descriptions-item label="答辩类型">{{ detailData.defenseTypeName || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="课题类别">{{ detailData.topicCategory || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="对应专业">{{ detailData.majorName || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="答辩时间">{{ detailData.defenseTime || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="答辩地点">{{ detailData.defenseLocation || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="创建人">{{ detailData.creatorName || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="报告截止时间" :span="2">{{ detailData.deadline || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="答辩小组" :span="2">{{ panelTeacherText }}</a-descriptions-item>
+        <a-descriptions-item label="备注" :span="2">{{ detailData.remark || '-' }}</a-descriptions-item>
+      </a-descriptions>
+      <a-empty v-else description="暂无详情数据" />
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { message } from 'ant-design-vue'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { message, Modal } from 'ant-design-vue'
 import { PlusOutlined } from '@ant-design/icons-vue'
 import { defenseApi } from '@/api/defense'
+import { userApi } from '@/api/user'
+import { majorApi } from '@/api/major'
+import { phaseApi } from '@/api/phase'
+import { useUserStore } from '@/stores/user'
 import { DefenseType, DefenseTypeMap } from '@/types/defense'
+import { UserRole } from '@/types/user'
 import type { DefenseArrangementVO, ArrangementQueryDTO, CreateArrangementDTO } from '@/types/defense'
+import type { UserVO } from '@/types/user'
 import type { FormInstance } from 'ant-design-vue'
 import dayjs from 'dayjs'
 
@@ -127,8 +183,18 @@ const submitLoading = ref(false)
 const modalVisible = ref(false)
 const isEdit = ref(false)
 const tableData = ref<DefenseArrangementVO[]>([])
+const detailVisible = ref(false)
+const detailLoading = ref(false)
+const detailData = ref<DefenseArrangementVO | null>(null)
 const formRef = ref<FormInstance>()
 const teacherOptions = ref<{ label: string; value: string }[]>([])
+const teacherOptionsLoading = ref(false)
+const majorOptions = ref<{ label: string; value: string }[]>([])
+const majorOptionsLoading = ref(false)
+const currentCohort = ref(`${dayjs().year()}届`)
+const userStore = useUserStore()
+
+const topicCategoryOptions = ['高职升本', '3+1', '实验班']
 
 const queryParams = reactive<ArrangementQueryDTO>({
   defenseType: undefined,
@@ -147,30 +213,64 @@ const pagination = reactive({
   showTotal: (total: number) => `共 ${total} 条`
 })
 
-const formData = reactive<CreateArrangementDTO & { arrangementId?: string }>({
+type ArrangementFormModel = Omit<CreateArrangementDTO, 'panelTeachers'> & {
+  arrangementId?: string
+  panelLeader?: string
+  panelMembers: string[]
+}
+
+const formData = reactive<ArrangementFormModel>({
   defenseType: DefenseType.OPENING,
   topicCategory: '',
+  majorId: '',
   cohort: '',
   defenseTime: '',
   defenseLocation: '',
-  panelTeachers: [],
+  panelLeader: undefined,
+  panelMembers: [],
   deadline: undefined,
   remark: ''
 })
 
 const formRules = {
   defenseType: [{ required: true, message: '请选择答辩类型' }],
-  topicCategory: [{ required: true, message: '请输入课题类别' }],
-  cohort: [{ required: true, message: '请输入毕业届别' }],
+  topicCategory: [{ required: true, message: '请选择课题类别' }],
+  majorId: [{ required: true, message: '请选择对应专业' }],
   defenseTime: [{ required: true, message: '请选择答辩时间' }],
   defenseLocation: [{ required: true, message: '请输入答辩地点' }],
-  panelTeachers: [{ required: true, message: '请选择答辩小组教师', type: 'array' }]
+  panelLeader: [{ required: true, message: '请选择答辩组长' }],
+  panelMembers: [
+    { required: true, message: '请选择2位答辩老师', type: 'array' },
+    {
+      validator: (_rule: unknown, value: string[]) => {
+        const members = value || []
+        if (members.length !== 2) {
+          return Promise.reject(new Error('答辩老师必须选择2位'))
+        }
+        if (formData.panelLeader && members.includes(formData.panelLeader)) {
+          return Promise.reject(new Error('答辩组长不能同时出现在答辩老师中'))
+        }
+        return Promise.resolve()
+      }
+    }
+  ]
 }
+
+const filterSelectOption = (input: string, option: { label: string; value: string }) => {
+  return (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+}
+
+const panelTeacherText = computed(() => {
+  if (!detailData.value?.panelTeacherInfos?.length) {
+    return '-'
+  }
+  return formatPanelTeacherText(detailData.value.panelTeacherInfos)
+})
 
 const columns = [
   { title: '答辩类型', dataIndex: 'defenseType', key: 'defenseType', width: 100 },
   { title: '课题类别', dataIndex: 'topicCategory', key: 'topicCategory', width: 100 },
-  { title: '毕业届别', dataIndex: 'cohort', key: 'cohort', width: 100 },
+  { title: '对应专业', dataIndex: 'majorName', key: 'majorName', width: 160 },
   { title: '答辩时间', dataIndex: 'defenseTime', key: 'defenseTime', width: 160 },
   { title: '答辩地点', dataIndex: 'defenseLocation', key: 'defenseLocation', width: 150 },
   { title: '答辩小组', dataIndex: 'panelTeachers', key: 'panelTeachers', width: 200 },
@@ -229,10 +329,12 @@ const handleCreate = () => {
     arrangementId: undefined,
     defenseType: DefenseType.OPENING,
     topicCategory: '',
-    cohort: '',
+    majorId: '',
+    cohort: currentCohort.value,
     defenseTime: '',
     defenseLocation: '',
-    panelTeachers: [],
+    panelLeader: undefined,
+    panelMembers: [],
     deadline: undefined,
     remark: ''
   })
@@ -245,19 +347,33 @@ const handleEdit = (record: DefenseArrangementVO) => {
     arrangementId: record.arrangementId,
     defenseType: record.defenseType,
     topicCategory: record.topicCategory,
+    majorId: record.majorId,
     cohort: record.cohort,
     defenseTime: record.defenseTime ? dayjs(record.defenseTime) : undefined,
     defenseLocation: record.defenseLocation,
-    panelTeachers: record.panelTeachers,
+    panelLeader: record.panelTeachers?.[0],
+    panelMembers: record.panelTeachers?.slice(1, 3) || [],
     deadline: record.deadline ? dayjs(record.deadline) : undefined,
     remark: record.remark
   })
   modalVisible.value = true
 }
 
-const handleView = (record: DefenseArrangementVO) => {
-  // 可跳转到详情页或弹窗查看
-  message.info('查看详情: ' + record.arrangementId)
+const handleView = async (record: DefenseArrangementVO) => {
+  detailVisible.value = true
+  detailLoading.value = true
+  detailData.value = null
+  try {
+    const res = await defenseApi.getArrangementDetail(record.arrangementId)
+    if (res.code === 200) {
+      detailData.value = res.data
+    }
+  } catch (error) {
+    console.error('加载答辩安排详情失败', error)
+    message.error('加载答辩安排详情失败')
+  } finally {
+    detailLoading.value = false
+  }
 }
 
 const handleDelete = async (arrangementId: string) => {
@@ -272,17 +388,38 @@ const handleDelete = async (arrangementId: string) => {
   }
 }
 
+const handleDeleteClick = (arrangementId: string) => {
+  Modal.confirm({
+    title: '确定删除该安排？',
+    okText: '确定',
+    cancelText: '取消',
+    onOk: async () => {
+      await handleDelete(arrangementId)
+    }
+  })
+}
+
 const handleSubmit = async () => {
   try {
     await formRef.value?.validate()
     submitLoading.value = true
+    const panelTeachers = [formData.panelLeader, ...formData.panelMembers].filter(Boolean) as string[]
     const submitData = {
-      ...formData,
+      defenseType: formData.defenseType,
+      topicCategory: formData.topicCategory,
+      majorId: formData.majorId,
+      defenseLocation: formData.defenseLocation,
+      panelTeachers,
+      remark: formData.remark,
+      cohort: formData.cohort || currentCohort.value,
       defenseTime: formData.defenseTime ? dayjs(formData.defenseTime).format('YYYY-MM-DD HH:mm:ss') : '',
       deadline: formData.deadline ? dayjs(formData.deadline).format('YYYY-MM-DD HH:mm:ss') : undefined
     }
     if (isEdit.value) {
-      const res = await defenseApi.updateArrangement(submitData as any)
+      const res = await defenseApi.updateArrangement({
+        arrangementId: formData.arrangementId as string,
+        ...submitData
+      })
       if (res.code === 200) {
         message.success('更新成功')
         modalVisible.value = false
@@ -303,7 +440,111 @@ const handleSubmit = async () => {
   }
 }
 
+const loadTeacherOptions = async () => {
+  teacherOptionsLoading.value = true
+  try {
+    const teacherRoleCodes = [
+      UserRole.SUPERVISOR_TEACHER,
+      UserRole.UNIVERSITY_TEACHER,
+      UserRole.MAJOR_DIRECTOR,
+      UserRole.ENTERPRISE_TEACHER
+    ]
+
+    const responses = await Promise.all(
+      teacherRoleCodes.map(roleCode =>
+        userApi.getUserList({
+          roleCode,
+          userStatus: 1,
+          pageNum: 1,
+          pageSize: 500
+        })
+      )
+    )
+
+    const teacherMap = new Map<string, UserVO>()
+    responses.forEach(res => {
+      ;(res.data.records || []).forEach(user => {
+        teacherMap.set(user.userId, user)
+      })
+    })
+
+    const roleLabelMap: Record<string, string> = {
+      [UserRole.SUPERVISOR_TEACHER]: '督导教师',
+      [UserRole.UNIVERSITY_TEACHER]: '高校教师',
+      [UserRole.MAJOR_DIRECTOR]: '专业方向主管',
+      [UserRole.ENTERPRISE_TEACHER]: '企业教师'
+    }
+
+    teacherOptions.value = Array.from(teacherMap.values()).map(user => {
+      const teacherRoleNames = (user.roles || [])
+        .map(role => role.roleCode)
+        .filter(roleCode => teacherRoleCodes.includes(roleCode as UserRole))
+        .map(roleCode => roleLabelMap[roleCode] || roleCode)
+      return {
+        label: teacherRoleNames.length
+          ? `${user.realName}（${teacherRoleNames.join(' / ')}）`
+          : user.realName,
+        value: user.userId
+      }
+    })
+  } catch (error) {
+    console.error('加载教师列表失败', error)
+    message.error('加载答辩小组教师失败')
+  } finally {
+    teacherOptionsLoading.value = false
+  }
+}
+
+const loadMajorOptions = async () => {
+  majorOptionsLoading.value = true
+  try {
+    const res = await majorApi.getMajorTree(userStore.userInfo?.enterpriseId, 1)
+    const options: { label: string; value: string }[] = []
+    const walk = (nodes: Array<{ id: string; label: string; type: string; children?: any[] }>) => {
+      nodes.forEach(node => {
+        if (node.type === 'major') {
+          options.push({ label: node.label, value: node.id })
+        }
+        if (Array.isArray(node.children) && node.children.length > 0) {
+          walk(node.children)
+        }
+      })
+    }
+    walk(res.data || [])
+    majorOptions.value = options
+  } catch (error) {
+    console.error('加载专业列表失败', error)
+    message.error('加载专业列表失败')
+  } finally {
+    majorOptionsLoading.value = false
+  }
+}
+
+const formatPanelTeacherText = (teachers: Array<{ realName: string }>) => {
+  if (!teachers.length) {
+    return '-'
+  }
+  const leader = teachers[0]?.realName || '-'
+  const members = teachers.slice(1).map(item => item.realName).join('、')
+  if (!members) {
+    return `组长：${leader}`
+  }
+  return `组长：${leader}；答辩老师：${members}`
+}
+
+const loadCurrentCohort = async () => {
+  try {
+    const res = await phaseApi.getCurrentPhaseStatus()
+    if (res.data?.cohort) {
+      currentCohort.value = res.data.cohort
+    }
+  } catch (error) {
+    console.warn('加载当前届别失败，使用默认届别', error)
+  }
+}
+
 onMounted(() => {
+  Promise.all([loadCurrentCohort(), loadTeacherOptions(), loadMajorOptions()])
   fetchData()
 })
 </script>

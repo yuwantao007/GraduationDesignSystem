@@ -184,7 +184,7 @@
         >
           <template #icon><CalendarOutlined /></template>
           <template #title>开题答辩</template>
-          <a-menu-item v-if="userStore.hasPermission('defense:arrangement:list')" key="/defense/arrangement">
+          <a-menu-item v-if="userStore.hasPermission('defense:arrangement:list') && userStore.hasAnyRole(['ENTERPRISE_LEADER'])" key="/defense/arrangement">
             答辩安排
           </a-menu-item>
           <a-menu-item v-if="userStore.hasPermission('defense:taskbook:save')" key="/defense/taskbook">
