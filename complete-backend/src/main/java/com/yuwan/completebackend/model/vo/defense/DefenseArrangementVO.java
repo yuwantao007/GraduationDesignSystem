@@ -34,6 +34,12 @@ public class DefenseArrangementVO implements Serializable {
     @Schema(description = "课题类别")
     private String topicCategory;
 
+    @Schema(description = "专业ID")
+    private String majorId;
+
+    @Schema(description = "专业名称")
+    private String majorName;
+
     @Schema(description = "答辩时间")
     private Date defenseTime;
 

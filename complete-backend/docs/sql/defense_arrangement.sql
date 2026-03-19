@@ -13,9 +13,10 @@ CREATE TABLE IF NOT EXISTS `defense_arrangement` (
     `arrangement_id`    VARCHAR(32)   NOT NULL COMMENT '安排ID',
     `defense_type`      TINYINT       NOT NULL COMMENT '答辩类型: 1=开题, 2=中期, 3=正式, 4=二次',
     `topic_category`    VARCHAR(20)   NOT NULL COMMENT '课题类别（高职升本/3+1/实验班）',
+    `major_id`          VARCHAR(32)   NOT NULL COMMENT '专业ID',
     `defense_time`      DATETIME      NOT NULL COMMENT '答辩时间',
     `defense_location`  VARCHAR(200)  NOT NULL COMMENT '答辩地点',
-    `panel_teachers`    JSON          NOT NULL COMMENT '答辩小组教师ID列表（JSON数组，至少1人）',
+    `panel_teachers`    JSON          NOT NULL COMMENT '答辩小组教师ID列表（JSON数组，固定3人：组长+2位答辩老师）',
     `deadline`          DATETIME      DEFAULT NULL COMMENT '报告提交截止时间（仅开题/中期使用）',
     `cohort`            VARCHAR(20)   NOT NULL COMMENT '毕业届别（如：2026届）',
     `enterprise_id`     VARCHAR(32)   NOT NULL COMMENT '所属企业ID',
@@ -27,11 +28,12 @@ CREATE TABLE IF NOT EXISTS `defense_arrangement` (
     `update_time`       DATETIME      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`arrangement_id`),
     KEY `idx_type_category` (`defense_type`, `topic_category`),
+    KEY `idx_major_id` (`major_id`),
     KEY `idx_enterprise` (`enterprise_id`),
     KEY `idx_cohort` (`cohort`),
     KEY `idx_defense_time` (`defense_time`),
     KEY `idx_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='答辩安排表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='答辩安排表';
 
 -- =============================================
 -- 表2：开题报告表 opening_report
@@ -58,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `opening_report` (
     KEY `idx_arrangement_id` (`arrangement_id`),
     KEY `idx_review_status` (`review_status`),
     KEY `idx_reviewer_id` (`reviewer_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='开题报告表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='开题报告表';
 
 -- =============================================
 -- 表3：开题任务书表 opening_task_book
@@ -79,7 +81,7 @@ CREATE TABLE IF NOT EXISTS `opening_task_book` (
     UNIQUE KEY `uk_student_id` (`student_id`),
     KEY `idx_topic_id` (`topic_id`),
     KEY `idx_teacher_id` (`teacher_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='开题任务书表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='开题任务书表';
 
 -- =============================================
 -- 说明：

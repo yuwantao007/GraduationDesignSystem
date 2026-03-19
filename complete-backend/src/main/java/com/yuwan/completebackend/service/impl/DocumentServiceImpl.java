@@ -104,7 +104,7 @@ public class DocumentServiceImpl implements IDocumentService {
             throw new BusinessException("该学生尚未选择课题");
         }
 
-        // : 验证当前教师是否有权限给该学生上传批注
+        // todo: 验证当前教师是否有权限给该学生上传批注
 
         return saveDocument(file, studentId, selection.getTopicId(),
                 DocumentType.TEACHER_ANNOTATION.getCode(), currentUserId, remark);

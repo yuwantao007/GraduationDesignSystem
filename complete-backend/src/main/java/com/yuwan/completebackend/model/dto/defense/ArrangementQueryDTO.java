@@ -26,6 +26,9 @@ public class ArrangementQueryDTO implements Serializable {
     @Schema(description = "课题类别")
     private String topicCategory;
 
+    @Schema(description = "专业ID")
+    private String majorId;
+
     @Schema(description = "毕业届别")
     private String cohort;
 

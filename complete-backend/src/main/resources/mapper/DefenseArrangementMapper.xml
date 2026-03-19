@@ -7,6 +7,8 @@
         <id property="arrangementId" column="arrangement_id"/>
         <result property="defenseType" column="defense_type"/>
         <result property="topicCategory" column="topic_category"/>
+        <result property="majorId" column="major_id"/>
+        <result property="majorName" column="major_name"/>
         <result property="defenseTime" column="defense_time"/>
         <result property="defenseLocation" column="defense_location"/>
         <result property="panelTeachers" column="panel_teachers"
@@ -29,6 +31,8 @@
             da.arrangement_id,
             da.defense_type,
             da.topic_category,
+            da.major_id,
+            mi.major_name,
             da.defense_time,
             da.defense_location,
             da.panel_teachers,
@@ -43,8 +47,13 @@
             da.create_time,
             da.update_time
         FROM defense_arrangement da
-        LEFT JOIN enterprise_info e ON da.enterprise_id = e.enterprise_id
-        LEFT JOIN user_info u ON da.creator_id = u.user_id
+        LEFT JOIN enterprise_info e
+            ON da.enterprise_id COLLATE utf8mb4_unicode_ci = e.enterprise_id COLLATE utf8mb4_unicode_ci
+        LEFT JOIN user_info u
+            ON da.creator_id COLLATE utf8mb4_unicode_ci = u.user_id COLLATE utf8mb4_unicode_ci
+        LEFT JOIN major_info mi
+            ON da.major_id COLLATE utf8mb4_unicode_ci = mi.major_id COLLATE utf8mb4_unicode_ci
+            AND mi.deleted = 0
         WHERE da.is_deleted = 0
         <if test="enterpriseId != null and enterpriseId != ''">
             AND da.enterprise_id = #{enterpriseId}
@@ -54,6 +63,9 @@
         </if>
         <if test="topicCategory != null and topicCategory != ''">
             AND da.topic_category = #{topicCategory}
+        </if>
+        <if test="majorId != null and majorId != ''">
+            AND da.major_id = #{majorId}
         </if>
         <if test="cohort != null and cohort != ''">
             AND da.cohort = #{cohort}
@@ -70,6 +82,8 @@
             da.arrangement_id,
             da.defense_type,
             da.topic_category,
+            da.major_id,
+            mi.major_name,
             da.defense_time,
             da.defense_location,
             da.panel_teachers,
@@ -84,8 +98,13 @@
             da.create_time,
             da.update_time
         FROM defense_arrangement da
-        LEFT JOIN enterprise_info e ON da.enterprise_id = e.enterprise_id
-        LEFT JOIN user_info u ON da.creator_id = u.user_id
+        LEFT JOIN enterprise_info e
+            ON da.enterprise_id COLLATE utf8mb4_unicode_ci = e.enterprise_id COLLATE utf8mb4_unicode_ci
+        LEFT JOIN user_info u
+            ON da.creator_id COLLATE utf8mb4_unicode_ci = u.user_id COLLATE utf8mb4_unicode_ci
+        LEFT JOIN major_info mi
+            ON da.major_id COLLATE utf8mb4_unicode_ci = mi.major_id COLLATE utf8mb4_unicode_ci
+            AND mi.deleted = 0
         WHERE da.is_deleted = 0
         AND da.arrangement_id = #{arrangementId}
     </select>

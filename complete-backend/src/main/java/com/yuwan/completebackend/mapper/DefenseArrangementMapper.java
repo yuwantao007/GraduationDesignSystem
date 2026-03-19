@@ -25,6 +25,7 @@ public interface DefenseArrangementMapper extends BaseMapper<DefenseArrangement>
      * @param enterpriseId 企业ID
      * @param defenseType  答辩类型
      * @param topicCategory 课题类别
+    * @param majorId      专业ID
      * @param cohort       毕业届别
      * @param status       状态
      * @return 分页结果
@@ -34,6 +35,7 @@ public interface DefenseArrangementMapper extends BaseMapper<DefenseArrangement>
             @Param("enterpriseId") String enterpriseId,
             @Param("defenseType") Integer defenseType,
             @Param("topicCategory") String topicCategory,
+            @Param("majorId") String majorId,
             @Param("cohort") String cohort,
             @Param("status") Integer status
     );

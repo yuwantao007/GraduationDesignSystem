@@ -36,6 +36,9 @@ public class DefenseArrangement implements Serializable {
     @Schema(description = "课题类别（高职升本/3+1/实验班）")
     private String topicCategory;
 
+    @Schema(description = "专业ID")
+    private String majorId;
+
     @Schema(description = "答辩时间")
     private Date defenseTime;
 

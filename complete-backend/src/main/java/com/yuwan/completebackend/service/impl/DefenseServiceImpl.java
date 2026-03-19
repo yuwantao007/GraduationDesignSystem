@@ -2,6 +2,7 @@ package com.yuwan.completebackend.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -67,6 +68,7 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
         if (defenseType == null) {
             throw new BusinessException("无效的答辩类型");
         }
+        validatePanelTeachers(dto.getPanelTeachers());
 
         // 创建答辩安排
         DefenseArrangement arrangement = new DefenseArrangement();
@@ -94,6 +96,7 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
         if (!arrangement.getEnterpriseId().equals(enterpriseId)) {
             throw new BusinessException("无权修改此答辩安排");
         }
+        validatePanelTeachers(dto.getPanelTeachers());
 
         BeanUtil.copyProperties(dto, arrangement, "arrangementId", "enterpriseId", "creatorId");
         return this.updateById(arrangement);
@@ -128,6 +131,7 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
                 enterpriseId,
                 queryDTO.getDefenseType(),
                 queryDTO.getTopicCategory(),
+            queryDTO.getMajorId(),
                 queryDTO.getCohort(),
                 queryDTO.getStatus()
         );
@@ -178,6 +182,18 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
     private String getEnterpriseIdByUserId(String userId) {
         User user = userMapper.selectById(userId);
         return user != null ? user.getEnterpriseId() : null;
+    }
+
+    /**
+     * 校验答辩小组结构：1名组长 + 2名答辩老师（共3名且不重复）
+     */
+    private void validatePanelTeachers(List<String> panelTeachers) {
+        if (CollUtil.isEmpty(panelTeachers) || panelTeachers.size() != 3) {
+            throw new BusinessException("答辩小组必须由1名组长和2名答辩老师组成");
+        }
+        if (CollectionUtil.distinct(panelTeachers).size() != 3) {
+            throw new BusinessException("答辩小组成员不能重复");
+        }
     }
 
     // ==================== 开题任务书管理 ====================

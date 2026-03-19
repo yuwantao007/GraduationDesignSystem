@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Tag(name = "开题答辩管理", description = "答辩安排、任务书、开题报告管理接口")
 @RestController
-@RequestMapping("/api/defense")
+@RequestMapping("/defense")
 @RequiredArgsConstructor
 public class DefenseController {
 

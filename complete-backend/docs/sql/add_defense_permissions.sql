@@ -44,9 +44,7 @@ INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`) VALUES
 -- 为企业教师角色分配权限（role_id=6）
 INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`) VALUES
 (REPLACE(UUID(),'-',''), '6', '940'),
-(REPLACE(UUID(),'-',''), '6', '941'),
 (REPLACE(UUID(),'-',''), '6', '942'),
-(REPLACE(UUID(),'-',''), '6', '946'),
 (REPLACE(UUID(),'-',''), '6', '947'),
 (REPLACE(UUID(),'-',''), '6', '948'),
 (REPLACE(UUID(),'-',''), '6', '949'),
@@ -58,9 +56,7 @@ INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`) VALUES
 -- 为学生角色分配权限（role_id=7）
 INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`) VALUES
 (REPLACE(UUID(),'-',''), '7', '940'),
-(REPLACE(UUID(),'-',''), '7', '941'),
 (REPLACE(UUID(),'-',''), '7', '942'),
-(REPLACE(UUID(),'-',''), '7', '946'),
 (REPLACE(UUID(),'-',''), '7', '947'),
 (REPLACE(UUID(),'-',''), '7', '948'),
 (REPLACE(UUID(),'-',''), '7', '956'),
@@ -72,12 +68,10 @@ INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`) VALUES
 -- 为系统管理员角色分配权限（role_id=1）
 INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`) VALUES
 (REPLACE(UUID(),'-',''), '1', '940'),
-(REPLACE(UUID(),'-',''), '1', '941'),
 (REPLACE(UUID(),'-',''), '1', '942'),
 (REPLACE(UUID(),'-',''), '1', '943'),
 (REPLACE(UUID(),'-',''), '1', '944'),
 (REPLACE(UUID(),'-',''), '1', '945'),
-(REPLACE(UUID(),'-',''), '1', '946'),
 (REPLACE(UUID(),'-',''), '1', '947'),
 (REPLACE(UUID(),'-',''), '1', '948'),
 (REPLACE(UUID(),'-',''), '1', '949'),

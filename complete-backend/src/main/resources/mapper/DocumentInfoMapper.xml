@@ -44,9 +44,9 @@
             d.create_time,
             d.update_time
         FROM document_info d
-        LEFT JOIN user_info stu ON d.student_id = stu.user_id
-        LEFT JOIN topic t ON d.topic_id = t.topic_id
-        LEFT JOIN user_info uploader ON d.uploader_id = uploader.user_id
+                LEFT JOIN user_info stu ON d.student_id COLLATE utf8mb4_unicode_ci = stu.user_id COLLATE utf8mb4_unicode_ci
+                LEFT JOIN topic_info t ON d.topic_id COLLATE utf8mb4_unicode_ci = t.topic_id COLLATE utf8mb4_unicode_ci
+                LEFT JOIN user_info uploader ON d.uploader_id COLLATE utf8mb4_unicode_ci = uploader.user_id COLLATE utf8mb4_unicode_ci
         WHERE d.student_id = #{studentId}
           AND d.is_deleted = 0
         <if test="documentType != null">
@@ -79,9 +79,9 @@
             d.create_time,
             d.update_time
         FROM document_info d
-        LEFT JOIN user_info stu ON d.student_id = stu.user_id
-        LEFT JOIN topic t ON d.topic_id = t.topic_id
-        LEFT JOIN user_info uploader ON d.uploader_id = uploader.user_id
+                LEFT JOIN user_info stu ON d.student_id COLLATE utf8mb4_unicode_ci = stu.user_id COLLATE utf8mb4_unicode_ci
+                LEFT JOIN topic_info t ON d.topic_id COLLATE utf8mb4_unicode_ci = t.topic_id COLLATE utf8mb4_unicode_ci
+                LEFT JOIN user_info uploader ON d.uploader_id COLLATE utf8mb4_unicode_ci = uploader.user_id COLLATE utf8mb4_unicode_ci
         WHERE d.topic_id = #{topicId}
           AND d.is_deleted = 0
         <if test="documentType != null">
@@ -111,9 +111,9 @@
             d.create_time,
             d.update_time
         FROM document_info d
-        LEFT JOIN user_info stu ON d.student_id = stu.user_id
-        LEFT JOIN topic t ON d.topic_id = t.topic_id
-        LEFT JOIN user_info uploader ON d.uploader_id = uploader.user_id
+                LEFT JOIN user_info stu ON d.student_id COLLATE utf8mb4_unicode_ci = stu.user_id COLLATE utf8mb4_unicode_ci
+                LEFT JOIN topic_info t ON d.topic_id COLLATE utf8mb4_unicode_ci = t.topic_id COLLATE utf8mb4_unicode_ci
+                LEFT JOIN user_info uploader ON d.uploader_id COLLATE utf8mb4_unicode_ci = uploader.user_id COLLATE utf8mb4_unicode_ci
         WHERE d.document_id = #{documentId}
           AND d.is_deleted = 0
     </select>

@@ -37,6 +37,10 @@ public class UpdateArrangementDTO implements Serializable {
     @Schema(description = "课题类别", example = "高职升本")
     private String topicCategory;
 
+    @NotBlank(message = "专业不能为空")
+    @Schema(description = "专业ID")
+    private String majorId;
+
     @NotNull(message = "答辩时间不能为空")
     @Schema(description = "答辩时间")
     private Date defenseTime;
