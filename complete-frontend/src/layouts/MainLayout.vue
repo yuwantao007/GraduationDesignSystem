@@ -18,7 +18,7 @@
       >
         <a-menu-item key="/dashboard">
           <template #icon><DashboardOutlined /></template>
-          <span>仪表盘</span>
+          <span>首页</span>
         </a-menu-item>
         
         <a-sub-menu v-if="userStore.hasAnyRole(['SYSTEM_ADMIN'])" key="user-mgmt">
@@ -102,7 +102,7 @@
 
         <!-- 质量监控：系统管理员和企业负责人可见 -->
         <a-sub-menu
-          v-if="userStore.hasPermission('monitor:dashboard:view')"
+          v-if="userStore.hasPermission('monitor:dashboard:view') && !userStore.hasAnyRole(['STUDENT'])"
           key="monitor"
         >
           <template #icon><BarChartOutlined /></template>
@@ -138,12 +138,23 @@
           </a-menu-item>
           <!-- 流程监控：仅管理员 -->
           <a-menu-item
-            v-if="userStore.hasPermission('monitor:dashboard:view')"
+            v-if="userStore.hasPermission('monitor:dashboard:view') && !userStore.hasAnyRole(['STUDENT'])"
             key="/workflow/monitor"
           >
             流程监控
           </a-menu-item>
         </a-sub-menu>
+
+        <a-menu-item v-if="userStore.hasPermission('notification:view')" key="/notification/center">
+          <template #icon><BellOutlined /></template>
+          <span>消息中心</span>
+          <a-badge
+            v-if="notificationUnreadCount > 0"
+            :count="notificationUnreadCount"
+            :overflow-count="99"
+            style="margin-left: 8px"
+          />
+        </a-menu-item>
 
         <!-- 过程管理：指导记录 -->
         <!-- 企业教师/高校教师：学生指导 -->
@@ -179,7 +190,7 @@
 
         <!-- 过程管理：开题答辩管理 -->
         <a-sub-menu
-          v-if="userStore.hasPermission('defense:arrangement:list') || userStore.hasPermission('defense:taskbook:save') || userStore.hasPermission('defense:report:list') || userStore.hasPermission('defense:report:my') || userStore.hasPermission('defense:taskbook:detail')"
+          v-if="!userStore.hasAnyRole(['SYSTEM_ADMIN']) && (userStore.hasPermission('defense:arrangement:list') || userStore.hasPermission('defense:taskbook:save') || userStore.hasPermission('defense:report:list') || userStore.hasPermission('defense:report:my') || userStore.hasPermission('defense:taskbook:detail'))"
           key="defense"
         >
           <template #icon><CalendarOutlined /></template>
@@ -237,7 +248,18 @@
           </a-breadcrumb>
         </div>
         
-        <div style="padding-right: 24px">
+        <div style="padding-right: 24px; display: flex; align-items: center">
+          <a-badge
+            v-if="userStore.hasPermission('notification:view')"
+            :count="notificationUnreadCount"
+            :overflow-count="99"
+            :show-zero="false"
+            style="margin-right: 16px; cursor: pointer"
+            @click="handleOpenNotificationCenter"
+          >
+            <BellOutlined style="font-size: 18px" />
+          </a-badge>
+
           <a-dropdown>
             <a class="ant-dropdown-link" @click.prevent>
               <a-avatar :size="32" :src="userInfo?.avatar" style="background-color: #1890ff">
@@ -279,7 +301,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, h } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { message, Modal, notification } from 'ant-design-vue'
 import {
@@ -311,12 +333,14 @@ import {
 } from '@ant-design/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
+import { useNotificationStore } from '@/stores/notification'
 import { phaseApi } from '@/api/phase'
 
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
 const appStore = useAppStore()
+const notificationStore = useNotificationStore()
 
 // 侧边栏折叠状态
 const collapsed = computed({
@@ -339,6 +363,8 @@ const breadcrumbs = computed(() => appStore.breadcrumbs)
 
 // 用户信息
 const userInfo = computed(() => userStore.userInfo)
+const notificationUnreadCount = computed(() => notificationStore.unreadCount)
+let notificationTimer: number | null = null
 
 /**
  * 根据路径计算需要展开的子菜单
@@ -358,13 +384,14 @@ const getOpenKeys = (path: string): string[] => {
   if (path.startsWith('/guidance')) return []
   if (path.startsWith('/defense')) return ['defense']
   if (path.startsWith('/midterm')) return ['midterm']
+  if (path.startsWith('/notification')) return []
   return []
 }
 
 // 更新面包屑
 const updateBreadcrumbs = (path: string) => {
   const breadcrumbMap: Record<string, Array<{ title: string; path?: string }>> = {
-    '/dashboard': [{ title: '首页' }, { title: '仪表盘' }],
+    '/dashboard': [{ title: '首页' }],
     '/user': [{ title: '首页', path: '/' }, { title: '用户管理' }, { title: '用户列表' }],
     '/user/role': [{ title: '首页', path: '/' }, { title: '用户管理' }, { title: '角色权限' }],
     '/enterprise/list': [{ title: '首页', path: '/' }, { title: '企业管理' }, { title: '企业列表' }],
@@ -386,6 +413,7 @@ const updateBreadcrumbs = (path: string) => {
     '/settings': [{ title: '首页', path: '/' }, { title: '系统设置' }],
     '/monitor': [{ title: '首页', path: '/' }, { title: '质量监控' }, { title: '监控仪表盘' }],
     '/monitor/alerts': [{ title: '首页', path: '/' }, { title: '质量监控' }, { title: '预警中心' }],
+    '/notification/center': [{ title: '首页', path: '/' }, { title: '消息中心' }],
     '/workflow/tasks': [{ title: '首页', path: '/' }, { title: '工作流' }, { title: '待办任务' }],
     '/workflow/definition': [{ title: '首页', path: '/' }, { title: '工作流' }, { title: '流程定义' }],
     '/workflow/monitor': [{ title: '首页', path: '/' }, { title: '工作流' }, { title: '流程监控' }],
@@ -430,8 +458,31 @@ const handleProfile = () => {
   router.push('/profile')
 }
 
+const handleOpenNotificationCenter = () => {
+  router.push('/notification/center')
+}
+
+const loadNotificationUnreadCount = async () => {
+  if (!userStore.hasPermission('notification:view')) {
+    notificationStore.resetUnreadCount()
+    return
+  }
+  try {
+    await notificationStore.loadUnreadCount()
+  } catch {
+    // 静默失败，不影响主流程
+  }
+}
+
 // 登录后阶段提示（非管理员角色，每次会话仅提示一次）
 onMounted(async () => {
+  await loadNotificationUnreadCount()
+  if (userStore.hasPermission('notification:view')) {
+    notificationTimer = window.setInterval(() => {
+      loadNotificationUnreadCount()
+    }, 60000)
+  }
+
   if (!userStore.hasAnyRole(['SYSTEM_ADMIN']) && userStore.hasPermission('phase:view')) {
     const shown = sessionStorage.getItem('phaseNotificationShown')
     if (!shown) {
@@ -456,6 +507,13 @@ onMounted(async () => {
         }
       }, 600)
     }
+  }
+})
+
+onUnmounted(() => {
+  if (notificationTimer !== null) {
+    window.clearInterval(notificationTimer)
+    notificationTimer = null
   }
 })
 

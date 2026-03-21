@@ -29,7 +29,7 @@ const routes: RouteRecordRaw[] = [
         path: 'dashboard',
         name: 'Dashboard',
         component: () => import('@/views/Dashboard.vue'),
-        meta: { title: '仪表盘', icon: 'DashboardOutlined' }
+        meta: { title: '首页', icon: 'DashboardOutlined' }
       },
       {
         path: 'user',
@@ -180,6 +180,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/monitor/AlertCenter.vue'),
         meta: { title: '预警中心', icon: 'BellOutlined', permission: 'monitor:alert:view' }
       },
+      {
+        path: 'notification/center',
+        name: 'NotificationCenter',
+        component: () => import('@/views/notification/NotificationCenter.vue'),
+        meta: { title: '消息中心', icon: 'BellOutlined', permission: 'notification:view' }
+      },
       // 工作流路由（Flowable 审查流程）
       {
         path: 'workflow/tasks',
@@ -237,6 +243,12 @@ const routes: RouteRecordRaw[] = [
         name: 'DefenseArrangementList',
         component: () => import('@/views/defense/ArrangementList.vue'),
         meta: { title: '答辩安排', icon: 'CalendarOutlined', permission: 'defense:arrangement:list' }
+      },
+      {
+        path: 'defense/arrangement/detail/:arrangementId',
+        name: 'DefenseArrangementDetail',
+        component: () => import('@/views/defense/ArrangementDetail.vue'),
+        meta: { title: '答辩安排详情', permission: 'defense:arrangement:detail', hideInMenu: true }
       },
       {
         path: 'defense/taskbook',
@@ -305,6 +317,26 @@ const router = createRouter({
 // 白名单路由（不需要登录即可访问）
 const whiteList = ['/login', '/register']
 
+const isStudentBlockedMonitorRoute = (path: string, userStore: ReturnType<typeof useUserStore>) => {
+  return path.startsWith('/monitor') && userStore.hasAnyRole(['STUDENT'])
+}
+
+const canAccessRoute = (to: any, userStore: ReturnType<typeof useUserStore>) => {
+  if (to.path.startsWith('/defense') && userStore.hasAnyRole(['SYSTEM_ADMIN'])) {
+    message.error('管理员无需访问开题答辩模块')
+    return false
+  }
+  if (isStudentBlockedMonitorRoute(to.path, userStore)) {
+    message.error('学生无需访问质量监控模块')
+    return false
+  }
+  if (to.meta.permission && !userStore.hasPermission(to.meta.permission as string)) {
+    message.error('没有访问权限')
+    return false
+  }
+  return true
+}
+
 /**
  * 当前页面生命周期内是否已从服务端拉取过最新权限。
  * 使用模块级变量（非 localStorage），保证每次页面刷新/新 Tab 都重新拉取一次，
@@ -332,7 +364,11 @@ router.beforeEach(async (to, _from, next) => {
         try {
           await userStore.getUserInfoData()
           permissionsRefreshed = true
-          next()
+          if (!canAccessRoute(to, userStore)) {
+            next({ path: '/403' })
+          } else {
+            next()
+          }
         } catch (error) {
           // 获取用户信息失败（token 过期等），清除认证信息并跳转登录页
           await userStore.logout()
@@ -342,8 +378,7 @@ router.beforeEach(async (to, _from, next) => {
         }
       } else {
         // 同一页面会话内已刷新过权限，直接使用内存中的数据
-        if (to.meta.permission && !userStore.hasPermission(to.meta.permission as string)) {
-          message.error('没有访问权限')
+        if (!canAccessRoute(to, userStore)) {
           next({ path: '/403' })
         } else {
           next()

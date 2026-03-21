@@ -115,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, h } from 'vue'
+import { ref, computed, onMounted, h, resolveComponent } from 'vue'
 import { message } from 'ant-design-vue'
 import { UploadOutlined } from '@ant-design/icons-vue'
 import dayjs from 'dayjs'
@@ -203,7 +203,7 @@ const DocumentTable = {
       }
     ]
 
-    return () => h('a-table', {
+    return () => h(resolveComponent('a-table'), {
       columns,
       dataSource: props.documents,
       rowKey: 'documentId',

@@ -44,7 +44,7 @@
       </a-form-item>
 
       <a-form-item label="指导类型" name="guidanceType">
-        <a-radio-group v-model:value="formData.guidanceType" :disabled="typeDisabled">
+        <a-radio-group v-model:value="formData.guidanceType">
           <a-radio :value="1">项目指导</a-radio>
           <a-radio :value="2">论文指导</a-radio>
         </a-radio-group>
@@ -138,12 +138,6 @@ const selectedTopicTitle = ref('')
 
 // 指导日期（dayjs格式）
 const guidanceDateValue = ref<Dayjs | null>(null)
-
-// 指导类型是否禁用（根据角色自动设置）
-const typeDisabled = computed(() => {
-  // 企业教师只能选项目指导，高校教师只能选论文指导
-  return userStore.hasAnyRole(['ENTERPRISE_TEACHER']) || userStore.hasAnyRole(['UNIVERSITY_TEACHER'])
-})
 
 // 表单数据
 const formData = reactive<CreateGuidanceDTO>({
