@@ -8,6 +8,7 @@ import com.yuwan.completebackend.mapper.EnterpriseMapper;
 import com.yuwan.completebackend.mapper.MajorDirectionMapper;
 import com.yuwan.completebackend.mapper.MajorMapper;
 import com.yuwan.completebackend.mapper.MajorTeacherMapper;
+import com.yuwan.completebackend.mapper.OpeningTaskBookMapper;
 import com.yuwan.completebackend.mapper.TeacherAssignmentMapper;
 import com.yuwan.completebackend.mapper.TeacherRelationshipMapper;
 import com.yuwan.completebackend.mapper.TopicMapper;
@@ -19,6 +20,7 @@ import com.yuwan.completebackend.model.entity.Enterprise;
 import com.yuwan.completebackend.model.entity.Major;
 import com.yuwan.completebackend.model.entity.MajorDirection;
 import com.yuwan.completebackend.model.entity.MajorTeacher;
+import com.yuwan.completebackend.model.entity.OpeningTaskBook;
 import com.yuwan.completebackend.model.entity.TeacherAssignment;
 import com.yuwan.completebackend.model.entity.Topic;
 import com.yuwan.completebackend.model.entity.TopicSelection;
@@ -33,6 +35,7 @@ import com.yuwan.completebackend.model.vo.TopicForSelectionVO;
 import com.yuwan.completebackend.model.vo.TopicSelectionVO;
 import com.yuwan.completebackend.model.vo.UnselectedStudentVO;
 import com.yuwan.completebackend.security.SecurityUtil;
+import com.yuwan.completebackend.service.INotificationDispatchService;
 import com.yuwan.completebackend.service.ITopicSelectionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,8 +51,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 课题选报服务实现类
@@ -74,6 +79,8 @@ public class TopicSelectionServiceImpl implements ITopicSelectionService {
     private final MajorMapper majorMapper;
     private final TeacherAssignmentMapper teacherAssignmentMapper;
     private final TeacherRelationshipMapper teacherRelationshipMapper;
+    private final OpeningTaskBookMapper openingTaskBookMapper;
+    private final INotificationDispatchService notificationDispatchService;
 
     /** 学生最多选报课题数 */
     private static final int MAX_SELECTION_COUNT = 3;
@@ -288,9 +295,32 @@ public class TopicSelectionServiceImpl implements ITopicSelectionService {
                         .eq(TopicSelection::getSelectionId, selectionId)
         );
 
+        // 7. 选题确认后，自动将课题申报内容同步为学生任务书
+        syncTaskBookFromTopic(selection, topic, teacherId);
+
+        User student = userMapper.selectById(selection.getStudentId());
+        User teacher = userMapper.selectById(teacherId);
+        Map<String, String> variables = new HashMap<>();
+        variables.put("studentName", student != null ? student.getRealName() : "同学");
+        variables.put("topicTitle", topic.getTopicTitle());
+        variables.put("teacherName", teacher != null ? teacher.getRealName() : "指导教师");
+        variables.put("result", "已中选");
+
+        notificationDispatchService.sendByTemplateAfterCommit(
+            "TOPIC_SELECTION_RESULT",
+            selection.getStudentId(),
+            "TOPIC_SELECTION",
+            selection.getSelectionId(),
+            "/topic-selection/my",
+            variables,
+            "selection:confirm:" + selection.getSelectionId() + ":" + selection.getStudentId(),
+            null,
+            null
+        );
+
         log.info("教师 {} 确认学生 {} 的课题选报 {}", teacherId, selection.getStudentId(), selectionId);
 
-        // 7. 返回更新后的记录
+        // 8. 返回更新后的记录
         List<SelectionForTeacherVO> list = topicSelectionMapper.selectByTeacher(teacherId, null);
         return list.stream()
                 .filter(v -> v.getSelectionId().equals(selectionId))
@@ -330,6 +360,26 @@ public class TopicSelectionServiceImpl implements ITopicSelectionService {
                         .set(TopicSelection::getConfirmedBy, teacherId)
                         .eq(TopicSelection::getSelectionId, selectionId)
         );
+
+                User student = userMapper.selectById(selection.getStudentId());
+                User teacher = userMapper.selectById(teacherId);
+                Map<String, String> variables = new HashMap<>();
+                variables.put("studentName", student != null ? student.getRealName() : "同学");
+                variables.put("topicTitle", topic.getTopicTitle());
+                variables.put("teacherName", teacher != null ? teacher.getRealName() : "指导教师");
+                variables.put("result", "未中选");
+
+                notificationDispatchService.sendByTemplateAfterCommit(
+                    "TOPIC_SELECTION_RESULT",
+                    selection.getStudentId(),
+                    "TOPIC_SELECTION",
+                    selection.getSelectionId(),
+                    "/topic-selection/my",
+                    variables,
+                    "selection:reject:" + selection.getSelectionId() + ":" + selection.getStudentId(),
+                    null,
+                    null
+                );
 
         log.info("教师 {} 拒绝学生 {} 的课题选报 {}", teacherId, selection.getStudentId(), selectionId);
 
@@ -693,5 +743,60 @@ public class TopicSelectionServiceImpl implements ITopicSelectionService {
      */
     private String nullSafe(Object value) {
         return value != null ? value.toString() : "";
+    }
+
+    /**
+     * 按“确认选报”结果同步任务书，保证学生在“我的任务书”可见。
+     */
+    private void syncTaskBookFromTopic(TopicSelection selection, Topic topic, String teacherId) {
+        String content = buildTaskBookContentFromTopic(topic);
+
+        LambdaQueryWrapper<OpeningTaskBook> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OpeningTaskBook::getStudentId, selection.getStudentId());
+        OpeningTaskBook existing = openingTaskBookMapper.selectOne(wrapper);
+
+        if (existing != null) {
+            existing.setTopicId(topic.getTopicId());
+            existing.setTeacherId(teacherId);
+            existing.setContent(content);
+            openingTaskBookMapper.updateById(existing);
+            return;
+        }
+
+        OpeningTaskBook taskBook = new OpeningTaskBook();
+        taskBook.setStudentId(selection.getStudentId());
+        taskBook.setTopicId(topic.getTopicId());
+        taskBook.setTeacherId(teacherId);
+        taskBook.setContent(content);
+        openingTaskBookMapper.insert(taskBook);
+    }
+
+    private String buildTaskBookContentFromTopic(Topic topic) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<h2>毕业设计（论文）任务书</h2>");
+        appendTaskBookSection(sb, "课题名称", topic.getTopicTitle());
+        appendTaskBookSection(sb, "指导方向", topic.getGuidanceDirection());
+        appendTaskBookSection(sb, "选题背景与意义", topic.getBackgroundSignificance());
+        appendTaskBookSection(sb, "课题内容简述", topic.getContentSummary());
+        appendTaskBookSection(sb, "专业知识综合训练情况", topic.getProfessionalTraining());
+        if (topic.getWorkloadWeeks() != null) {
+            appendTaskBookSection(sb, "工作量总周数", String.valueOf(topic.getWorkloadWeeks()));
+        }
+        appendTaskBookSection(sb, "备注", topic.getRemark());
+
+        if (sb.length() <= "<h2>毕业设计（论文）任务书</h2>".length()) {
+            sb.append("<p>该课题已确认，暂无可同步的任务书正文内容，请联系指导教师完善。</p>");
+        }
+        return sb.toString();
+    }
+
+    private void appendTaskBookSection(StringBuilder sb, String title, String value) {
+        if (!StringUtils.hasText(value)) {
+            return;
+        }
+        sb.append("<h3>").append(title).append("</h3>")
+                .append("<p>")
+                .append(value.replace("\n", "<br/>"))
+                .append("</p>");
     }
 }

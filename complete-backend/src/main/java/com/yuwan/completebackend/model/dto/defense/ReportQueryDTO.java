@@ -23,8 +23,8 @@ public class ReportQueryDTO implements Serializable {
     @Schema(description = "学生姓名（模糊查询）")
     private String studentName;
 
-    @Schema(description = "审查状态: 0=未提交, 1=已提交待审, 2=通过, 3=不合格")
-    private Integer reviewStatus;
+    @Schema(description = "状态: 0=草稿, 1=已定稿")
+    private Integer status;
 
     @Schema(description = "答辩安排ID")
     private String arrangementId;

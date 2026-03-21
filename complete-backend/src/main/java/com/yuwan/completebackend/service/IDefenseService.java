@@ -120,11 +120,4 @@ public interface IDefenseService extends IService<DefenseArrangement> {
      */
     OpeningReportVO getReportDetail(String reportId);
 
-    /**
-     * 审查开题报告（企业教师）
-     *
-     * @param dto 审查开题报告DTO
-     * @return 是否成功
-     */
-    boolean reviewReport(ReviewReportDTO dto);
 }

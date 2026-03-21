@@ -3,6 +3,7 @@ package com.yuwan.completebackend.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -12,18 +13,25 @@ import com.yuwan.completebackend.common.enums.DefenseType;
 import com.yuwan.completebackend.common.enums.OpeningReportStatus;
 import com.yuwan.completebackend.exception.BusinessException;
 import com.yuwan.completebackend.mapper.DefenseArrangementMapper;
+import com.yuwan.completebackend.mapper.NotificationTargetMapper;
 import com.yuwan.completebackend.mapper.OpeningReportMapper;
 import com.yuwan.completebackend.mapper.OpeningTaskBookMapper;
+import com.yuwan.completebackend.mapper.TopicMapper;
+import com.yuwan.completebackend.mapper.TopicSelectionMapper;
 import com.yuwan.completebackend.mapper.UserMapper;
 import com.yuwan.completebackend.model.dto.defense.*;
 import com.yuwan.completebackend.model.entity.DefenseArrangement;
 import com.yuwan.completebackend.model.entity.OpeningReport;
 import com.yuwan.completebackend.model.entity.OpeningTaskBook;
+import com.yuwan.completebackend.model.entity.Topic;
+import com.yuwan.completebackend.model.entity.TopicSelection;
+import com.yuwan.completebackend.model.enums.TopicCategory;
 import com.yuwan.completebackend.model.entity.User;
 import com.yuwan.completebackend.model.vo.defense.DefenseArrangementVO;
 import com.yuwan.completebackend.model.vo.defense.OpeningReportVO;
 import com.yuwan.completebackend.model.vo.defense.OpeningTaskBookVO;
 import com.yuwan.completebackend.service.IDefenseService;
+import com.yuwan.completebackend.service.INotificationDispatchService;
 import com.yuwan.completebackend.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +39,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * 开题答辩管理Service实现类
@@ -50,7 +62,11 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
     private final DefenseArrangementMapper arrangementMapper;
     private final OpeningReportMapper reportMapper;
     private final OpeningTaskBookMapper taskBookMapper;
+    private final TopicSelectionMapper topicSelectionMapper;
+    private final TopicMapper topicMapper;
     private final UserMapper userMapper;
+    private final NotificationTargetMapper notificationTargetMapper;
+    private final INotificationDispatchService notificationDispatchService;
 
     // ==================== 答辩安排管理 ====================
 
@@ -78,6 +94,7 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
         arrangement.setStatus(1);
 
         this.save(arrangement);
+        sendArrangementNotification(arrangement, false);
         log.info("创建答辩安排成功，ID: {}", arrangement.getArrangementId());
         return arrangement.getArrangementId();
     }
@@ -99,7 +116,11 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
         validatePanelTeachers(dto.getPanelTeachers());
 
         BeanUtil.copyProperties(dto, arrangement, "arrangementId", "enterpriseId", "creatorId");
-        return this.updateById(arrangement);
+        boolean updated = this.updateById(arrangement);
+        if (updated) {
+            sendArrangementNotification(arrangement, true);
+        }
+        return updated;
     }
 
     @Override
@@ -228,6 +249,13 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
 
     @Override
     public OpeningTaskBookVO getTaskBookByStudent(String studentId) {
+        OpeningTaskBookVO vo = taskBookMapper.selectTaskBookByStudentId(studentId);
+        if (vo != null) {
+            return vo;
+        }
+
+        // 历史数据兜底：若学生已中选但尚未生成任务书，则按课题申报自动回填
+        autoBackfillTaskBookBySelection(studentId);
         return taskBookMapper.selectTaskBookByStudentId(studentId);
     }
 
@@ -242,6 +270,16 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
     @Transactional(rollbackFor = Exception.class)
     public String submitReport(SubmitReportDTO dto) {
         String currentUserId = SecurityUtil.getCurrentUserId();
+        validateReportStatus(dto.getStatus());
+
+        User student = userMapper.selectById(currentUserId);
+        if (student == null) {
+            throw new BusinessException("学生信息不存在");
+        }
+        Topic topic = topicMapper.selectById(dto.getTopicId());
+        if (topic == null) {
+            throw new BusinessException("课题不存在");
+        }
 
         // 查询是否已存在报告
         LambdaQueryWrapper<OpeningReport> wrapper = new LambdaQueryWrapper<>();
@@ -249,30 +287,17 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
         OpeningReport existing = reportMapper.selectOne(wrapper);
 
         if (existing != null) {
-            // 检查状态：已通过的不能重新提交
-            if (OpeningReportStatus.PASSED.getCode().equals(existing.getReviewStatus())) {
-                throw new BusinessException("开题报告已通过，不能重新提交");
+            if (OpeningReportStatus.FINALIZED.getCode().equals(existing.getStatus())) {
+                throw new BusinessException("开题报告已定稿，不能再次修改");
             }
-            // 更新
-            existing.setTopicId(dto.getTopicId());
-            existing.setArrangementId(dto.getArrangementId());
-            existing.setDocumentId(dto.getDocumentId());
-            existing.setSubmitTime(new Date());
-            existing.setReviewStatus(OpeningReportStatus.SUBMITTED.getCode());
-            existing.setReviewComment(null);
-            existing.setReviewerId(null);
-            existing.setReviewTime(null);
+
+            applyReportContent(existing, dto, student, topic);
             reportMapper.updateById(existing);
             return existing.getReportId();
         } else {
-            // 新建
             OpeningReport report = new OpeningReport();
             report.setStudentId(currentUserId);
-            report.setTopicId(dto.getTopicId());
-            report.setArrangementId(dto.getArrangementId());
-            report.setDocumentId(dto.getDocumentId());
-            report.setSubmitTime(new Date());
-            report.setReviewStatus(OpeningReportStatus.SUBMITTED.getCode());
+            applyReportContent(report, dto, student, topic);
             reportMapper.insert(report);
             return report.getReportId();
         }
@@ -283,7 +308,7 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
         String currentUserId = SecurityUtil.getCurrentUserId();
         OpeningReportVO vo = reportMapper.selectReportByStudentId(currentUserId);
         if (vo != null) {
-            vo.setReviewStatusName(OpeningReportStatus.getDescByCode(vo.getReviewStatus()));
+            vo.setStatusName(OpeningReportStatus.getDescByCode(vo.getStatus()));
         }
         return vo;
     }
@@ -298,13 +323,13 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
                 page,
                 enterpriseId,
                 queryDTO.getStudentName(),
-                queryDTO.getReviewStatus(),
+                queryDTO.getStatus(),
                 queryDTO.getArrangementId()
         );
 
         // 填充状态名称
         for (OpeningReportVO vo : result.getRecords()) {
-            vo.setReviewStatusName(OpeningReportStatus.getDescByCode(vo.getReviewStatus()));
+            vo.setStatusName(OpeningReportStatus.getDescByCode(vo.getStatus()));
         }
         return result;
     }
@@ -315,35 +340,247 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
         if (vo == null) {
             throw new BusinessException("开题报告不存在");
         }
-        vo.setReviewStatusName(OpeningReportStatus.getDescByCode(vo.getReviewStatus()));
+        vo.setStatusName(OpeningReportStatus.getDescByCode(vo.getStatus()));
         return vo;
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public boolean reviewReport(ReviewReportDTO dto) {
-        OpeningReport report = reportMapper.selectById(dto.getReportId());
-        if (report == null) {
-            throw new BusinessException("开题报告不存在");
+    private void validateReportStatus(Integer status) {
+        if (status == null || OpeningReportStatus.getByCode(status) == null) {
+            throw new BusinessException("开题报告状态无效");
+        }
+    }
+
+    private void applyReportContent(OpeningReport report, SubmitReportDTO dto, User student, Topic topic) {
+        report.setTopicId(dto.getTopicId());
+        report.setArrangementId(dto.getArrangementId());
+        report.setStudentName(StrUtil.blankToDefault(dto.getStudentName(), student.getRealName()));
+        report.setMajorName(StrUtil.blankToDefault(dto.getMajorName(), student.getMajor()));
+        report.setClassName(dto.getClassName());
+        report.setTopicTitle(StrUtil.blankToDefault(dto.getTopicTitle(), topic.getTopicTitle()));
+        report.setAdvisorNames(StrUtil.blankToDefault(dto.getAdvisorNames(), getAdvisorNamesByTopic(topic)));
+        report.setReportDate(dto.getReportDate());
+        report.setResearchStatus(dto.getResearchStatus());
+        report.setPurposeSignificance(dto.getPurposeSignificance());
+        report.setResearchContent(dto.getResearchContent());
+        report.setInnovationPoints(dto.getInnovationPoints());
+        report.setProblemsToSolve(dto.getProblemsToSolve());
+        report.setProgressExpectation(dto.getProgressExpectation());
+        report.setCurrentConditions(dto.getCurrentConditions());
+        report.setAdvisorOpinion(dto.getAdvisorOpinion());
+        report.setCollegeOpinion(dto.getCollegeOpinion());
+        report.setStatus(dto.getStatus());
+
+        if (OpeningReportStatus.FINALIZED.getCode().equals(dto.getStatus())) {
+            report.setSubmitTime(new Date());
+        } else {
+            report.setSubmitTime(null);
+        }
+    }
+
+    private String getAdvisorNamesByTopic(Topic topic) {
+        if (topic == null || StrUtil.isBlank(topic.getCreatorId())) {
+            return null;
+        }
+        User advisor = userMapper.selectById(topic.getCreatorId());
+        return advisor != null ? advisor.getRealName() : null;
+    }
+
+    private void autoBackfillTaskBookBySelection(String studentId) {
+        LambdaQueryWrapper<TopicSelection> selectionWrapper = new LambdaQueryWrapper<>();
+        selectionWrapper.eq(TopicSelection::getStudentId, studentId)
+                .eq(TopicSelection::getSelectionStatus, 1)
+                .orderByDesc(TopicSelection::getConfirmTime)
+                .last("LIMIT 1");
+
+        TopicSelection selected = topicSelectionMapper.selectOne(selectionWrapper);
+        if (selected == null) {
+            return;
         }
 
-        // 验证状态：只能审查已提交待审的报告
-        if (!OpeningReportStatus.SUBMITTED.getCode().equals(report.getReviewStatus())) {
-            throw new BusinessException("当前状态不允许审查");
+        Topic topic = topicMapper.selectById(selected.getTopicId());
+        if (topic == null) {
+            return;
         }
 
-        // 验证审查状态值
-        if (!OpeningReportStatus.PASSED.getCode().equals(dto.getReviewStatus())
-                && !OpeningReportStatus.FAILED.getCode().equals(dto.getReviewStatus())) {
-            throw new BusinessException("审查状态无效");
+        LambdaQueryWrapper<OpeningTaskBook> taskBookWrapper = new LambdaQueryWrapper<>();
+        taskBookWrapper.eq(OpeningTaskBook::getStudentId, studentId);
+        OpeningTaskBook existing = taskBookMapper.selectOne(taskBookWrapper);
+        if (existing != null) {
+            return;
         }
 
-        String currentUserId = SecurityUtil.getCurrentUserId();
-        report.setReviewStatus(dto.getReviewStatus());
-        report.setReviewComment(dto.getReviewComment());
-        report.setReviewerId(currentUserId);
-        report.setReviewTime(new Date());
+        OpeningTaskBook taskBook = new OpeningTaskBook();
+        taskBook.setStudentId(studentId);
+        taskBook.setTopicId(topic.getTopicId());
+        taskBook.setTeacherId(topic.getCreatorId());
+        taskBook.setContent(buildTaskBookContentFromTopic(topic));
+        taskBookMapper.insert(taskBook);
+    }
 
-        return reportMapper.updateById(report) > 0;
+    private String buildTaskBookContentFromTopic(Topic topic) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<h2>毕业设计（论文）任务书</h2>");
+        appendTaskBookSection(sb, "课题名称", topic.getTopicTitle());
+        appendTaskBookSection(sb, "指导方向", topic.getGuidanceDirection());
+        appendTaskBookSection(sb, "选题背景与意义", topic.getBackgroundSignificance());
+        appendTaskBookSection(sb, "课题内容简述", topic.getContentSummary());
+        appendTaskBookSection(sb, "专业知识综合训练情况", topic.getProfessionalTraining());
+        if (topic.getWorkloadWeeks() != null) {
+            appendTaskBookSection(sb, "工作量总周数", String.valueOf(topic.getWorkloadWeeks()));
+        }
+        appendTaskBookSection(sb, "备注", topic.getRemark());
+
+        if (sb.length() <= "<h2>毕业设计（论文）任务书</h2>".length()) {
+            sb.append("<p>该课题已确认，暂无可同步的任务书正文内容，请联系指导教师完善。</p>");
+        }
+        return sb.toString();
+    }
+
+    private void appendTaskBookSection(StringBuilder sb, String title, String value) {
+        if (StrUtil.isBlank(value)) {
+            return;
+        }
+        sb.append("<h3>").append(title).append("</h3>")
+                .append("<p>")
+                .append(value.replace("\n", "<br/>"))
+                .append("</p>");
+    }
+
+    private void sendArrangementNotification(DefenseArrangement arrangement, boolean updated) {
+        String arrangementType = DefenseType.getDescByCode(arrangement.getDefenseType());
+        String route = "/defense/arrangement/detail/" + arrangement.getArrangementId();
+        Integer topicCategoryCode = resolveTopicCategoryCode(arrangement.getTopicCategory());
+
+        Map<String, String> variables = new HashMap<>();
+        variables.put("defenseType", arrangementType);
+        variables.put("defenseTime", arrangement.getDefenseTime() != null
+            ? DateUtil.format(arrangement.getDefenseTime(), "yyyy-MM-dd HH:mm")
+            : "待定");
+        variables.put("defenseLocation", StrUtil.blankToDefault(arrangement.getDefenseLocation(), "待定"));
+        variables.put("action", updated ? "已更新" : "已发布");
+
+        String suffix = updated ? (":" + System.currentTimeMillis()) : "";
+        String dedupPrefix = "defense:arrangement:" + arrangement.getArrangementId() + suffix;
+
+        Set<String> receiverIds = new HashSet<>();
+        List<String> panelTeacherIds = new ArrayList<>();
+        List<String> enterpriseTeacherIds;
+        List<String> studentIds;
+        if (CollUtil.isNotEmpty(arrangement.getPanelTeachers())) {
+            panelTeacherIds.addAll(arrangement.getPanelTeachers());
+            receiverIds.addAll(panelTeacherIds);
+        }
+        enterpriseTeacherIds = queryEnterpriseTeachersWithFallback(
+            arrangement.getEnterpriseId(), topicCategoryCode, arrangement.getMajorId(), arrangement.getArrangementId());
+        studentIds = queryStudentsWithFallback(
+            arrangement.getEnterpriseId(), topicCategoryCode, arrangement.getMajorId(), arrangement.getArrangementId());
+
+        receiverIds.addAll(enterpriseTeacherIds);
+        receiverIds.addAll(studentIds);
+
+        receiverIds.removeIf(id -> !StrUtil.isNotBlank(id));
+
+        log.info("答辩通知接收人统计，arrangementId={}, panelTeachers={}, enterpriseTeachers={}, students={}, total={}",
+            arrangement.getArrangementId(), panelTeacherIds.size(), enterpriseTeacherIds.size(), studentIds.size(), receiverIds.size());
+        if (CollUtil.isEmpty(studentIds)) {
+            log.warn("答辩通知未命中任何学生，arrangementId={}, enterpriseId={}, topicCategory={}, majorId={}",
+                arrangement.getArrangementId(), arrangement.getEnterpriseId(), arrangement.getTopicCategory(), arrangement.getMajorId());
+        }
+
+        notificationDispatchService.sendBatchByTemplateAfterCommit(
+                "DEFENSE_ARRANGEMENT_NOTICE",
+                new ArrayList<>(receiverIds),
+                "DEFENSE_ARRANGEMENT",
+                arrangement.getArrangementId(),
+                route,
+                variables,
+                dedupPrefix,
+                null,
+                arrangement.getDeadline()
+        );
+    }
+
+    private Integer resolveTopicCategoryCode(String topicCategory) {
+        if (StrUtil.isBlank(topicCategory)) {
+            return null;
+        }
+        if (StrUtil.isNumeric(topicCategory)) {
+            return Integer.parseInt(topicCategory);
+        }
+        for (TopicCategory category : TopicCategory.values()) {
+            if (StrUtil.equals(category.getDesc(), topicCategory)) {
+                return category.getCode();
+            }
+        }
+        log.warn("答辩安排课题类别无法映射为数值编码，topicCategory={}", topicCategory);
+        return null;
+    }
+
+    private List<String> queryStudentsWithFallback(String enterpriseId,
+                                                   Integer topicCategoryCode,
+                                                   String majorId,
+                                                   String arrangementId) {
+        List<String> studentIds = notificationTargetMapper.selectStudentIdsForArrangement(enterpriseId, topicCategoryCode, majorId);
+        if (CollUtil.isNotEmpty(studentIds)) {
+            return studentIds;
+        }
+
+        if (StrUtil.isNotBlank(majorId)) {
+            studentIds = notificationTargetMapper.selectStudentIdsForArrangement(enterpriseId, topicCategoryCode, null);
+            if (CollUtil.isNotEmpty(studentIds)) {
+                log.warn("答辩通知学生匹配回退生效（忽略majorId），arrangementId={}, enterpriseId={}, topicCategory={}, majorId={}",
+                        arrangementId, enterpriseId, topicCategoryCode, majorId);
+                return studentIds;
+            }
+        }
+
+        if (topicCategoryCode != null) {
+            studentIds = notificationTargetMapper.selectStudentIdsForArrangement(enterpriseId, null, majorId);
+            if (CollUtil.isNotEmpty(studentIds)) {
+                log.warn("答辩通知学生匹配回退生效（忽略topicCategory），arrangementId={}, enterpriseId={}, topicCategory={}, majorId={}",
+                        arrangementId, enterpriseId, topicCategoryCode, majorId);
+                return studentIds;
+            }
+        }
+
+        studentIds = notificationTargetMapper.selectStudentIdsForArrangement(enterpriseId, null, null);
+        if (CollUtil.isNotEmpty(studentIds)) {
+            log.warn("答辩通知学生匹配回退生效（仅按enterpriseId），arrangementId={}, enterpriseId={}", arrangementId, enterpriseId);
+        }
+        return studentIds;
+    }
+
+    private List<String> queryEnterpriseTeachersWithFallback(String enterpriseId,
+                                                             Integer topicCategoryCode,
+                                                             String majorId,
+                                                             String arrangementId) {
+        List<String> teacherIds = notificationTargetMapper.selectEnterpriseTeacherIdsForArrangement(enterpriseId, topicCategoryCode, majorId);
+        if (CollUtil.isNotEmpty(teacherIds)) {
+            return teacherIds;
+        }
+
+        if (StrUtil.isNotBlank(majorId)) {
+            teacherIds = notificationTargetMapper.selectEnterpriseTeacherIdsForArrangement(enterpriseId, topicCategoryCode, null);
+            if (CollUtil.isNotEmpty(teacherIds)) {
+                log.warn("答辩通知企业教师匹配回退生效（忽略majorId），arrangementId={}, enterpriseId={}, topicCategory={}, majorId={}",
+                        arrangementId, enterpriseId, topicCategoryCode, majorId);
+                return teacherIds;
+            }
+        }
+
+        if (topicCategoryCode != null) {
+            teacherIds = notificationTargetMapper.selectEnterpriseTeacherIdsForArrangement(enterpriseId, null, majorId);
+            if (CollUtil.isNotEmpty(teacherIds)) {
+                log.warn("答辩通知企业教师匹配回退生效（忽略topicCategory），arrangementId={}, enterpriseId={}, topicCategory={}, majorId={}",
+                        arrangementId, enterpriseId, topicCategoryCode, majorId);
+                return teacherIds;
+            }
+        }
+
+        teacherIds = notificationTargetMapper.selectEnterpriseTeacherIdsForArrangement(enterpriseId, null, null);
+        if (CollUtil.isNotEmpty(teacherIds)) {
+            log.warn("答辩通知企业教师匹配回退生效（仅按enterpriseId），arrangementId={}, enterpriseId={}", arrangementId, enterpriseId);
+        }
+        return teacherIds;
     }
 }

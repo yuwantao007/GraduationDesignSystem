@@ -137,11 +137,4 @@ public class DefenseController {
         return Result.success(vo);
     }
 
-    @Operation(summary = "审查开题报告", description = "企业教师审查学生的开题报告")
-    @PostMapping("/report/review")
-    @PreAuthorize("hasAuthority('defense:report:review')")
-    public Result<Boolean> reviewReport(@Valid @RequestBody ReviewReportDTO dto) {
-        Boolean success = defenseService.reviewReport(dto);
-        return Result.success("审查完成", success);
-    }
 }

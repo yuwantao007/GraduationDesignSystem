@@ -14,7 +14,6 @@ import type {
   SaveTaskBookDTO,
   OpeningReportVO,
   SubmitReportDTO,
-  ReviewReportDTO,
   ReportQueryDTO,
   PageResult
 } from '@/types/defense'
@@ -113,10 +112,4 @@ export const defenseApi = {
     return request.get(`/defense/report/${reportId}`)
   },
 
-  /**
-   * 审查开题报告
-   */
-  reviewReport(data: ReviewReportDTO): Promise<ApiResponse<boolean>> {
-    return request.post('/defense/report/review', data)
-  }
 }

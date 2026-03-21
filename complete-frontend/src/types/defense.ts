@@ -21,28 +21,22 @@ export const DefenseTypeMap: Record<DefenseType, string> = {
   [DefenseType.SECONDARY]: '二次答辩'
 }
 
-/** 开题报告审查状态枚举 */
+/** 开题报告状态枚举 */
 export enum OpeningReportStatus {
-  NOT_SUBMITTED = 0,  // 未提交
-  SUBMITTED = 1,      // 已提交待审
-  PASSED = 2,         // 通过
-  FAILED = 3          // 不合格
+  DRAFT = 0,      // 草稿
+  FINALIZED = 1   // 已定稿
 }
 
 /** 开题报告状态名称映射 */
 export const OpeningReportStatusMap: Record<OpeningReportStatus, string> = {
-  [OpeningReportStatus.NOT_SUBMITTED]: '未提交',
-  [OpeningReportStatus.SUBMITTED]: '已提交待审',
-  [OpeningReportStatus.PASSED]: '通过',
-  [OpeningReportStatus.FAILED]: '不合格'
+  [OpeningReportStatus.DRAFT]: '草稿',
+  [OpeningReportStatus.FINALIZED]: '已定稿'
 }
 
 /** 状态颜色映射 */
 export const OpeningReportStatusColor: Record<OpeningReportStatus, string> = {
-  [OpeningReportStatus.NOT_SUBMITTED]: 'default',
-  [OpeningReportStatus.SUBMITTED]: 'processing',
-  [OpeningReportStatus.PASSED]: 'success',
-  [OpeningReportStatus.FAILED]: 'error'
+  [OpeningReportStatus.DRAFT]: 'default',
+  [OpeningReportStatus.FINALIZED]: 'success'
 }
 
 // ==================== 答辩安排相关类型 ====================
@@ -142,19 +136,25 @@ export interface OpeningReportVO {
   studentId: string
   studentName: string
   studentNo: string
+  majorName?: string
+  className?: string
   topicId: string
   topicName: string
+  advisorNames?: string
+  reportDate?: string
   arrangementId?: string
-  documentId?: string
-  documentName?: string
-  documentUrl?: string
+  researchStatus?: string
+  purposeSignificance?: string
+  researchContent?: string
+  innovationPoints?: string
+  problemsToSolve?: string
+  progressExpectation?: string
+  currentConditions?: string
+  advisorOpinion?: string
+  collegeOpinion?: string
   submitTime?: string
-  reviewStatus: OpeningReportStatus
-  reviewStatusName: string
-  reviewComment?: string
-  reviewerId?: string
-  reviewerName?: string
-  reviewTime?: string
+  status: OpeningReportStatus
+  statusName: string
   createTime: string
   updateTime: string
 }
@@ -163,20 +163,28 @@ export interface OpeningReportVO {
 export interface SubmitReportDTO {
   topicId: string
   arrangementId?: string
-  documentId: string
-}
-
-/** 审查开题报告DTO */
-export interface ReviewReportDTO {
-  reportId: string
-  reviewStatus: OpeningReportStatus.PASSED | OpeningReportStatus.FAILED
-  reviewComment?: string
+  studentName?: string
+  majorName?: string
+  className?: string
+  topicTitle?: string
+  advisorNames?: string
+  reportDate?: string
+  researchStatus?: string
+  purposeSignificance?: string
+  researchContent?: string
+  innovationPoints?: string
+  problemsToSolve?: string
+  progressExpectation?: string
+  currentConditions?: string
+  advisorOpinion?: string
+  collegeOpinion?: string
+  status: OpeningReportStatus
 }
 
 /** 开题报告查询DTO */
 export interface ReportQueryDTO {
   studentName?: string
-  reviewStatus?: OpeningReportStatus
+  status?: OpeningReportStatus
   arrangementId?: string
   pageNum?: number
   pageSize?: number

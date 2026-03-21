@@ -21,6 +21,7 @@ import com.yuwan.completebackend.model.vo.GuidanceRecordVO;
 import com.yuwan.completebackend.model.vo.GuidanceStudentVO;
 import com.yuwan.completebackend.security.SecurityUtil;
 import com.yuwan.completebackend.service.IGuidanceRecordService;
+import com.yuwan.completebackend.service.INotificationDispatchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
@@ -34,8 +35,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 指导记录服务实现类
@@ -56,6 +59,7 @@ public class GuidanceRecordServiceImpl implements IGuidanceRecordService {
     private final TopicSelectionMapper topicSelectionMapper;
     private final UserMapper userMapper;
     private final TeacherRelationshipMapper teacherRelationshipMapper;
+    private final INotificationDispatchService notificationDispatchService;
 
     @Override
     public GuidanceRecordVO createGuidanceRecord(CreateGuidanceDTO dto) {
@@ -117,6 +121,25 @@ public class GuidanceRecordServiceImpl implements IGuidanceRecordService {
 
         guidanceRecordMapper.insert(record);
         log.info("指导记录创建成功，记录ID: {}", record.getRecordId());
+
+        User teacher = userMapper.selectById(currentUserId);
+        Map<String, String> variables = new HashMap<>();
+        variables.put("studentId", dto.getStudentId());
+        variables.put("teacherName", teacher != null ? teacher.getRealName() : "指导教师");
+        variables.put("topicTitle", topic.getTopicTitle());
+        variables.put("guidanceType", guidanceType.getDescription());
+
+        notificationDispatchService.sendByTemplateAfterCommit(
+            "GUIDANCE_RECORD_CREATED",
+            dto.getStudentId(),
+            "GUIDANCE_RECORD",
+            record.getRecordId(),
+            "/guidance/student",
+            variables,
+            "guidance:create:" + record.getRecordId() + ":" + dto.getStudentId(),
+            null,
+            null
+        );
 
         return guidanceRecordMapper.selectRecordDetail(record.getRecordId());
     }

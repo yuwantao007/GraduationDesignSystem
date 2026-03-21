@@ -24,7 +24,7 @@ public interface OpeningReportMapper extends BaseMapper<OpeningReport> {
      * @param page          分页参数
      * @param enterpriseId  企业ID
      * @param studentName   学生姓名（模糊）
-     * @param reviewStatus  审查状态
+     * @param status        报告状态
      * @param arrangementId 答辩安排ID
      * @return 分页结果
      */
@@ -32,7 +32,7 @@ public interface OpeningReportMapper extends BaseMapper<OpeningReport> {
             Page<OpeningReportVO> page,
             @Param("enterpriseId") String enterpriseId,
             @Param("studentName") String studentName,
-            @Param("reviewStatus") Integer reviewStatus,
+            @Param("status") Integer status,
             @Param("arrangementId") String arrangementId
     );
 

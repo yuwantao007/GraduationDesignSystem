@@ -3,7 +3,7 @@ package com.yuwan.completebackend.common.enums;
 import lombok.Getter;
 
 /**
- * 开题报告审查状态枚举
+ * 开题报告状态枚举
  *
  * @author 系统架构师
  * @version 1.0
@@ -12,10 +12,8 @@ import lombok.Getter;
 @Getter
 public enum OpeningReportStatus {
 
-    NOT_SUBMITTED(0, "未提交"),
-    SUBMITTED(1, "已提交待审"),
-    PASSED(2, "通过"),
-    FAILED(3, "不合格");
+    DRAFT(0, "草稿"),
+    FINALIZED(1, "已定稿");
 
     private final Integer code;
     private final String desc;

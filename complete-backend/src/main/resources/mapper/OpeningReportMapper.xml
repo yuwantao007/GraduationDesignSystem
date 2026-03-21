@@ -8,17 +8,24 @@
         <result property="studentId" column="student_id"/>
         <result property="studentName" column="student_name"/>
         <result property="studentNo" column="student_no"/>
+        <result property="majorName" column="major_name"/>
+        <result property="className" column="class_name"/>
         <result property="topicId" column="topic_id"/>
         <result property="topicName" column="topic_name"/>
+        <result property="advisorNames" column="advisor_names"/>
+        <result property="reportDate" column="report_date"/>
         <result property="arrangementId" column="arrangement_id"/>
-        <result property="documentId" column="document_id"/>
-        <result property="documentName" column="document_name"/>
+        <result property="researchStatus" column="research_status"/>
+        <result property="purposeSignificance" column="purpose_significance"/>
+        <result property="researchContent" column="research_content"/>
+        <result property="innovationPoints" column="innovation_points"/>
+        <result property="problemsToSolve" column="problems_to_solve"/>
+        <result property="progressExpectation" column="progress_expectation"/>
+        <result property="currentConditions" column="current_conditions"/>
+        <result property="advisorOpinion" column="advisor_opinion"/>
+        <result property="collegeOpinion" column="college_opinion"/>
         <result property="submitTime" column="submit_time"/>
-        <result property="reviewStatus" column="review_status"/>
-        <result property="reviewComment" column="review_comment"/>
-        <result property="reviewerId" column="reviewer_id"/>
-        <result property="reviewerName" column="reviewer_name"/>
-        <result property="reviewTime" column="review_time"/>
+        <result property="status" column="status"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
@@ -28,35 +35,39 @@
         SELECT
             r.report_id,
             r.student_id,
-            u.real_name AS student_name,
+            r.student_name,
             u.student_no,
+            r.major_name,
+            r.class_name,
             r.topic_id,
-            t.topic_name,
+            r.topic_title AS topic_name,
+            r.advisor_names,
+            r.report_date,
             r.arrangement_id,
-            r.document_id,
-            d.file_name AS document_name,
+            r.research_status,
+            r.purpose_significance,
+            r.research_content,
+            r.innovation_points,
+            r.problems_to_solve,
+            r.progress_expectation,
+            r.current_conditions,
+            r.advisor_opinion,
+            r.college_opinion,
             r.submit_time,
-            r.review_status,
-            r.review_comment,
-            r.reviewer_id,
-            ru.real_name AS reviewer_name,
-            r.review_time,
+            r.status,
             r.create_time,
             r.update_time
         FROM opening_report r
         LEFT JOIN user_info u ON r.student_id = u.user_id
-        LEFT JOIN topic_info t ON r.topic_id = t.topic_id
-        LEFT JOIN document_info d ON r.document_id = d.document_id
-        LEFT JOIN user_info ru ON r.reviewer_id = ru.user_id
         WHERE r.is_deleted = 0
         <if test="enterpriseId != null and enterpriseId != ''">
             AND u.enterprise_id = #{enterpriseId}
         </if>
         <if test="studentName != null and studentName != ''">
-            AND u.real_name LIKE CONCAT('%', #{studentName}, '%')
+            AND r.student_name LIKE CONCAT('%', #{studentName}, '%')
         </if>
-        <if test="reviewStatus != null">
-            AND r.review_status = #{reviewStatus}
+        <if test="status != null">
+            AND r.status = #{status}
         </if>
         <if test="arrangementId != null and arrangementId != ''">
             AND r.arrangement_id = #{arrangementId}
@@ -69,26 +80,30 @@
         SELECT
             r.report_id,
             r.student_id,
-            u.real_name AS student_name,
+            r.student_name,
             u.student_no,
+            r.major_name,
+            r.class_name,
             r.topic_id,
-            t.topic_name,
+            r.topic_title AS topic_name,
+            r.advisor_names,
+            r.report_date,
             r.arrangement_id,
-            r.document_id,
-            d.file_name AS document_name,
+            r.research_status,
+            r.purpose_significance,
+            r.research_content,
+            r.innovation_points,
+            r.problems_to_solve,
+            r.progress_expectation,
+            r.current_conditions,
+            r.advisor_opinion,
+            r.college_opinion,
             r.submit_time,
-            r.review_status,
-            r.review_comment,
-            r.reviewer_id,
-            ru.real_name AS reviewer_name,
-            r.review_time,
+            r.status,
             r.create_time,
             r.update_time
         FROM opening_report r
         LEFT JOIN user_info u ON r.student_id = u.user_id
-        LEFT JOIN topic_info t ON r.topic_id = t.topic_id
-        LEFT JOIN document_info d ON r.document_id = d.document_id
-        LEFT JOIN user_info ru ON r.reviewer_id = ru.user_id
         WHERE r.is_deleted = 0
         AND r.report_id = #{reportId}
     </select>
@@ -98,26 +113,30 @@
         SELECT
             r.report_id,
             r.student_id,
-            u.real_name AS student_name,
+            r.student_name,
             u.student_no,
+            r.major_name,
+            r.class_name,
             r.topic_id,
-            t.topic_name,
+            r.topic_title AS topic_name,
+            r.advisor_names,
+            r.report_date,
             r.arrangement_id,
-            r.document_id,
-            d.file_name AS document_name,
+            r.research_status,
+            r.purpose_significance,
+            r.research_content,
+            r.innovation_points,
+            r.problems_to_solve,
+            r.progress_expectation,
+            r.current_conditions,
+            r.advisor_opinion,
+            r.college_opinion,
             r.submit_time,
-            r.review_status,
-            r.review_comment,
-            r.reviewer_id,
-            ru.real_name AS reviewer_name,
-            r.review_time,
+            r.status,
             r.create_time,
             r.update_time
         FROM opening_report r
         LEFT JOIN user_info u ON r.student_id = u.user_id
-        LEFT JOIN topic_info t ON r.topic_id = t.topic_id
-        LEFT JOIN document_info d ON r.document_id = d.document_id
-        LEFT JOIN user_info ru ON r.reviewer_id = ru.user_id
         WHERE r.is_deleted = 0
         AND r.student_id = #{studentId}
     </select>

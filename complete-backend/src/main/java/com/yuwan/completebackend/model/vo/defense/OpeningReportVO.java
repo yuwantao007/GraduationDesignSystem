@@ -33,44 +33,62 @@ public class OpeningReportVO implements Serializable {
     @Schema(description = "学号")
     private String studentNo;
 
+    @Schema(description = "专业名称")
+    private String majorName;
+
+    @Schema(description = "班级名称")
+    private String className;
+
     @Schema(description = "课题ID")
     private String topicId;
 
     @Schema(description = "课题名称")
     private String topicName;
 
+    @Schema(description = "指导教师")
+    private String advisorNames;
+
+    @Schema(description = "报告日期")
+    private Date reportDate;
+
     @Schema(description = "对应答辩安排ID")
     private String arrangementId;
 
-    @Schema(description = "报告文件ID")
-    private String documentId;
+    @Schema(description = "国内外研究现状")
+    private String researchStatus;
 
-    @Schema(description = "报告文件名称")
-    private String documentName;
+    @Schema(description = "研究目的、意义")
+    private String purposeSignificance;
 
-    @Schema(description = "报告文件URL")
-    private String documentUrl;
+    @Schema(description = "研究内容")
+    private String researchContent;
+
+    @Schema(description = "课题研究创新点")
+    private String innovationPoints;
+
+    @Schema(description = "拟解决问题")
+    private String problemsToSolve;
+
+    @Schema(description = "进度及预期结果")
+    private String progressExpectation;
+
+    @Schema(description = "完成题目的现有条件")
+    private String currentConditions;
+
+    @Schema(description = "指导教师意见")
+    private String advisorOpinion;
+
+    @Schema(description = "学院意见")
+    private String collegeOpinion;
 
     @Schema(description = "提交时间")
     private Date submitTime;
 
-    @Schema(description = "审查状态: 0=未提交, 1=已提交待审, 2=通过, 3=不合格")
-    private Integer reviewStatus;
+    @Schema(description = "状态: 0=草稿, 1=已定稿")
+    private Integer status;
 
-    @Schema(description = "审查状态名称")
-    private String reviewStatusName;
-
-    @Schema(description = "审查意见")
-    private String reviewComment;
-
-    @Schema(description = "审查人ID")
-    private String reviewerId;
-
-    @Schema(description = "审查人姓名")
-    private String reviewerName;
-
-    @Schema(description = "审查时间")
-    private Date reviewTime;
+    @Schema(description = "状态名称")
+    private String statusName;
 
     @Schema(description = "创建时间")
     private Date createTime;

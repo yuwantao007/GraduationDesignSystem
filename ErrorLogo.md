@@ -23,6 +23,160 @@
 20. [企业负责人双选审核 TooManyResultsException 异常](#企业负责人双选审核-too-many-results-exception-异常)
 21. [学生选报课题无法查看任务书详情](#学生选报课题无法查看任务书详情)
 22. [答辩安排创建后报系统错误 — MySQL 排序规则冲突](#答辩安排创建后报系统错误--mysql-排序规则冲突)
+23. [站内消息闭环开发防错记录（2026-03-21）](#站内消息闭环开发防错记录2026-03-21)
+24. [后端启动失败 — Notification 模板正则写法错误](#后端启动失败--notification-模板正则写法错误)
+25. [答辩通知未触达学生 — 自动匹配未命中导致消息漏发](#答辩通知未触达学生--自动匹配未命中导致消息漏发)
+26. [消息中心“查看详情”跳转错误 — 误跳我的开题报告](#消息中心查看详情跳转错误--误跳我的开题报告)
+
+---
+
+# 答辩通知未触达学生 — 自动匹配未命中导致消息漏发
+
+- 日期：2026-03-21
+- 严重程度：高（教师端已发布答辩安排，但学生端无消息提醒）
+
+## 一、问题描述
+
+企业教师/企业负责人已创建或更新答辩安排，界面可看到安排记录；但学生端消息中心为空，右上角铃铛无新增提示。
+
+## 二、是否因为“没有选择学生”
+
+结论：**不是页面漏选学生**。
+
+当前答辩安排模块并不提供“手工勾选学生”字段，学生接收人由后端根据业务条件自动匹配。
+
+## 三、根因分析
+
+答辩通知发送链路中，学生接收人原先主要依赖 `topic_selection.selection_status = 1` 的中选记录；当历史数据存在状态不一致（例如已有任务书但中选状态链路不完整）时，学生会被筛选漏掉，导致消息未写入 `notification_message`。
+
+此外，已对课题类别匹配做过编码统一（文本类别映射为数值码）；本次问题的关键残留点是“接收人来源单一”，导致特定数据形态下仍可能漏发。
+
+## 四、解决方案
+
+### 4.1 扩展学生接收人来源（核心修复）
+
+将学生接收人从“仅中选记录”扩展为“中选记录 + 已生成任务书”双通道并集：
+
+1. 通道A：`topic_selection` 中 `selection_status = 1` 的学生；
+2. 通道B：`opening_task_book` 中已存在任务书的学生；
+3. 最终对两通道结果去重后作为答辩通知学生接收人。
+
+### 4.2 增加发送命中统计日志
+
+在答辩通知发送处增加日志：
+
+- 小组教师命中数
+- 企业教师命中数
+- 学生命中数
+- 总接收人数
+
+若学生命中数为 0，输出告警日志，便于快速定位“匹配条件未命中”问题。
+
+## 五、涉及修改文件
+
+1. `complete-backend/src/main/java/com/yuwan/completebackend/mapper/NotificationTargetMapper.java`
+2. `complete-backend/src/main/java/com/yuwan/completebackend/service/impl/DefenseServiceImpl.java`
+
+## 六、验证方法
+
+1. 企业端对同一条答辩安排执行一次“编辑并保存”（触发更新通知）；
+2. 查看后端日志中“答辩通知接收人统计”，确认 `students > 0`；
+3. 学生端刷新消息中心，确认出现新消息与铃铛角标。
+
+## 七、经验与预防
+
+1. 业务通知接收人不要仅依赖单一状态表，应结合业务落地痕迹（如任务书、报告）做兜底；
+2. 发送通知必须记录命中统计日志，避免“发送成功但命中为0”的隐性故障；
+3. 对“自动匹配接收人”场景，建议增加可观测能力（按安排ID查询命中学生列表）用于快速排障。
+
+---
+
+# 后端启动失败 — Notification 模板正则写法错误
+
+- 日期：2026-03-21
+- 严重程度：高（应用上下文初始化失败，后端无法启动）
+
+## 一、问题描述
+
+启动后端时，Spring 容器在创建 `notificationDispatchServiceImpl` Bean 阶段失败，导致依赖链上的 `defenseServiceImpl`、`defenseController` 均无法实例化，最终应用启动中断。
+
+日志关键报错：
+
+```text
+Caused by: java.util.regex.PatternSyntaxException: Illegal repetition near index 3
+\\{(\\w+)}
+  ^
+at com.yuwan.completebackend.service.impl.NotificationDispatchServiceImpl.<clinit>(NotificationDispatchServiceImpl.java:37)
+```
+
+## 二、根因分析
+
+`NotificationDispatchServiceImpl` 中模板占位符正则写成了过度转义形式：
+
+```java
+private static final Pattern TEMPLATE_PATTERN = Pattern.compile("\\\\{(\\\\w+)}");
+```
+
+该字符串传递到正则引擎后模式非法，类在静态初始化阶段抛出 `PatternSyntaxException`，属于**类加载即失败**类型异常，因此 Bean 无法创建。
+
+## 三、解决方案
+
+将正则改为 Java 字符串中的正确写法：
+
+```java
+private static final Pattern TEMPLATE_PATTERN = Pattern.compile("\\{(\\w+)}");
+```
+
+修复后可正确匹配 `{topicTitle}`、`{reviewResult}` 等模板变量，且不会在类初始化阶段抛错。
+
+## 四、验证结论
+
+1. 修改后该文件静态检查通过，无新增编译问题。
+2. 启动链路中原先的 Bean 创建异常（`notificationDispatchServiceImpl`）已被消除。
+3. 复测中若出现 `spring-boot:run` 的 JDK 版本错误（class file 61 vs 52），属于本机 Maven 运行时 JDK 配置问题，与本次代码缺陷无关。
+
+## 五、防错建议
+
+1. 对正则常量优先采用最小必要转义，并在提交前增加单元测试覆盖模板替换方法。
+2. 对 `static final Pattern` 这类类初始化逻辑，优先在本地执行一次完整启动验证，避免将异常延后到运行期。
+3. 统一开发环境到 JDK 17，避免排查过程中混入环境噪音错误。
+
+---
+
+# 站内消息闭环开发防错记录（2026-03-21）
+
+- 日期：2026-03-21
+- 目标：实现“仅站内消息闭环”（不引入邮件/短信/RabbitMQ）
+
+## 一、避免重复历史错误的执行要点
+
+1. **避免Controller路径重复 `/api` 前缀**
+  - 新增 `NotificationController` 使用 `@RequestMapping("/notification")`，不再重复写 `/api`。
+
+2. **避免前后端接口类型不一致**
+  - 后端统一 `Result<PageResult<NotificationVO>>`。
+  - 前端 `notificationApi` 与 `types/notification.ts` 按 `request.ts` 的 `ApiResponse` 结构对齐。
+
+3. **避免临时变量/函数顺序导致前端运行错误**
+  - 在 `NotificationCenter.vue` 中将 `showTotal` 抽成显式函数并声明类型，规避隐式 `any`。
+
+4. **避免MyBatis动态SQL拼接转义错误**
+  - `NotificationTargetMapper` 的 `<if test='... != ""'>` 采用 Java 字符串正确转义，避免编译失败。
+
+5. **避免消息重复发送和业务事务不一致**
+  - 采用 `sendByTemplateAfterCommit` 在事务提交后发送。
+  - 使用 `dedupKey` + 索引约束避免同一事件重复写入。
+
+## 二、本次策略沉淀
+
+1. **站内消息闭环优先“可追踪”而非“高实时”**
+  - 先做数据库持久化与状态流转（未读/已读/已处理/删除）。
+
+2. **清理策略明确为30天**
+  - 定时任务每日 02:30 清理“过期”或“创建超过30天”消息，防止表持续膨胀。
+
+3. **触发点统一服务化接入**
+  - 审查、指导、双选、答辩安排、中期审查均通过统一分发服务接入，减少分散实现。
 
 ---
 
@@ -5019,5 +5173,128 @@ ALTER TABLE opening_task_book CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_u
 - 新模块建表必须与主库统一字符集与排序规则，禁止混用 `utf8mb4_general_ci` 与 `utf8mb4_unicode_ci`。
 - 对跨表 JOIN 频繁的 ID 字段（如 `enterprise_id`、`creator_id`、`user_id`），应优先保证表结构层面排序规则一致。
 - 热修可通过 SQL `COLLATE` 快速止血，但根治应通过表结构统一。
+
+---
+
+# 开题报告结构化改造 — 旧审核字段导致运行时SQL与流程漂移
+
+- 日期：2026-03-21
+- 严重程度：高（数据库迁移后会直接触发开题报告查询和提交流程异常）
+
+## 一、问题描述
+
+开题报告表已按新业务改造为“结构化单表+草稿/定稿”，但应用层仍保留旧设计：
+- 后端实体/Mapper/Service 继续读写 `document_id`、`review_status`、`review_comment`、`reviewer_id`、`review_time`
+- 前端页面仍按“上传文件并提交审核”流程开发
+
+直接后果：数据库执行迁移脚本后，开题报告页面会出现字段不存在错误或业务流程不一致。
+
+## 二、根因分析
+
+1. 数据库脚本与应用代码演进不同步（典型契约漂移）。
+2. 开题报告流程仍沿用旧审核模型，未切换为“学生自填+草稿/定稿”。
+3. 前端/后端 DTO 与 VO 字段未与新表结构对齐。
+
+## 三、修复方案
+
+### 3.1 后端契约同步
+
+- 更新 `OpeningReport` 实体：移除旧审核字段，新增结构化字段及 `status`。
+- 更新 `SubmitReportDTO`：支持结构化内容与 `status`（0草稿/1定稿）。
+- 更新 `OpeningReportVO`：改为结构化返回，增加 `statusName`。
+- 更新 `ReportQueryDTO`：由 `reviewStatus` 改为 `status`。
+- 更新 `OpeningReportMapper.xml`：彻底移除对旧列的 SQL 引用。
+
+### 3.2 业务流程切换
+
+- `DefenseServiceImpl.submitReport`：
+  - 改为保存结构化内容；
+  - 已定稿后禁止二次修改；
+  - 定稿时写入 `submit_time`，草稿清空 `submit_time`。
+- 移除开题报告审核接口调用链（Controller / API / 页面动作）。
+
+### 3.3 前端流程切换
+
+- `MyReport.vue`：
+  - 去掉文件上传；
+  - 改为结构化表单；
+  - 支持“保存草稿”和“提交定稿”；
+  - 保留打印功能。
+- `ReportList.vue`：去掉“审查”弹窗与动作，改为状态查看。
+
+## 四、验证结果
+
+1. 后端编译通过：`mvn -DskipTests compile` 成功。
+2. 本次改动相关文件在编辑器错误检查中无报错。
+3. 前端全量 `type-check` 仍有历史遗留错误（与本次开题报告改造无直接关系），未在本次改动中引入新错误。
+
+## 五、经验与预防
+
+- 涉及数据库字段重构时，必须同步改造 Entity/DTO/VO/Mapper/Service/前端类型与页面。
+- SQL 迁移脚本提交后，应立即做一次“契约一致性检查”，避免只改表不改代码。
+- 流程变更（如去审核）需同时删除前后端入口，避免出现“前端还能操作、后端已废弃”的灰色状态。
+
+---
+
+# 消息中心“查看详情”跳转错误 — 误跳我的开题报告
+
+- 日期：2026-03-21
+- 严重程度：高（通知跳转到错误业务页面，用户无法直接查看答辩安排信息）
+
+## 一、问题描述
+
+学生在消息中心点击答辩通知的“查看详情”后，实际跳转到了“我的开题报告”页面，而不是答辩安排详情页面，导致通知与业务详情脱节。
+
+## 二、根因分析
+
+1. 后端答辩通知在生成 `businessRoute` 时，开题答辩类型被写死为 `/defense/my-report`，路由语义错误。
+2. 前端 `NotificationCenter` 的“查看详情”逻辑默认直接 `router.push(item.businessRoute)`，没有针对 `DEFENSE_ARRANGEMENT` 做业务兜底。
+3. 前端缺少可用于通知深链接直达的“答辩安排详情页”路由与页面承接。
+
+## 三、解决方案
+
+### 3.1 后端修复通知路由
+
+在答辩通知发送处将路由改为答辩安排详情深链接：
+
+- 从：`/defense/my-report`
+- 改为：`/defense/arrangement/detail/{arrangementId}`
+
+### 3.2 前端新增详情路由与页面
+
+新增隐藏菜单路由：
+
+- `path: /defense/arrangement/detail/:arrangementId`
+- `permission: defense:arrangement:detail`
+
+新增页面用于展示答辩安排详情（类型、时间、地点、答辩小组、备注等），支持从通知直达查看。
+
+### 3.3 前端通知跳转兼容兜底
+
+在消息中心点击逻辑中增加业务类型识别：
+
+- 当 `businessType === 'DEFENSE_ARRANGEMENT'` 且存在 `businessId` 时，优先跳转 `/defense/arrangement/detail/{businessId}`；
+- 其余情况仍按 `businessRoute` 跳转。
+
+该策略可兼容历史消息，避免旧数据路由不准确时继续误跳。
+
+## 四、涉及修改文件
+
+1. `complete-backend/src/main/java/com/yuwan/completebackend/service/impl/DefenseServiceImpl.java`
+2. `complete-frontend/src/router/index.ts`
+3. `complete-frontend/src/views/defense/ArrangementDetail.vue`
+4. `complete-frontend/src/views/notification/NotificationCenter.vue`
+
+## 五、验证结果
+
+1. 后端编译通过：`mvn -DskipTests compile` 成功。
+2. 本次改动文件诊断无新增报错。
+3. 复测路径：消息中心点击答辩通知“查看详情”可正确进入答辩安排详情页，不再跳转“我的开题报告”。
+
+## 六、经验与预防
+
+1. 通知 `businessRoute` 必须与 `businessType` 语义一致，避免“能跳但跳错页面”。
+2. 消息中心跳转应保留业务类型兜底逻辑，不应完全信任单一路由字符串。
+3. 关键业务通知建议统一采用“详情页深链接”策略，减少列表页/个人页混跳问题。
 
 ---

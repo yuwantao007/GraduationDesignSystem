@@ -37,20 +37,40 @@ CREATE TABLE IF NOT EXISTS `defense_arrangement` (
 
 -- =============================================
 -- 表2：开题报告表 opening_report
--- 用途：记录学生的开题报告提交与审查情况
+-- 用途：学生结构化填写开题报告（单表存储，支持查看/修改/打印）
 -- 约束：一个学生只有一份开题报告（student_id唯一）
+-- 说明：
+--   1) 不保存最终上传文件ID
+--   2) 不走审核流程（无 review_* 字段）
+--   3) “进度及预期结果”按单表文本字段存储（不拆明细子表）
 -- =============================================
 CREATE TABLE IF NOT EXISTS `opening_report` (
     `report_id`         VARCHAR(32)   NOT NULL COMMENT '报告ID',
-    `student_id`        VARCHAR(32)   NOT NULL COMMENT '学生ID（一个学生只有一份）',
+    `student_id`        VARCHAR(32)   NOT NULL COMMENT '学生ID（唯一）',
     `topic_id`          VARCHAR(32)   NOT NULL COMMENT '课题ID',
-    `arrangement_id`    VARCHAR(32)   DEFAULT NULL COMMENT '对应答辩安排ID',
-    `document_id`       VARCHAR(32)   DEFAULT NULL COMMENT '报告文件ID（关联document_info）',
-    `submit_time`       DATETIME      DEFAULT NULL COMMENT '提交时间',
-    `review_status`     TINYINT       DEFAULT 0 COMMENT '审查状态: 0=未提交, 1=已提交待审, 2=通过, 3=不合格',
-    `review_comment`    TEXT          DEFAULT NULL COMMENT '审查意见',
-    `reviewer_id`       VARCHAR(32)   DEFAULT NULL COMMENT '审查人ID（企业教师）',
-    `review_time`       DATETIME      DEFAULT NULL COMMENT '审查时间',
+    `arrangement_id`    VARCHAR(32)   DEFAULT NULL COMMENT '对应答辩安排ID（可选）',
+
+    `student_name`      VARCHAR(50)   NOT NULL COMMENT '姓名快照',
+    `major_name`        VARCHAR(100)  DEFAULT NULL COMMENT '专业快照',
+    `class_name`        VARCHAR(100)  DEFAULT NULL COMMENT '班级快照',
+    `topic_title`       VARCHAR(300)  NOT NULL COMMENT '题目快照',
+    `advisor_names`     VARCHAR(200)  DEFAULT NULL COMMENT '指导教师姓名（可多名，逗号分隔）',
+    `report_date`       DATE          DEFAULT NULL COMMENT '报告日期',
+
+    `research_status`       TEXT      DEFAULT NULL COMMENT '一-1 国内外研究现状',
+    `purpose_significance`  TEXT      DEFAULT NULL COMMENT '一-2 研究目的、意义',
+    `research_content`      TEXT      DEFAULT NULL COMMENT '一-3 研究内容',
+    `innovation_points`     TEXT      DEFAULT NULL COMMENT '一-4 课题研究创新点',
+    `problems_to_solve`     TEXT      DEFAULT NULL COMMENT '一-5 拟解决问题',
+
+    `progress_expectation`  LONGTEXT  DEFAULT NULL COMMENT '二 进度及预期结果（单表文本）',
+    `current_conditions`    LONGTEXT  DEFAULT NULL COMMENT '完成题目的现有条件',
+    `advisor_opinion`       TEXT      DEFAULT NULL COMMENT '审查意见（文本）',
+    `college_opinion`       TEXT      DEFAULT NULL COMMENT '学院意见（文本）',
+
+    `status`            TINYINT       NOT NULL DEFAULT 0 COMMENT '状态: 0=草稿, 1=已定稿',
+    `submit_time`       DATETIME      DEFAULT NULL COMMENT '提交/定稿时间',
+
     `is_deleted`        TINYINT       DEFAULT 0 COMMENT '逻辑删除: 0=正常, 1=删除',
     `create_time`       DATETIME      DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`       DATETIME      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -58,8 +78,8 @@ CREATE TABLE IF NOT EXISTS `opening_report` (
     UNIQUE KEY `uk_student_id` (`student_id`),
     KEY `idx_topic_id` (`topic_id`),
     KEY `idx_arrangement_id` (`arrangement_id`),
-    KEY `idx_review_status` (`review_status`),
-    KEY `idx_reviewer_id` (`reviewer_id`)
+    KEY `idx_status` (`status`),
+    KEY `idx_submit_time` (`submit_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='开题报告表';
 
 -- =============================================
@@ -87,9 +107,9 @@ CREATE TABLE IF NOT EXISTS `opening_task_book` (
 -- 说明：
 -- 1. defense_arrangement 表支持所有类型答辩（开题/中期/正式/二次），通过 defense_type 区分
 -- 2. panel_teachers 使用 JSON 数组存储答辩小组教师ID，支持灵活配置
--- 3. opening_report 的 document_id 关联 document_info 表，复用文档管理模块
--- 4. opening_task_book 的 content 字段支持富文本，也可选择上传附件（document_id）
--- 5. 审查状态流转：0(未提交) → 1(已提交待审) → 2(通过)/3(不合格)
--- 6. 不合格的学生直接进入二次答辩流程
+-- 3. opening_report 采用结构化单表字段存储，不依赖最终上传文件ID
+-- 4. opening_report 不启用审核流，仅保留草稿/定稿状态
+-- 5. opening_report “进度及预期结果”使用 progress_expectation 文本字段存储
+-- 6. opening_task_book 的 content 字段支持富文本，也可选择上传附件（document_id）
 -- =============================================
 

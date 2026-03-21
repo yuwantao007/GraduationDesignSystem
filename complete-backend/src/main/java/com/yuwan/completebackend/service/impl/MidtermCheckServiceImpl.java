@@ -13,6 +13,7 @@ import com.yuwan.completebackend.model.enums.MidtermReviewStatus;
 import com.yuwan.completebackend.model.enums.MidtermSubmitStatus;
 import com.yuwan.completebackend.model.vo.MidtermCheckListVO;
 import com.yuwan.completebackend.model.vo.MidtermCheckVO;
+import com.yuwan.completebackend.service.INotificationDispatchService;
 import com.yuwan.completebackend.service.IMidtermCheckService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 中期检查服务实现类
@@ -38,6 +41,7 @@ public class MidtermCheckServiceImpl extends ServiceImpl<MidtermCheckMapper, Mid
         implements IMidtermCheckService {
 
     private final MidtermCheckMapper midtermCheckMapper;
+    private final INotificationDispatchService notificationDispatchService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -125,6 +129,23 @@ public class MidtermCheckServiceImpl extends ServiceImpl<MidtermCheckMapper, Mid
         check.setReviewerId(reviewerId);
         check.setReviewTime(new Date());
         updateById(check);
+
+        Map<String, String> variables = new HashMap<>();
+        variables.put("topicId", check.getTopicId());
+        variables.put("reviewResult", MidtermReviewStatus.getDescByCode(dto.getReviewStatus()));
+        variables.put("reviewComment", StringUtils.hasText(dto.getReviewComment()) ? dto.getReviewComment() : "无");
+
+        notificationDispatchService.sendByTemplateAfterCommit(
+            "MIDTERM_REVIEW_RESULT",
+            check.getStudentId(),
+            "MIDTERM_REVIEW",
+            check.getCheckId(),
+            "/midterm/student",
+            variables,
+            "midterm:review:" + check.getCheckId() + ":" + check.getStudentId(),
+            null,
+            null
+        );
         
         log.info("高校教师[{}]审查中期检查表[{}]，结果：{}", reviewerId, dto.getCheckId(), 
                 MidtermReviewStatus.getDescByCode(dto.getReviewStatus()));

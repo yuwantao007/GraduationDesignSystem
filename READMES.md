@@ -27,6 +27,19 @@
 - 文档处理：OnlyOffice（在线编辑）、Apache POI（文档解析）
 - 流程引擎：Flowable 7.x（轻量级工作流引擎）
 
+### 2.3 开题报告模块开发进度（2026-03-21）
+
+已完成：
+- 后端开题报告模型由“文件+审核”改为“结构化字段+草稿/定稿”，移除 `document_id`、`review_*` 的业务依赖。
+- 开题报告查询 SQL 全量改造，避免已删除列导致运行时 SQL 报错。
+- 学生端提交流程支持“保存草稿/提交定稿”，并保留打印功能。
+- 企业教师开题报告列表去除审核动作，改为定稿状态查看。
+
+待完成：
+- 联调数据库迁移脚本 `optimize_opening_report_table.sql` 并在测试库完成回归验证。
+- 补充开题报告模块接口测试与页面端到端测试。
+- 根据最新业务说明补齐开题报告详情页（教师端）展示字段。
+
 ## 3. 角色定义与权限管理
 
 ### 3.1 系统角色概览
@@ -1715,8 +1728,8 @@ graph TD
 - ⏳ 质量指标体系
 - ⏳ 智能预警系统
 
-#### 11.2.6 通知管理模块（待开发 ⏳）
-- ⏳ 系统内消息
+#### 11.2.6 通知管理模块（部分完成）
+- ✅ 系统内消息闭环（消息模板 + 收件箱 + 已读/批量已读/已处理/删除 + 未读角标 + 30天清理）
 - ⏳ 短信提醒
 - ⏳ 邮件通知
 - ⏳ 微信小程序推送
@@ -1788,9 +1801,47 @@ graph TD
 
 
 
-**文档版本**：V4.5  
-**更新日期**：2026年3月15日  
+**文档版本**：V4.6  
+**更新日期**：2026年3月21日  
 **更新内容**：
+
+### V4.6 更新（2026-03-21）- 站内消息闭环（不含邮件/短信）
+
+#### 通知管理模块 - 站内消息中心（完整闭环）
+- ✅ **数据库设计**
+  - `notification_template`：消息模板表（模板编码、标题模板、内容模板、默认级别、分类）
+  - `notification_message`：消息收件箱表（每接收人一条，含状态、业务路由、去重键、过期时间）
+  - `notification_action_log`：消息操作日志表（已读/批量已读/处理/删除）
+  - SQL脚本：`complete-backend/docs/sql/notification_center.sql`
+- ✅ **后端实现**
+  - `NotificationController`（8个API端点）
+    - `GET /notification/list`：我的消息分页查询
+    - `GET /notification/unread-count`：未读消息数
+    - `GET /notification/{messageId}`：消息详情
+    - `POST /notification/{messageId}/read`：单条已读
+    - `POST /notification/read-batch`：批量已读
+    - `POST /notification/read-all`：全部已读
+    - `POST /notification/{messageId}/process`：标记已处理
+    - `DELETE /notification/{messageId}`：删除消息
+  - `NotificationDispatchServiceImpl`：模板渲染、事务提交后发送、去重发送
+  - `NotificationServiceImpl`：收件箱闭环能力（查询/状态流转/日志留痕）
+  - `NotificationCleanupScheduler`：每日02:30清理超过30天或已过期消息
+- ✅ **业务触发点接入（一期）**
+  - 课题审查结果通知：`TopicReviewServiceImpl`
+  - 指导记录新增通知：`GuidanceRecordServiceImpl`
+  - 双选确认/拒绝结果通知：`TopicSelectionServiceImpl`
+  - 答辩安排发布/更新通知：`DefenseServiceImpl`
+  - 中期审查结果通知：`MidtermCheckServiceImpl`
+- ✅ **前端实现**
+  - 类型定义：`types/notification.ts`
+  - API封装：`api/notification.ts`
+  - 页面：`views/notification/NotificationCenter.vue`
+  - 路由：`/notification/center`（权限：`notification:view`）
+  - 主布局：侧栏“消息中心”入口 + 顶部未读角标（60秒轮询）
+- ✅ **权限配置**
+  - 脚本：`complete-backend/docs/sql/add_notification_permissions.sql`
+  - 权限编码：`notification:view`、`notification:read`、`notification:process`、`notification:delete`
+  - 角色分配：系统全角色可访问站内消息中心
 
 ### V4.5 更新（2026-03-15）- 文档管理功能模块开发完成
 

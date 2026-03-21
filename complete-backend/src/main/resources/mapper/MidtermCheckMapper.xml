@@ -51,7 +51,7 @@
         mc.submit_status, mc.review_status, mc.review_comment, mc.reviewer_id, mc.review_time,
         mc.create_time, mc.update_time,
         su.real_name AS student_name, su.student_no AS student_no,
-        t.topic_name AS topic_name,
+        t.topic_title AS topic_name,
         et.real_name AS enterprise_teacher_name,
         rv.real_name AS reviewer_name,
         d.file_name AS document_file_name
@@ -61,7 +61,7 @@
         mc.check_id, mc.student_id, mc.submit_status, mc.review_status, mc.review_time,
         mc.create_time, mc.update_time,
         su.real_name AS student_name, su.student_no AS student_no,
-        t.topic_name AS topic_name,
+        t.topic_title AS topic_name,
         et.real_name AS enterprise_teacher_name,
         rv.real_name AS reviewer_name
     </sql>

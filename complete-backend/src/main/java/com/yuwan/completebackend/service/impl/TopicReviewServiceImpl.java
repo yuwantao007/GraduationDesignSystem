@@ -16,6 +16,7 @@ import com.yuwan.completebackend.model.enums.TopicCategory;
 import com.yuwan.completebackend.model.enums.TopicReviewStatus;
 import com.yuwan.completebackend.model.vo.*;
 import com.yuwan.completebackend.security.SecurityUtil;
+import com.yuwan.completebackend.service.INotificationDispatchService;
 import com.yuwan.completebackend.service.ITopicFlowService;
 import com.yuwan.completebackend.service.ITopicReviewService;
 import com.yuwan.completebackend.service.ITopicService;
@@ -64,6 +65,7 @@ public class TopicReviewServiceImpl implements ITopicReviewService {
     private final EnterpriseMapper enterpriseMapper;
     private final ITopicService topicService;
     private final ITopicFlowService topicFlowService;
+    private final INotificationDispatchService notificationDispatchService;
 
     /**
      * 企业教师最大可通过终审的课题数量
@@ -239,6 +241,8 @@ public class TopicReviewServiceImpl implements ITopicReviewService {
         log.info("课题审查完成，课题ID: {}, 审查阶段: {}, 审查结果: {}, 审查人: {}",
                 topic.getTopicId(), stage.getDesc(), result.getDesc(), currentUser.getRealName());
 
+        sendReviewNotification(topic, stage, result, currentUser.getRealName(), record.getReviewId());
+
         return topicService.getTopicDetail(topic.getTopicId());
     }
 
@@ -334,6 +338,8 @@ public class TopicReviewServiceImpl implements ITopicReviewService {
                 record.setNewStatus(newStatus.getCode());
                 record.setIsModified(0);
                 reviewRecordMapper.insert(record);
+
+                sendReviewNotification(topic, stage, result, currentUser.getRealName(), record.getReviewId());
 
                 resultVO.addSuccess(topicId);
 
@@ -476,7 +482,37 @@ public class TopicReviewServiceImpl implements ITopicReviewService {
         log.info("修改审查结果，审查记录ID: {}, 课题ID: {}, 新结果: {}, 修改人: {}",
                 record.getReviewId(), topic.getTopicId(), newResult.getDesc(), currentUser.getRealName());
 
+        sendReviewNotification(topic, stage, newResult, currentUser.getRealName(), record.getReviewId());
+
         return topicService.getTopicDetail(topic.getTopicId());
+    }
+
+    private void sendReviewNotification(Topic topic,
+                                        ReviewStage stage,
+                                        ReviewResult result,
+                                        String reviewerName,
+                                        String reviewId) {
+        if (topic == null || !StringUtils.hasText(topic.getCreatorId())) {
+            return;
+        }
+
+        Map<String, String> variables = new HashMap<>();
+        variables.put("topicTitle", topic.getTopicTitle());
+        variables.put("reviewStage", stage.getDesc());
+        variables.put("reviewResult", result.getDesc());
+        variables.put("reviewerName", reviewerName);
+
+        notificationDispatchService.sendByTemplateAfterCommit(
+                "TOPIC_REVIEW_RESULT",
+                topic.getCreatorId(),
+                "TOPIC_REVIEW",
+                topic.getTopicId(),
+                "/topic/detail/" + topic.getTopicId(),
+                variables,
+                "topic:review:" + reviewId + ":" + topic.getCreatorId(),
+                null,
+                null
+        );
     }
 
     @Override
