@@ -171,9 +171,90 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
         if (vo == null) {
             throw new BusinessException("答辩安排不存在");
         }
+        validateArrangementDetailAccess(vo);
         vo.setDefenseTypeName(DefenseType.getDescByCode(vo.getDefenseType()));
         fillPanelTeacherInfos(vo);
         return vo;
+    }
+
+    /**
+     * 严格校验答辩安排详情访问范围：
+     * 1) 企业负责人：仅本企业
+     * 2) 企业教师：仅命中该安排范围内课题创建教师
+     * 3) 高校教师：仅与命中企业教师存在启用配对关系
+     * 4) 学生：仅命中该安排范围内学生
+     * 5) 管理员：放行
+     */
+    private void validateArrangementDetailAccess(DefenseArrangementVO vo) {
+        String currentUserId = SecurityUtil.getCurrentUserId();
+        if (StrUtil.isBlank(currentUserId)) {
+            throw new BusinessException("用户未登录");
+        }
+
+        List<String> roleCodes = SecurityUtil.getCurrentUserRoleCodes();
+        if (CollUtil.isEmpty(roleCodes)) {
+            throw new BusinessException("无权限查看该答辩安排");
+        }
+        if (roleCodes.contains("SYSTEM_ADMIN")) {
+            return;
+        }
+
+        Integer topicCategoryCode = resolveTopicCategoryCode(vo.getTopicCategory());
+        List<String> enterpriseTeacherIds = queryEnterpriseTeachersWithFallback(
+            vo.getEnterpriseId(), topicCategoryCode, vo.getMajorId(), vo.getArrangementId());
+        List<String> studentIds = queryStudentsWithFallback(
+            vo.getEnterpriseId(), topicCategoryCode, vo.getMajorId(), vo.getArrangementId());
+
+        if (roleCodes.contains("ENTERPRISE_LEADER")) {
+            String currentEnterpriseId = getEnterpriseIdByUserId(currentUserId);
+            if (StrUtil.equals(currentEnterpriseId, vo.getEnterpriseId())) {
+                return;
+            }
+        }
+
+        if (roleCodes.contains("ENTERPRISE_TEACHER") && enterpriseTeacherIds.contains(currentUserId)) {
+            return;
+        }
+
+        if (roleCodes.contains("UNIVERSITY_TEACHER")
+                && isRelatedUniversityTeacher(currentUserId, enterpriseTeacherIds, vo.getCohort())) {
+            return;
+        }
+
+        if (roleCodes.contains("STUDENT") && studentIds.contains(currentUserId)) {
+            return;
+        }
+
+        throw new BusinessException("无权限查看该答辩安排");
+    }
+
+    private boolean isRelatedUniversityTeacher(String univTeacherId,
+                                               List<String> enterpriseTeacherIds,
+                                               String cohort) {
+        if (StrUtil.isBlank(univTeacherId) || CollUtil.isEmpty(enterpriseTeacherIds)) {
+            return false;
+        }
+        Integer count = notificationTargetMapper.countUniversityTeacherRelationForTeachers(
+            univTeacherId,
+            enterpriseTeacherIds,
+            cohort
+        );
+        return count != null && count > 0;
+    }
+
+    private List<String> queryUniversityTeachersByRelation(List<String> enterpriseTeacherIds,
+                                                           String cohort,
+                                                           String arrangementId) {
+        if (CollUtil.isEmpty(enterpriseTeacherIds)) {
+            return new ArrayList<>();
+        }
+        List<String> univTeacherIds = notificationTargetMapper
+            .selectUniversityTeacherIdsByEnterpriseTeachers(enterpriseTeacherIds, cohort);
+        if (CollUtil.isEmpty(univTeacherIds)) {
+            log.warn("答辩通知未命中关联高校教师，arrangementId={}, cohort={}, enterpriseTeacherCount={}",
+                arrangementId, cohort, enterpriseTeacherIds.size());
+        }
+        return univTeacherIds;
     }
 
     /**
@@ -463,25 +544,25 @@ public class DefenseServiceImpl extends ServiceImpl<DefenseArrangementMapper, De
         String dedupPrefix = "defense:arrangement:" + arrangement.getArrangementId() + suffix;
 
         Set<String> receiverIds = new HashSet<>();
-        List<String> panelTeacherIds = new ArrayList<>();
         List<String> enterpriseTeacherIds;
+        List<String> univTeacherIds;
         List<String> studentIds;
-        if (CollUtil.isNotEmpty(arrangement.getPanelTeachers())) {
-            panelTeacherIds.addAll(arrangement.getPanelTeachers());
-            receiverIds.addAll(panelTeacherIds);
-        }
+
         enterpriseTeacherIds = queryEnterpriseTeachersWithFallback(
             arrangement.getEnterpriseId(), topicCategoryCode, arrangement.getMajorId(), arrangement.getArrangementId());
+        univTeacherIds = queryUniversityTeachersByRelation(
+            enterpriseTeacherIds, arrangement.getCohort(), arrangement.getArrangementId());
         studentIds = queryStudentsWithFallback(
             arrangement.getEnterpriseId(), topicCategoryCode, arrangement.getMajorId(), arrangement.getArrangementId());
 
         receiverIds.addAll(enterpriseTeacherIds);
+        receiverIds.addAll(univTeacherIds);
         receiverIds.addAll(studentIds);
 
         receiverIds.removeIf(id -> !StrUtil.isNotBlank(id));
 
-        log.info("答辩通知接收人统计，arrangementId={}, panelTeachers={}, enterpriseTeachers={}, students={}, total={}",
-            arrangement.getArrangementId(), panelTeacherIds.size(), enterpriseTeacherIds.size(), studentIds.size(), receiverIds.size());
+        log.info("答辩通知接收人统计，arrangementId={}, enterpriseTeachers={}, univTeachers={}, students={}, total={}",
+            arrangement.getArrangementId(), enterpriseTeacherIds.size(), univTeacherIds.size(), studentIds.size(), receiverIds.size());
         if (CollUtil.isEmpty(studentIds)) {
             log.warn("答辩通知未命中任何学生，arrangementId={}, enterpriseId={}, topicCategory={}, majorId={}",
                 arrangement.getArrangementId(), arrangement.getEnterpriseId(), arrangement.getTopicCategory(), arrangement.getMajorId());

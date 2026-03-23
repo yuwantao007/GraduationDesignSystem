@@ -67,7 +67,6 @@ public class DefenseController {
 
     @Operation(summary = "获取答辩安排详情", description = "根据ID获取答辩安排详情")
     @GetMapping("/arrangement/{arrangementId}")
-    @PreAuthorize("hasAuthority('defense:arrangement:detail')")
     public Result<DefenseArrangementVO> getArrangementDetail(
             @Parameter(description = "安排ID") @PathVariable String arrangementId) {
         DefenseArrangementVO vo = defenseService.getArrangementDetail(arrangementId);

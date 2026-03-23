@@ -1,0 +1,2838 @@
+-- MySQL dump 10.13  Distrib 8.0.23, for Win64 (x86_64)
+--
+-- Host: localhost    Database: graduation_system
+-- ------------------------------------------------------
+-- Server version	8.0.23
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `act_evt_log`
+--
+
+DROP TABLE IF EXISTS `act_evt_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_evt_log` (
+  `LOG_NR_` bigint NOT NULL AUTO_INCREMENT,
+  `TYPE_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `TASK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `TIME_STAMP_` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `USER_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `DATA_` longblob,
+  `LOCK_OWNER_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `LOCK_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `IS_PROCESSED_` tinyint DEFAULT '0',
+  PRIMARY KEY (`LOG_NR_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_evt_log`
+--
+
+LOCK TABLES `act_evt_log` WRITE;
+/*!40000 ALTER TABLE `act_evt_log` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_evt_log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ge_bytearray`
+--
+
+DROP TABLE IF EXISTS `act_ge_bytearray`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ge_bytearray` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `DEPLOYMENT_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `BYTES_` longblob,
+  `GENERATED_` tinyint DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_FK_BYTEARR_DEPL` (`DEPLOYMENT_ID_`),
+  CONSTRAINT `ACT_FK_BYTEARR_DEPL` FOREIGN KEY (`DEPLOYMENT_ID_`) REFERENCES `act_re_deployment` (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ge_bytearray`
+--
+
+LOCK TABLES `act_ge_bytearray` WRITE;
+/*!40000 ALTER TABLE `act_ge_bytearray` DISABLE KEYS */;
+INSERT INTO `act_ge_bytearray` VALUES ('517b0910-2031-11f1-ba76-00ff4626f3bf',1,'E:\\gitHub\\completeSystem\\complete-backend\\target\\classes\\processes\\topic_review.bpmn20.xml','517ae1ff-2031-11f1-ba76-00ff4626f3bf',_binary '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<!--\r\n  è¯¾é¢˜å®¡æŸ¥æµç¨‹å®šä¹‰\r\n  æ”¯æŒä¸¤æ¡å®¡æŸ¥è·¯å¾„ï¼š\r\n    è·¯å¾„Aï¼ˆé«˜èŒå‡æœ¬ï¼ŒtopicCategory=1ï¼‰ï¼š\r\n      é¢„å®¡(é«˜æ ¡æ•™å¸ˆ) â†’ åˆå®¡(ä¸“ä¸šæ–¹å‘ä¸»ç®¡) â†’ ç»ˆå®¡(ç£å¯¼æ•™å¸ˆ)\r\n    è·¯å¾„Bï¼ˆ3+1/å®éªŒç­ï¼ŒtopicCategory=2/3ï¼‰ï¼š\r\n      åˆå®¡(ä¸“ä¸šæ–¹å‘ä¸»ç®¡) â†’ ç»ˆå®¡(é«˜æ ¡æ•™å¸ˆ)\r\n\r\n  ä»»æ„å®¡æŸ¥é˜¶æ®µè¿”å›\"éœ€ä¿®æ”¹\"æ—¶ï¼Œä¼ä¸šæ•™å¸ˆå®Œæˆä¿®æ”¹ä»»åŠ¡åé‡æ–°è¿›å…¥è¯¥è·¯å¾„çš„é¦–ä¸ªå®¡æŸ¥èŠ‚ç‚¹ã€‚\r\n-->\r\n<definitions xmlns=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\r\n             xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n             xmlns:flowable=\"http://flowable.org/bpmn\"\r\n             xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\"\r\n             xmlns:omgdc=\"http://www.omg.org/spec/DD/20100524/DC\"\r\n             xmlns:omgdi=\"http://www.omg.org/spec/DD/20100524/DI\"\r\n             typeLanguage=\"http://www.w3.org/2001/XMLSchema\"\r\n             expressionLanguage=\"http://www.w3.org/1999/XPath\"\r\n             targetNamespace=\"http://www.flowable.org/processdef\">\r\n\r\n  <process id=\"topic_review\" name=\"è¯¾é¢˜å®¡æŸ¥æµç¨‹\" isExecutable=\"true\">\r\n\r\n    <!-- ============================================================\r\n         æµç¨‹å˜é‡è¯´æ˜ï¼š\r\n           topicId        : è¯¾é¢˜ä¸šåŠ¡ID\r\n           topicCategory  : è¯¾é¢˜å¤§ç±»ï¼ˆ1=é«˜èŒå‡æœ¬, 2=3+1, 3=å®éªŒç­ï¼‰\r\n           creatorId      : è¯¾é¢˜åˆ›å»ºè€…ï¼ˆä¼ä¸šæ•™å¸ˆï¼‰ç”¨æˆ·ID\r\n           topicTitle     : è¯¾é¢˜æ ‡é¢˜ï¼ˆæ–¹ä¾¿ä»»åŠ¡åˆ—è¡¨å±•ç¤ºï¼‰\r\n           preOutcome     : é¢„å®¡ç»“æœå˜é‡ï¼ˆPASS | NEED_MODIFYï¼‰\r\n           initOutcome    : åˆå®¡ç»“æœå˜é‡ï¼ˆPASS | NEED_MODIFYï¼‰\r\n           finalOutcome   : ç»ˆå®¡ç»“æœå˜é‡ï¼ˆPASS | REJECTï¼‰\r\n         ============================================================ -->\r\n\r\n    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• å¼€å§‹äº‹ä»¶ â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->\r\n    <startEvent id=\"startEvent\" name=\"è¯¾é¢˜æäº¤\" />\r\n\r\n    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• è¯¾é¢˜ç±»å‹åˆ†æ”¯ç½‘å…³ â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->\r\n    <exclusiveGateway id=\"categoryGateway\" name=\"è¯¾é¢˜ç±»å‹åˆ¤æ–­\" />\r\n\r\n    <sequenceFlow id=\"flow_start_to_gateway\"\r\n                  sourceRef=\"startEvent\"\r\n                  targetRef=\"categoryGateway\" />\r\n\r\n    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• è·¯å¾„Aï¼šé«˜èŒå‡æœ¬ï¼ˆtopicCategory == 1ï¼‰ â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->\r\n\r\n    <!-- A1ï¼šé¢„å®¡ä»»åŠ¡ï¼ˆå€™é€‰ç»„ï¼šUNIVERSITY_TEACHERï¼‰ -->\r\n    <userTask id=\"preReviewTask\"\r\n              name=\"é¢„å®¡\"\r\n              flowable:candidateGroups=\"UNIVERSITY_TEACHER\">\r\n      <documentation>é«˜æ ¡æ•™å¸ˆå¯¹é«˜èŒå‡æœ¬è¯¾é¢˜è¿›è¡Œé¢„å®¡</documentation>\r\n      <extensionElements>\r\n        <flowable:taskListener event=\"create\"\r\n                               class=\"com.yuwan.completebackend.workflow.listener.ReviewTaskCreateListener\" />\r\n      </extensionElements>\r\n    </userTask>\r\n\r\n    <sequenceFlow id=\"flow_upgrade_to_pre\"\r\n                  sourceRef=\"categoryGateway\"\r\n                  targetRef=\"preReviewTask\">\r\n      <conditionExpression xsi:type=\"tFormalExpression\">${topicCategory == 1}</conditionExpression>\r\n    </sequenceFlow>\r\n\r\n    <!-- A1 ç½‘å…³ï¼šé¢„å®¡ç»“æœ -->\r\n    <exclusiveGateway id=\"preReviewGateway\" name=\"é¢„å®¡ç»“æœåˆ¤æ–­\" />\r\n    <sequenceFlow id=\"flow_pre_to_gateway\"\r\n                  sourceRef=\"preReviewTask\"\r\n                  targetRef=\"preReviewGateway\" />\r\n\r\n    <!-- A1 â†’ A2ï¼ˆé¢„å®¡é€šè¿‡ï¼‰ -->\r\n    <sequenceFlow id=\"flow_pre_pass\"\r\n                  name=\"é€šè¿‡\"\r\n                  sourceRef=\"preReviewGateway\"\r\n                  targetRef=\"initUpgradeTask\">\r\n      <conditionExpression xsi:type=\"tFormalExpression\">${preOutcome == \'PASS\'}</conditionExpression>\r\n    </sequenceFlow>\r\n\r\n    <!-- A1 â†’ é¢„å®¡ä¿®æ”¹ä»»åŠ¡ï¼ˆéœ€ä¿®æ”¹ï¼‰ -->\r\n    <sequenceFlow id=\"flow_pre_need_modify\"\r\n                  name=\"éœ€ä¿®æ”¹\"\r\n                  sourceRef=\"preReviewGateway\"\r\n                  targetRef=\"preModifyTask\">\r\n      <conditionExpression xsi:type=\"tFormalExpression\">${preOutcome == \'NEED_MODIFY\'}</conditionExpression>\r\n    </sequenceFlow>\r\n\r\n    <!-- é¢„å®¡ä¿®æ”¹ä»»åŠ¡ï¼ˆæŒ‡å®šç»™ä¼ä¸šæ•™å¸ˆï¼‰ -->\r\n    <userTask id=\"preModifyTask\"\r\n              name=\"é¢„å®¡ä¿®æ”¹å¾…é‡æ\"\r\n              flowable:assignee=\"${creatorId}\">\r\n      <documentation>ä¼ä¸šæ•™å¸ˆæ ¹æ®é¢„å®¡æ„è§ä¿®æ”¹è¯¾é¢˜åé‡æ–°æäº¤</documentation>\r\n    </userTask>\r\n\r\n    <!-- é¢„å®¡ä¿®æ”¹å®Œæˆ â†’ å¾ªç¯å›é¢„å®¡ä»»åŠ¡ -->\r\n    <sequenceFlow id=\"flow_pre_modify_resubmit\"\r\n                  name=\"é‡æ–°æäº¤\"\r\n                  sourceRef=\"preModifyTask\"\r\n                  targetRef=\"preReviewTask\" />\r\n\r\n    <!-- A2ï¼šåˆå®¡ä»»åŠ¡ - é«˜èŒå‡æœ¬ï¼ˆå€™é€‰ç»„ï¼šMAJOR_DIRECTORï¼‰ -->\r\n    <userTask id=\"initUpgradeTask\"\r\n              name=\"åˆå®¡ï¼ˆå‡æœ¬ï¼‰\"\r\n              flowable:candidateGroups=\"MAJOR_DIRECTOR\">\r\n      <documentation>ä¸“ä¸šæ–¹å‘ä¸»ç®¡å¯¹é«˜èŒå‡æœ¬è¯¾é¢˜è¿›è¡Œåˆå®¡</documentation>\r\n      <extensionElements>\r\n        <flowable:taskListener event=\"create\"\r\n                               class=\"com.yuwan.completebackend.workflow.listener.ReviewTaskCreateListener\" />\r\n      </extensionElements>\r\n    </userTask>\r\n\r\n    <!-- A2 ç½‘å…³ï¼šåˆå®¡ç»“æœï¼ˆé«˜èŒå‡æœ¬ï¼‰ -->\r\n    <exclusiveGateway id=\"initUpgradeGateway\" name=\"åˆå®¡ç»“æœåˆ¤æ–­ï¼ˆå‡æœ¬ï¼‰\" />\r\n    <sequenceFlow id=\"flow_init_upgrade_to_gateway\"\r\n                  sourceRef=\"initUpgradeTask\"\r\n                  targetRef=\"initUpgradeGateway\" />\r\n\r\n    <!-- A2 â†’ A3ï¼ˆåˆå®¡é€šè¿‡ï¼‰ -->\r\n    <sequenceFlow id=\"flow_init_upgrade_pass\"\r\n                  name=\"é€šè¿‡\"\r\n                  sourceRef=\"initUpgradeGateway\"\r\n                  targetRef=\"finalUpgradeTask\">\r\n      <conditionExpression xsi:type=\"tFormalExpression\">${initOutcome == \'PASS\'}</conditionExpression>\r\n    </sequenceFlow>\r\n\r\n    <!-- A2 â†’ åˆå®¡ä¿®æ”¹ä»»åŠ¡ï¼ˆéœ€ä¿®æ”¹ï¼‰ -->\r\n    <sequenceFlow id=\"flow_init_upgrade_need_modify\"\r\n                  name=\"éœ€ä¿®æ”¹\"\r\n                  sourceRef=\"initUpgradeGateway\"\r\n                  targetRef=\"initUpgradeModifyTask\">\r\n      <conditionExpression xsi:type=\"tFormalExpression\">${initOutcome == \'NEED_MODIFY\'}</conditionExpression>\r\n    </sequenceFlow>\r\n\r\n    <!-- åˆå®¡ä¿®æ”¹ä»»åŠ¡ï¼ˆé«˜èŒå‡æœ¬è·¯å¾„ï¼‰ -->\r\n    <userTask id=\"initUpgradeModifyTask\"\r\n              name=\"åˆå®¡ä¿®æ”¹å¾…é‡æï¼ˆå‡æœ¬ï¼‰\"\r\n              flowable:assignee=\"${creatorId}\">\r\n      <documentation>ä¼ä¸šæ•™å¸ˆæ ¹æ®åˆå®¡æ„è§ä¿®æ”¹è¯¾é¢˜åé‡æ–°æäº¤ï¼Œè¿”å›é¢„å®¡èŠ‚ç‚¹</documentation>\r\n    </userTask>\r\n\r\n    <!-- åˆå®¡ä¿®æ”¹å®Œæˆ â†’ å¾ªç¯å›é¢„å®¡ä»»åŠ¡ï¼ˆä¸ç°æœ‰ä¸šåŠ¡ä¸€è‡´ï¼šä»INIT_MODIFYé‡æåå›åˆ°PENDING_PREï¼‰ -->\r\n    <sequenceFlow id=\"flow_init_upgrade_modify_resubmit\"\r\n                  name=\"é‡æ–°æäº¤\"\r\n                  sourceRef=\"initUpgradeModifyTask\"\r\n                  targetRef=\"preReviewTask\" />\r\n\r\n    <!-- A3ï¼šç»ˆå®¡ä»»åŠ¡ï¼ˆå€™é€‰ç»„ï¼šSUPERVISOR_TEACHERï¼‰ -->\r\n    <userTask id=\"finalUpgradeTask\"\r\n              name=\"ç»ˆå®¡ï¼ˆå‡æœ¬ï¼‰\"\r\n              flowable:candidateGroups=\"SUPERVISOR_TEACHER\">\r\n      <documentation>ç£å¯¼æ•™å¸ˆå¯¹é«˜èŒå‡æœ¬è¯¾é¢˜è¿›è¡Œç»ˆå®¡</documentation>\r\n      <extensionElements>\r\n        <flowable:taskListener event=\"create\"\r\n                               class=\"com.yuwan.completebackend.workflow.listener.ReviewTaskCreateListener\" />\r\n      </extensionElements>\r\n    </userTask>\r\n\r\n    <!-- A3 ç½‘å…³ï¼šç»ˆå®¡ç»“æœï¼ˆé«˜èŒå‡æœ¬ï¼‰ -->\r\n    <exclusiveGateway id=\"finalUpgradeGateway\" name=\"ç»ˆå®¡ç»“æœåˆ¤æ–­ï¼ˆå‡æœ¬ï¼‰\" />\r\n    <sequenceFlow id=\"flow_final_upgrade_to_gateway\"\r\n                  sourceRef=\"finalUpgradeTask\"\r\n                  targetRef=\"finalUpgradeGateway\" />\r\n\r\n    <!-- A3 â†’ ç»ˆå®¡é€šè¿‡ç»“æŸ -->\r\n    <sequenceFlow id=\"flow_final_upgrade_pass\"\r\n                  name=\"ç»ˆå®¡é€šè¿‡\"\r\n                  sourceRef=\"finalUpgradeGateway\"\r\n                  targetRef=\"passedEndEvent\">\r\n      <conditionExpression xsi:type=\"tFormalExpression\">${finalOutcome == \'PASS\'}</conditionExpression>\r\n    </sequenceFlow>\r\n\r\n    <!-- A3 â†’ ç»ˆå®¡ä¸é€šè¿‡ç»“æŸ -->\r\n    <sequenceFlow id=\"flow_final_upgrade_reject\"\r\n                  name=\"ç»ˆå®¡ä¸é€šè¿‡\"\r\n                  sourceRef=\"finalUpgradeGateway\"\r\n                  targetRef=\"failedEndEvent\">\r\n      <conditionExpression xsi:type=\"tFormalExpression\">${finalOutcome == \'REJECT\'}</conditionExpression>\r\n    </sequenceFlow>\r\n\r\n    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• è·¯å¾„Bï¼š3+1/å®éªŒç­ï¼ˆtopicCategory != 1ï¼‰ â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->\r\n\r\n    <!-- B1ï¼šåˆå®¡ä»»åŠ¡ï¼ˆå€™é€‰ç»„ï¼šMAJOR_DIRECTORï¼‰ -->\r\n    <userTask id=\"initOtherTask\"\r\n              name=\"åˆå®¡ï¼ˆå®éªŒç­/3+1ï¼‰\"\r\n              flowable:candidateGroups=\"MAJOR_DIRECTOR\">\r\n      <documentation>ä¸“ä¸šæ–¹å‘ä¸»ç®¡å¯¹3+1/å®éªŒç­è¯¾é¢˜è¿›è¡Œåˆå®¡</documentation>\r\n      <extensionElements>\r\n        <flowable:taskListener event=\"create\"\r\n                               class=\"com.yuwan.completebackend.workflow.listener.ReviewTaskCreateListener\" />\r\n      </extensionElements>\r\n    </userTask>\r\n\r\n    <sequenceFlow id=\"flow_other_to_init\"\r\n                  sourceRef=\"categoryGateway\"\r\n                  targetRef=\"initOtherTask\">\r\n      <conditionExpression xsi:type=\"tFormalExpression\">${topicCategory != 1}</conditionExpression>\r\n    </sequenceFlow>\r\n\r\n    <!-- B1 ç½‘å…³ï¼šåˆå®¡ç»“æœï¼ˆ3+1/å®éªŒç­ï¼‰ -->\r\n    <exclusiveGateway id=\"initOtherGateway\" name=\"åˆå®¡ç»“æœåˆ¤æ–­ï¼ˆå…¶ä»–ï¼‰\" />\r\n    <sequenceFlow id=\"flow_init_other_to_gateway\"\r\n                  sourceRef=\"initOtherTask\"\r\n                  targetRef=\"initOtherGateway\" />\r\n\r\n    <!-- B1 â†’ B2ï¼ˆåˆå®¡é€šè¿‡ï¼‰ -->\r\n    <sequenceFlow id=\"flow_init_other_pass\"\r\n                  name=\"é€šè¿‡\"\r\n                  sourceRef=\"initOtherGateway\"\r\n                  targetRef=\"finalOtherTask\">\r\n      <conditionExpression xsi:type=\"tFormalExpression\">${initOutcome == \'PASS\'}</conditionExpression>\r\n    </sequenceFlow>\r\n\r\n    <!-- B1 â†’ åˆå®¡ä¿®æ”¹ä»»åŠ¡ï¼ˆéœ€ä¿®æ”¹ï¼‰ -->\r\n    <sequenceFlow id=\"flow_init_other_need_modify\"\r\n                  name=\"éœ€ä¿®æ”¹\"\r\n                  sourceRef=\"initOtherGateway\"\r\n                  targetRef=\"initOtherModifyTask\">\r\n      <conditionExpression xsi:type=\"tFormalExpression\">${initOutcome == \'NEED_MODIFY\'}</conditionExpression>\r\n    </sequenceFlow>\r\n\r\n    <!-- åˆå®¡ä¿®æ”¹ä»»åŠ¡ï¼ˆ3+1/å®éªŒç­è·¯å¾„ï¼‰ -->\r\n    <userTask id=\"initOtherModifyTask\"\r\n              name=\"åˆå®¡ä¿®æ”¹å¾…é‡æï¼ˆå…¶ä»–ï¼‰\"\r\n              flowable:assignee=\"${creatorId}\">\r\n      <documentation>ä¼ä¸šæ•™å¸ˆæ ¹æ®åˆå®¡æ„è§ä¿®æ”¹è¯¾é¢˜åé‡æ–°æäº¤ï¼Œè¿”å›åˆå®¡èŠ‚ç‚¹</documentation>\r\n    </userTask>\r\n\r\n    <!-- åˆå®¡ä¿®æ”¹å®Œæˆ â†’ å¾ªç¯å›åˆå®¡ä»»åŠ¡ï¼ˆ3+1/å®éªŒç­ä»INIT_MODIFYé‡æåå›åˆ°åˆå®¡ï¼‰ -->\r\n    <sequenceFlow id=\"flow_init_other_modify_resubmit\"\r\n                  name=\"é‡æ–°æäº¤\"\r\n                  sourceRef=\"initOtherModifyTask\"\r\n                  targetRef=\"initOtherTask\" />\r\n\r\n    <!-- B2ï¼šç»ˆå®¡ä»»åŠ¡ï¼ˆå€™é€‰ç»„ï¼šUNIVERSITY_TEACHERï¼‰ -->\r\n    <userTask id=\"finalOtherTask\"\r\n              name=\"ç»ˆå®¡ï¼ˆå®éªŒç­/3+1ï¼‰\"\r\n              flowable:candidateGroups=\"UNIVERSITY_TEACHER\">\r\n      <documentation>é«˜æ ¡æ•™å¸ˆå¯¹3+1/å®éªŒç­è¯¾é¢˜è¿›è¡Œç»ˆå®¡</documentation>\r\n      <extensionElements>\r\n        <flowable:taskListener event=\"create\"\r\n                               class=\"com.yuwan.completebackend.workflow.listener.ReviewTaskCreateListener\" />\r\n      </extensionElements>\r\n    </userTask>\r\n\r\n    <!-- B2 ç½‘å…³ï¼šç»ˆå®¡ç»“æœï¼ˆ3+1/å®éªŒç­ï¼‰ -->\r\n    <exclusiveGateway id=\"finalOtherGateway\" name=\"ç»ˆå®¡ç»“æœåˆ¤æ–­ï¼ˆå…¶ä»–ï¼‰\" />\r\n    <sequenceFlow id=\"flow_final_other_to_gateway\"\r\n                  sourceRef=\"finalOtherTask\"\r\n                  targetRef=\"finalOtherGateway\" />\r\n\r\n    <!-- B2 â†’ ç»ˆå®¡é€šè¿‡ç»“æŸ -->\r\n    <sequenceFlow id=\"flow_final_other_pass\"\r\n                  name=\"ç»ˆå®¡é€šè¿‡\"\r\n                  sourceRef=\"finalOtherGateway\"\r\n                  targetRef=\"passedEndEvent\">\r\n      <conditionExpression xsi:type=\"tFormalExpression\">${finalOutcome == \'PASS\'}</conditionExpression>\r\n    </sequenceFlow>\r\n\r\n    <!-- B2 â†’ ç»ˆå®¡ä¸é€šè¿‡ç»“æŸ -->\r\n    <sequenceFlow id=\"flow_final_other_reject\"\r\n                  name=\"ç»ˆå®¡ä¸é€šè¿‡\"\r\n                  sourceRef=\"finalOtherGateway\"\r\n                  targetRef=\"failedEndEvent\">\r\n      <conditionExpression xsi:type=\"tFormalExpression\">${finalOutcome == \'REJECT\'}</conditionExpression>\r\n    </sequenceFlow>\r\n\r\n    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• ç»“æŸäº‹ä»¶ â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->\r\n    <endEvent id=\"passedEndEvent\" name=\"å®¡æŸ¥é€šè¿‡\" />\r\n    <endEvent id=\"failedEndEvent\" name=\"å®¡æŸ¥ä¸é€šè¿‡\" />\r\n\r\n  </process>\r\n\r\n  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• BPMN å›¾å½¢å¸ƒå±€ï¼ˆDIï¼‰ â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->\r\n  <bpmndi:BPMNDiagram id=\"BPMNDiagram_topic_review\">\r\n    <bpmndi:BPMNPlane id=\"BPMNPlane_topic_review\" bpmnElement=\"topic_review\">\r\n\r\n      <bpmndi:BPMNShape id=\"startEvent_di\" bpmnElement=\"startEvent\">\r\n        <omgdc:Bounds x=\"152\" y=\"252\" width=\"36\" height=\"36\" />\r\n        <bpmndi:BPMNLabel><omgdc:Bounds x=\"140\" y=\"295\" width=\"60\" height=\"14\" /></bpmndi:BPMNLabel>\r\n      </bpmndi:BPMNShape>\r\n\r\n      <bpmndi:BPMNShape id=\"categoryGateway_di\" bpmnElement=\"categoryGateway\" isMarkerVisible=\"true\">\r\n        <omgdc:Bounds x=\"245\" y=\"245\" width=\"50\" height=\"50\" />\r\n        <bpmndi:BPMNLabel><omgdc:Bounds x=\"228\" y=\"302\" width=\"84\" height=\"27\" /></bpmndi:BPMNLabel>\r\n      </bpmndi:BPMNShape>\r\n\r\n      <!-- è·¯å¾„A -->\r\n      <bpmndi:BPMNShape id=\"preReviewTask_di\" bpmnElement=\"preReviewTask\">\r\n        <omgdc:Bounds x=\"360\" y=\"120\" width=\"120\" height=\"60\" />\r\n      </bpmndi:BPMNShape>\r\n      <bpmndi:BPMNShape id=\"preReviewGateway_di\" bpmnElement=\"preReviewGateway\" isMarkerVisible=\"true\">\r\n        <omgdc:Bounds x=\"545\" y=\"125\" width=\"50\" height=\"50\" />\r\n      </bpmndi:BPMNShape>\r\n      <bpmndi:BPMNShape id=\"preModifyTask_di\" bpmnElement=\"preModifyTask\">\r\n        <omgdc:Bounds x=\"530\" y=\"30\" width=\"120\" height=\"60\" />\r\n      </bpmndi:BPMNShape>\r\n      <bpmndi:BPMNShape id=\"initUpgradeTask_di\" bpmnElement=\"initUpgradeTask\">\r\n        <omgdc:Bounds x=\"660\" y=\"120\" width=\"120\" height=\"60\" />\r\n      </bpmndi:BPMNShape>\r\n      <bpmndi:BPMNShape id=\"initUpgradeGateway_di\" bpmnElement=\"initUpgradeGateway\" isMarkerVisible=\"true\">\r\n        <omgdc:Bounds x=\"845\" y=\"125\" width=\"50\" height=\"50\" />\r\n      </bpmndi:BPMNShape>\r\n      <bpmndi:BPMNShape id=\"initUpgradeModifyTask_di\" bpmnElement=\"initUpgradeModifyTask\">\r\n        <omgdc:Bounds x=\"830\" y=\"30\" width=\"120\" height=\"60\" />\r\n      </bpmndi:BPMNShape>\r\n      <bpmndi:BPMNShape id=\"finalUpgradeTask_di\" bpmnElement=\"finalUpgradeTask\">\r\n        <omgdc:Bounds x=\"960\" y=\"120\" width=\"120\" height=\"60\" />\r\n      </bpmndi:BPMNShape>\r\n      <bpmndi:BPMNShape id=\"finalUpgradeGateway_di\" bpmnElement=\"finalUpgradeGateway\" isMarkerVisible=\"true\">\r\n        <omgdc:Bounds x=\"1145\" y=\"125\" width=\"50\" height=\"50\" />\r\n      </bpmndi:BPMNShape>\r\n\r\n      <!-- è·¯å¾„B -->\r\n      <bpmndi:BPMNShape id=\"initOtherTask_di\" bpmnElement=\"initOtherTask\">\r\n        <omgdc:Bounds x=\"360\" y=\"360\" width=\"120\" height=\"60\" />\r\n      </bpmndi:BPMNShape>\r\n      <bpmndi:BPMNShape id=\"initOtherGateway_di\" bpmnElement=\"initOtherGateway\" isMarkerVisible=\"true\">\r\n        <omgdc:Bounds x=\"545\" y=\"365\" width=\"50\" height=\"50\" />\r\n      </bpmndi:BPMNShape>\r\n      <bpmndi:BPMNShape id=\"initOtherModifyTask_di\" bpmnElement=\"initOtherModifyTask\">\r\n        <omgdc:Bounds x=\"530\" y=\"460\" width=\"120\" height=\"60\" />\r\n      </bpmndi:BPMNShape>\r\n      <bpmndi:BPMNShape id=\"finalOtherTask_di\" bpmnElement=\"finalOtherTask\">\r\n        <omgdc:Bounds x=\"660\" y=\"360\" width=\"120\" height=\"60\" />\r\n      </bpmndi:BPMNShape>\r\n      <bpmndi:BPMNShape id=\"finalOtherGateway_di\" bpmnElement=\"finalOtherGateway\" isMarkerVisible=\"true\">\r\n        <omgdc:Bounds x=\"845\" y=\"365\" width=\"50\" height=\"50\" />\r\n      </bpmndi:BPMNShape>\r\n\r\n      <!-- ç»“æŸäº‹ä»¶ -->\r\n      <bpmndi:BPMNShape id=\"passedEndEvent_di\" bpmnElement=\"passedEndEvent\">\r\n        <omgdc:Bounds x=\"1262\" y=\"132\" width=\"36\" height=\"36\" />\r\n        <bpmndi:BPMNLabel><omgdc:Bounds x=\"1250\" y=\"175\" width=\"60\" height=\"14\" /></bpmndi:BPMNLabel>\r\n      </bpmndi:BPMNShape>\r\n      <bpmndi:BPMNShape id=\"failedEndEvent_di\" bpmnElement=\"failedEndEvent\">\r\n        <omgdc:Bounds x=\"1262\" y=\"372\" width=\"36\" height=\"36\" />\r\n        <bpmndi:BPMNLabel><omgdc:Bounds x=\"1246\" y=\"415\" width=\"68\" height=\"14\" /></bpmndi:BPMNLabel>\r\n      </bpmndi:BPMNShape>\r\n\r\n      <!-- è¿çº¿ -->\r\n      <bpmndi:BPMNEdge id=\"flow_start_to_gateway_di\" bpmnElement=\"flow_start_to_gateway\">\r\n        <omgdi:waypoint x=\"188\" y=\"270\" /><omgdi:waypoint x=\"245\" y=\"270\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_upgrade_to_pre_di\" bpmnElement=\"flow_upgrade_to_pre\">\r\n        <omgdi:waypoint x=\"270\" y=\"245\" /><omgdi:waypoint x=\"270\" y=\"150\" /><omgdi:waypoint x=\"360\" y=\"150\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_pre_to_gateway_di\" bpmnElement=\"flow_pre_to_gateway\">\r\n        <omgdi:waypoint x=\"480\" y=\"150\" /><omgdi:waypoint x=\"545\" y=\"150\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_pre_pass_di\" bpmnElement=\"flow_pre_pass\">\r\n        <omgdi:waypoint x=\"595\" y=\"150\" /><omgdi:waypoint x=\"660\" y=\"150\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_pre_need_modify_di\" bpmnElement=\"flow_pre_need_modify\">\r\n        <omgdi:waypoint x=\"570\" y=\"125\" /><omgdi:waypoint x=\"570\" y=\"90\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_pre_modify_resubmit_di\" bpmnElement=\"flow_pre_modify_resubmit\">\r\n        <omgdi:waypoint x=\"530\" y=\"60\" /><omgdi:waypoint x=\"420\" y=\"60\" /><omgdi:waypoint x=\"420\" y=\"120\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_init_upgrade_to_gateway_di\" bpmnElement=\"flow_init_upgrade_to_gateway\">\r\n        <omgdi:waypoint x=\"780\" y=\"150\" /><omgdi:waypoint x=\"845\" y=\"150\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_init_upgrade_pass_di\" bpmnElement=\"flow_init_upgrade_pass\">\r\n        <omgdi:waypoint x=\"895\" y=\"150\" /><omgdi:waypoint x=\"960\" y=\"150\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_init_upgrade_need_modify_di\" bpmnElement=\"flow_init_upgrade_need_modify\">\r\n        <omgdi:waypoint x=\"870\" y=\"125\" /><omgdi:waypoint x=\"870\" y=\"90\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_init_upgrade_modify_resubmit_di\" bpmnElement=\"flow_init_upgrade_modify_resubmit\">\r\n        <omgdi:waypoint x=\"830\" y=\"60\" /><omgdi:waypoint x=\"420\" y=\"60\" /><omgdi:waypoint x=\"420\" y=\"120\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_final_upgrade_to_gateway_di\" bpmnElement=\"flow_final_upgrade_to_gateway\">\r\n        <omgdi:waypoint x=\"1080\" y=\"150\" /><omgdi:waypoint x=\"1145\" y=\"150\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_final_upgrade_pass_di\" bpmnElement=\"flow_final_upgrade_pass\">\r\n        <omgdi:waypoint x=\"1195\" y=\"150\" /><omgdi:waypoint x=\"1262\" y=\"150\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_final_upgrade_reject_di\" bpmnElement=\"flow_final_upgrade_reject\">\r\n        <omgdi:waypoint x=\"1170\" y=\"175\" /><omgdi:waypoint x=\"1170\" y=\"390\" /><omgdi:waypoint x=\"1262\" y=\"390\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_other_to_init_di\" bpmnElement=\"flow_other_to_init\">\r\n        <omgdi:waypoint x=\"270\" y=\"295\" /><omgdi:waypoint x=\"270\" y=\"390\" /><omgdi:waypoint x=\"360\" y=\"390\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_init_other_to_gateway_di\" bpmnElement=\"flow_init_other_to_gateway\">\r\n        <omgdi:waypoint x=\"480\" y=\"390\" /><omgdi:waypoint x=\"545\" y=\"390\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_init_other_pass_di\" bpmnElement=\"flow_init_other_pass\">\r\n        <omgdi:waypoint x=\"595\" y=\"390\" /><omgdi:waypoint x=\"660\" y=\"390\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_init_other_need_modify_di\" bpmnElement=\"flow_init_other_need_modify\">\r\n        <omgdi:waypoint x=\"570\" y=\"415\" /><omgdi:waypoint x=\"570\" y=\"460\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_init_other_modify_resubmit_di\" bpmnElement=\"flow_init_other_modify_resubmit\">\r\n        <omgdi:waypoint x=\"530\" y=\"490\" /><omgdi:waypoint x=\"420\" y=\"490\" /><omgdi:waypoint x=\"420\" y=\"420\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_final_other_to_gateway_di\" bpmnElement=\"flow_final_other_to_gateway\">\r\n        <omgdi:waypoint x=\"780\" y=\"390\" /><omgdi:waypoint x=\"845\" y=\"390\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_final_other_pass_di\" bpmnElement=\"flow_final_other_pass\">\r\n        <omgdi:waypoint x=\"895\" y=\"390\" /><omgdi:waypoint x=\"1280\" y=\"390\" /><omgdi:waypoint x=\"1280\" y=\"408\" />\r\n      </bpmndi:BPMNEdge>\r\n      <bpmndi:BPMNEdge id=\"flow_final_other_reject_di\" bpmnElement=\"flow_final_other_reject\">\r\n        <omgdi:waypoint x=\"870\" y=\"415\" /><omgdi:waypoint x=\"870\" y=\"450\" /><omgdi:waypoint x=\"1280\" y=\"450\" /><omgdi:waypoint x=\"1280\" y=\"408\" />\r\n      </bpmndi:BPMNEdge>\r\n\r\n    </bpmndi:BPMNPlane>\r\n  </bpmndi:BPMNDiagram>\r\n\r\n</definitions>\r\n',0),('51ddc281-2031-11f1-ba76-00ff4626f3bf',1,'E:\\gitHub\\completeSystem\\complete-backend\\target\\classes\\processes\\topic_review.topic_review.png','517ae1ff-2031-11f1-ba76-00ff4626f3bf',_binary '‰PNG\r\n\Z\n\0\0\0\rIHDR\0\0\0\0\0\0\0®\Ï\0\0IIDATx^\ì\İ\r¬d\çY\'ø\Ğ o2 0\ÃZØ€6+\Í0\Ò v%@\Êl{°³keœ%\î®[\×_\íupÌ‚ä°c\rI;\ÍxvWâ¤QÄ±Ä¢Gj\Âtº\İ4\ì$¶œ;l\âq\'N\Ûn\Úqû3¤»c\ì\Ú\ó\ö\Üjª\ß:·î©ªsN\÷=¿Ÿ\ô¨}\Ï9Uu’·\î¿\Î\ó\ô\é{\×\Ö\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0’4\Z¾\ã\èÑ£¿\÷\Ş{¿u\ğ\àÁÑT\âU¬\ã+Gy\òĞ¡C\Ç\ë\r)“Wù•¼\0\0\ÈPÑ¼\ßY4{£\'NŒN:5:s\æŒJ¼\Â:†\õ<|ø\ğ\óECQ¼\æ*y•_\É+\0\0€…;…B³7*ı:~üø\ÓEÿ\éx\Í!U\ò*ß’W\0\0\0	ÿ,ÑByVX×¢?¯9¤J^\å[\ò\n\0\0 #\ághÅŸÊ§\Âú\Æk©’Wy—¼\0\0\ÈD\Õş\Ïı\Ì\ïŒş\Ä{\ÎVø\ï°->Nu«4\ğ\äD^\å]\ò\n\0\0 U\ZøŸ}b\ô\Ğ\İ\ï}\îo8¯Â¶°/>^u§4\ğ\äD^\å]\ò\n\0\0 U\Zøc\ïŸj\Ş\Ç\õø\ÃwM¯ºS\Zxr\"¯\ò.y\0\0‰*\rü_\İs\ËT\ã>®°/>^u§4\ğ\äD^\å]\ò\n\0\0 U\Zø‡\Ü4Õ¸+ì‹W\İ)\r<9‘Wy—¼\0\0È„>\ï\ÒÀ“y•w\É+\0\0€LTi\à\Ãoy\÷q…}\ñ\ñª;¥\'\'\ò*\ï’W\0\0\0™¨\ÒÀ?\ò\ÉL5\î\ã\nû\â\ãUwJON\äU\Ş%¯\0\0\02Q¥?ù\Ä\çGıÙ¯N5\ïa[\Ø¯ºS\Zxr\"¯\ò.y\0\0‰*\r|¨¯\Ü\ÛT¶\ÅÇ©n•œÈ«¼K^\0\0d¢Rú\ôè‘¿ü\ĞT¶…}SÇ«Î”œÈ«¼K^\0\0db»ş\ÅgŸ}ù“·N5\ï\ã\nû\Â1\ñ\ãT7JON\äU\Ş%¯\0\0\02±eú\ô\èø#‡F_ø\Ó_™j\Ú\ã\nÇ„c\İ=Ô½\ÒÀ“y•w\É+\0\0€L”5\ğ\Û\İ%´U¹{¨{¥\'\'\ò*\ï’W\0\0\0™(k\à«\Ü%´U…\Ç\ÆÏ§VW\Zxr\"¯\ò.y\0\0‰²>n\Ê\ç­øù\Ô\êJON\äU\Ş%¯\0\0\02Q\ÖÀ«|JON\äU\Ş%¯\0\0\02¡Ï»4\ğ\äD^\å]\ò\n\0\0 \Zø¼KON\äU\Ş%¯\0\0\02¡Ï»4\ğ\äD^\å]\ò\n\0\0 \Zø¼KON\äU\Ş%¯\0\0\02¡Ï»4\ğ\äD^\å]\ò\n\0\0 \Zø¼KON\äU\Ş%¯\0\0\02¡Ï»4\ğ\äD^\å]\ò\n\0\0 \Zø¼KON\äU\Ş%¯\0\0€)\ë\ë\ë#¥”RªÉŠ‡T*Ÿ2p\0\0¦„F0\ŞF\÷¹c(\ï\ÒÀ“y•w\É+\0\0`Šcšº\ÒÀ§RZ¹\ì_Ui\à\ÉI]yµV\ò½\Z\Êşz\ö/Z\ò\n\0\0˜b\à˜¦º\Zøek­¤YÜ–úşU•œÔ•Wk%ß›“\Û\ì_nÿ¢%¯\0\0€)iª«_¶\ÖJš\Õ\Ém©\ï_Ui\à\ÉI]yµV\ò½9¹\Íş\å\ö/Z\ò\n\0\0˜b\à˜¦º\Zøek­¤YÜ–úşU•œÔ•Wk%ß›“\Û\ì_nÿ¢%¯\0\0€)iª«_¶\ÖJš\Õ\Ém©\ï_Ui\à\ÉI]yµV\ò½9¹\Íş\å\ö/Z\ò\n\0\0˜b\à˜¦º\Zøek­¤YÜ–úşU•œÔ•Wk%ß›“\Û\ì_nÿ¢%¯\0\0€)iª«_¶\ÖJš\Õ\Ém©\ï_Ui\à\ÉI]yµV\ò½9¹\Íş\å\ö/Z\ò\n\0\0˜b\à˜¦º\Zøe«8•\Ò\ÊeÿªJON\êÊ«µ’\ï\ÕP\ö×³Ñ’W\0\0À\Ç4\Õ\ÕÀ«n–œÈ«¼K^\0\0SÓ¤Ï»4\ğ\äD^\å]\ò\n\0\0˜b\à˜&\r|Ş¥\'\'\ò*\ï’W\0\0À\Ç4i\à\ó.\r<9‘Wy—¼\0\0¦8¦IŸwi\àÉ‰¼Ê»\ä\0\00\ÅÀ1M\Zø¼KON\äU\Ş%¯\0\0€)i\ÒÀ\ç]\Zxr\"¯\ò.y\0\0L1pL“>\ï\ÒÀ“y•w\É+\0\0`Šcš4\ğy—œÈ«¼K^\0\0SÓ¤Ï»4\ğ\äD^\å]\ò\n\0\0˜b\à˜&\r|Ş¥\'\'\ò*\ï’W\0\0À\Ç4i\à\ó.\r<9‘Wy—¼\0\0¦8¦IŸwi\àÉ‰¼Ê»\ä\0\00\ÅÀ1M\Zø¼KON\äU\Ş%¯\0\0€)i\ÒÀ\ç]\Zxr\"¯\ò.y\0\0L1pL“>\ï\ÒÀ“y•w\É+\0\0`Šcš4\ğy—œÈ«¼K^\0\0S\Ót\ğ\àÁWN:5\Õø©\ô«X\×\'‹şt¼\æ*y•o\É+\0\0 ”cš9\ò\ä‰\'¦š?•~=\ö\Øc¿_4\ğŸ\×R%¯\ò-y\0\0”2pLÓ¡C‡.>|ø\ğ\óÇÚCyT±Ç¿úÕ¯ş^Ñ¼­¨‹\â5‡TÉ«üJ^\0\038¦+4y\áÎ’¢Î„Ÿ¡¥’¯°a=5\ïd\'¼¯7\ß\ß\ò*’W\0\0À\Ö\é‚]»vıÏƒÁ\à¥\âıøh¼ K\ä\0\0À6Yµ,Ş‡O…\÷bQ\ÅûºB^\0\0T`\à\È*]~ù\å¯)ŞƒŸ\İl\ŞCıu|@\È+\0\0€ŠY¡W\ï¿;\'š\÷q½.>`\Å\ä\0\0@U¬\Ê`0ø¿Jš\÷Q±ı\ÒøX€U’W\0\0\0s0pd†\Ãá›‹\÷\Ş\Ëq\ó¾Y¿°*\ò\n\0\0`N´m0ü\ó¢¡¤q×—\ã\Ç\0¬‚¼\0\0X€#m+\Şs¿_Ô™’\Æ}²¾/~@\Û\ä\0\0ÀB³oƒ¦\íÜ¹\ó¿‡?1n(\ê®\â}ø\Êd_l[°\n\ò\n\0\0`N¬Z\ñ|cQGŠ¦ı(šúËŠÿş@QoX5y\0\0P#«V¼\ß]4\ï·\Ä\ÛºF^\0\0T`\àÈª\ïÁ?)\Zø‹\ã\í\0]#¯\0\0\0*0pd\Å^U¼Ÿ¹ü\ò\Ëÿq¼ c\ä\0\0@¬\Ò`0øg\Å{\ğ¿\Ä\ÛºF^\0\0Td\à\È*ï¿«‹º-\Ş\Ğ5\ò\n\0\0 \"GV©xÿı\ö`0ø…x;@\×\È+\0\0€ŠY¥\âı\÷Å¢ÿ‘x;@\×\È+\0\0€ŠY•\ï.\Ş\Ï\ïÜ¹\ó\Û\ã}\0]\"¯\0\0\0\æ`\àÈªƒÿµxÿ}\"\Ş\Ğ5\ò\n\0\0`\Ã\á\ğ\Ù0`œU\á˜øqĞ„\âı\ökE½\'\Ş\Ğ5\ò\n\0\0`\Ã\ápO<`Œ+?šP¼\ß†»†\â\í\0]#¯\0\0\0f˜u—£»iKø9h\Å{\îù\ğs\Ñ\â}\0]\"¯\0\0\0¶1\ë.Gw7Ò–¢qÿ‹\÷\Ü\ã\í\0]#¯\0\0\0*(»\Ë\Ñİ´i0üB\ñ¾ûH¼ k\ä\0\0@ew9º»‘6ï¹\õ\Ä\ÛºF^\0\0T4y—£»i[\ñ¾{t0ü³x;@\×\È+\0\0€Š&\ïrtw#m*\Şo\ß[¼\ï)ş\óU\ñ>€.‘W\0\0\0s\Z\ß\åo‡&\ï»7\ï»?‰·t¼\0\0˜\Óø.\Çx;4i0\ÜR¼\ï\Şo\è\Zy\0\0\Ôb4\Z}\ÇÑ£G?~\ï½\÷~\ë\àÁƒ£d]a\àoË­Šu|\åÈ‘#O:t\è\âx½i_\ñû‹\ápøS\ñv\æ×·¼\êCÉ«n‘W\õ‘Wù•¼\0˜Cq1|gq\ñ4:q\â\Ä\èÔ©S£3gÎ¨\Ä+¬cX\ÏÃ‡?_\\ _¯9\í¹\æškş^\ÑÀ¿¸s\çÎ¿\ïc~\ò*¿’W\İ!¯\ê%¯\ò+y\00‡\ğ7\ï\á\â)¾¨R\é\×\ñ\ãÇŸ..ˆ?¯9\í\Ù\Ø\Øø\ñÁ`\ğ`¼\ÅÈ«|K^­¼ª—¼Ê·\ä\0@\áŸùø›\÷<+¬kqA|:^sÚ³ùsC?og1\ò*ß’W«\'¯\ê%¯\ò-y\0PAø™4\ñ…”Ê§\Âú\ÆkN#^oŠ\æıŠ&ş²x;‹‘Wy—¼j¼j¼Ê»\äUkJ\ó\n\0H@\Õ\âo<w|t\ô3¿3zø\ï9[\á¿Ã¶ø8Õ­rAÜŠE\Øü\ó<Elcc\ã\õ\ñv#¯\ò.y\Õ\ny\Õy•wÉ«Vl™W\0@ª\\¿ø\ì£‡\î~\÷\ès|\Ãy¶…}\ñ\ñª;å‚¸q\ã‹\á\ë7ÿ<wQ\\4\ï¯+\ê¯\Ç_³<y•wÉ«\ÆÉ«É«¼K^5nË¼\0Q\å‚ø\Ø\Ãû§.†\Ç\õø\ÃwM¯ºS.ˆÿ\Íûy_‡\Ã]ƒÁ\à?m\î£\ò*\ï’W’W-“Wy—¼j\ÔÌ¼\0Q\å‚ø¯\î¹e\êBx\\a_|¼\êN¹ n\ÌV¿\ç¶\rüûŠzG´Ÿ%È«¼K^5F^­€¼Ê»\äUc¶Í«h;\0\ĞUU.ˆ:p\ÓÔ…\ğ¸Â¾øxÕrAÜˆ\í.z\Ï\îÿ¹Ÿû¹/\rüO\Ä;Yœ¼Ê»\äU#\äÕŠÈ«¼K^5¢R^mş	\0t\â¼\Ëq\í*]\ì^pÁo,\ZøW^\óš\×üL¼\ÅÉ«¼K^\ÕN^­¼Ê»\äU\í*\å\ÕZ\õ\ã\0€U«rA~kb|!<®°/>^u§\\\×j®‹\Ü\ĞÄ¯\Íq<Û“Wy—¼ª•¼Z1y•wÉ«ZÍ•Wk\óOCv\ï\Şı\Ú\õ\õ\õKƒÁû‹?\õ•¢¾Y\Ôh\ó\Ï\ğ\õÁ\Íı—„\ã\ã\ç\0 cU.ˆù\ä¦.„\Ç\ö\ÅÇ«\î”\â\Ú,zq»\è\ã(!¯\ò.yU›Esg\Ñ\ÇQB^\å]\òª6‹\æÎ¢£\Ã\á\ğg\Ö\×\×\÷ufs¸Xµ\Â\ñû\Â\ã\ã\ç CU.ˆO>\ñù\ÑC\ö«S\Ãa[\Ø¯ºS.ˆk±\ìE\í²g“¼Ê»\äU-–Í›e\Ï&y•wÉ«Z,›7\Ë>9\r‡\Ã7¬¯¯\ßW2H\\¤\î\Ï¿\0©rA\ê+\÷\ß6uA¶\ÅÇ©n•\â¥\Õu1[\×\ó\ôš¼Ê»\ä\Õ\Ò\êÊ™º§\×\äU\Ş%¯–VW\Î\Ô\õ<Ì°{\÷\îƒÁo®¯¯¿\÷\ì\Ù3º\ã;F<\ğÀ\è\ÑG<yr„?\Ã\×a{\Ø‹/<oxşø5\È@¥\âÓ§Güå‡¦.ˆÃ¶°o\êxÕ™rA¼”º/b\ë~¾Ş‘Wy—¼ZJ\İùR\÷\ó\õ¼Ê»\ä\ÕR\êÎ—ºŸ	\ë\ë\ë¯‡Ÿ›nllŒ\ö\î\İ;zü\ñ\Ç\Ï«\nÇ‡Ç…\ÇGƒ\ÇÏ†×‰_€\ÄmwAü\â³OŒ¾ü\É[§.†\Ç\ö…c\âÇ©n”\â…5u\ñ\Ú\Ô\ó\ö‚¼Ê»\ä\ÕÂšÊ•¦·\äU\Ş%¯\ÖT®4\õ¼½6¨¨\'&‡ƒ·\Ür\Ë\èØ±c\ñ,q.\á\ñ\áy¢¡\ã±\ğz\ñ9\0°-/ˆOŸ\ä\Ğ\èú+SÁq…cÂ±ş6¾{\å‚x!M_´6ıüÙ’Wy—¼ZH\Óy\Ò\ô\ógK^\å]\òj!M\çI\Ó\Ï\ß+›w66†»\÷\ï\ß\Ï—/º\Û\ñ˜;2RvA¼\İßºoUş6¾{\å‚xn“«¯*\ê\Ê\Í?—Q\ö<.Š ¯\ò.y57y\Õa\ò*\ï’Ws“W		?Sq\òŸQ_u\ÕU£|0\Ö\"<oxş‰¡\ãgıLG€L”]Wù[\÷­*<6~>µºrA<—øbø·‹\nÿÿ…?½(\õ<.Š\ç$¯\ò.y5y\Õq\ò*\ï’Ws‘W‰\Ùü1\ç\îllj\Ø8\òN\Ç\ğú\ñ9 ²\âø\"wŞŠŸO­®\\W_œ^¹\ö_/b\Ç_\ÌV1y1<®+\Î;búu™A^\å]\òª²87\äUÉ«¼K^Uç†¼\ê¸\ápø†\õ\õ\õ—\ÇÃ¿»\îº+6\"¼\Î\Ä]/‡\óˆ\Ï\r€Ä”]«|\Êq%e¥e³\ó\\—=ş#›\Ûce¯O	y•wÉ«J\Ê\ò¢,o\äÕŠÉ«¼K^UR–ey#¯:d}}ı¾\ñ\à/üb—6E¿H\æ¾ø\Ü\0HŒ\â¼\Ë\ñ¶f]Œ–]\ÔV¹(.{\ÜV\Ãc³ÎƒM\ò*\ï’WÛš•e¹#¯VH^\å]\òj[³r¢,w\äU\ìÚµ\ë§\'ÿ)\õ²¿z^\á\õ&ÿiu8ŸøHˆ\â¼\Ë\ñLU.B\Ë.ng]—¿\İ\Å\ğX•\ó\é5y•wÉ«™ª\äCYşÈ«‘Wy—¼š©J>”å¼Z±\õ\õ\õ}\ãa\ßŞ½{\ãy`+\Â\ëN\Ü\å¸/>G\0\â‚8\ïrA¼¥y.>\Ë.r\Ë.ŠË«z1<6\Ïy\õ¼Ê»\äÕ–\æÉ…²’W+ ¯\ò.yµ¥yr¡,‡\äÕŠlll|\÷úúú™\ñ°¯\í»\Ç\Â\ëNÏ„\óŠ\Ï€+ú¢.Œ·\Ç\\\ç]9_W}—Xä¢³\ìbw\ò¢¸lÿ¼\Ãc‹œ_Òª®¥¼Ê»\äU©E\ò ,\äUMª®¥¼Ê»\äU©E\ò ,\äUÍª¬i±ÿ’\õ\ÍAß={\â9`«\Â\ë\Ï%œW|®\0¬\ØDH\Ïü€qAœwe~A\\\é=Y\æb³\ì¢7|ım%\Û½[\æ<“Su-\åU\Ş%¯¦,“\òª!U\×R^\å]\òj\Ê29 ¯\ZVeM‹\í·»ı\ö\Û\ã`«\Â\ëOœ\ó­\ñ¹°b!=\ó\Æq\ŞÕ“\â™\ï\ñ	u\\d–])úzÙ‹\á±:\Î7	U\×R^\å]\ò\ê<u|ÿË«T]Ky•wÉ«\ó\Ô\ñı/¯\ZTeM‡\Ã\á¡\ñşû\ï¿?¶*¼şø\\\ÂyM\'\0P\òÁRú\ã‚8\ï\ê\Ùq\é{|S—e\Åu_\ÕyŞU²†¥k)¯\ò.yuN\ß\÷\òªf%kXº–\ò*\ï’W\ç\Ôù}/¯\ZR²–SkZüùµ\ñ\ö£G\Æ3ÀV…×Ÿ8Ç¯Eÿs\0Xµ’”¸\Î~À¸ Î»zzA|\Ş{|­™‹\Ê\ğ\Ï|\â¿y_‡\íuk\âü;¥d\í\â:»–\ò*\ï’W\ò*%k\×Ùµ”Wy—¼’W))YÃ¸Âšş\Íø\ëgy&¶*¼şø\\†\Ã\á\ñÿ€¥•¡j \\\ç]\ñz\÷­v\î\Ü9º\à‚\Â\Å\ê\õq\Æ,a\Ö\ßÀ‡\íuş\rü\Ø\õ\ñÿ¶>–¼Ê»\â\õ\î[É«¼J^\å]\ñz\÷­\äU\Ş\õ\ÒK/\Å3ÀV…×Ÿ8Ÿ¿\r`i!`\âmTpL\Ô=\ëş\ÉOoª§\Ş{|­Ş¿Á.»ÿ&¾\î‹\â:Ï¿“JÖ°t-\åU\Ş%¯Îª\óû]^5 d\rK\×R^\å]\ò\ê¬:¿\ß\åUƒJ\ÖrjMÃ„\ã\í\îp²&\ŞFu³>P&\åzA¼vşÊ¹ªº?—\ê\Ùq\é{|S•e\Ã\ág\n•ıÅº.Š\ë8\ïÎ«º–]Í«µ’,	•\Êş®”¼:g\Ç\Ú\ò\ß\÷\òª!U\×R^5³¿+%¯\ÎÙ±¶ü\÷½¼jX•5]\÷3>	o£ºY(“ºzA¼l­•\\œNn\Ûn.Õ“\â™\ï\ñ	\Ë\\\\nu1<¾\è-Û¿\ìE\ñ2ç›”ªk\ÙÕ¼Z+É\Ém]\ßß•’W\çY\æû¿,\äUMª®¥¼jfWJ^g™\ïÿ²<’W5«²¦~K5\Ğ+!`\âmT7\ëeRW/ˆ—­µ’‹\Ó\Ém\Û\íÏ¥2¿ ®\ô,r‘Yv±[\ö\ÛË[\ô¢x‘\óLVÕµ\ìj^­•d\Çä¶®\ï\ïJÉ«)‹\ä@YÉ«\ZU]Ky\Õ\Ìş®”¼š²H”å¼j@•5-\ö\ß\Zú\ïP·\ß~{<lUxı\ñ¹„\óŠ\Ï`i!`\âmÔ¯«\Ä\Ë\ÖZ\É\Å\é\ä¶\í\ö\çR9_/a‹Í²‹Ü²‹á±²\ã\ç½(\çüz¥«yµV’“Ûº¾¿+%¯JÍ“eù#¯VD^5³¿+%¯JÍ“eù#¯V¨\è½/ù\ö\ì\Ù\Ï\0[u\İu×½21p¼$>W€¥8¶£«\Ä\Ë\ÖZ\É\Å\é\ä¶\í\ö\çR.ˆ·Tå¢³\ì\âv\Ö\Å\ğX\Ù\ãª^W9¯\Ş\êj^­•d\Çä¶®\ï\ïJÉ«-UÉ…²Ü‘W+$¯š\Ùß•’W[ª’e¹#¯Vlccã»‹şû\Ìx\Ğw\ìØ±xØŠ\ğº\Ã\Æ3\á¼\âsXšc;ºzA¼l­•\\œNn\Ûn.\å‚x¦YŸeµU.†\Ç\Ê¿\İE\ñ¬\óa­»yµV’“Ûº¾¿+%¯fš•ey#¯VL^5³¿+%¯fš•ey#¯:¢\è¿\÷‡}{\÷\îg­¯;1p\ÜŸ#@-\Û\Ñ\Õ\âek­\ä\âtr\Ûvûs)\Ä\Û\Ú\ê\"\ôÊµ\Å/†\Ç\Ê.Š¯8ïˆ¿³\Õy0¡«yµV’“Ûº¾¿+%¯¶µUN\\¹v~\ÎÈ«W\Í\ì\ïJÉ«mm•W®Ÿ3\òªCv\í\Ú\õ\Ó\ãa\ß\Æ\ÆF\ëw9†\×‡\çş9u8Ÿøja\àØ®^/[k\ç_„œ«ªûs)Ä•”]ŒN^\Ì.r1<V\åy\Ê^Ÿ]Í«µ’,	•\Êş®”¼ªd\Ç\Út^TÉ™*ª<O\Ù\ëSB^5³¿+%¯*Ù±6Ur¦Š*\ÏS\öúl£\èÁ\ïün¹\å–x&Ø¨\ğzw7\ŞŸ@m\Û\Ñ\ÕbUO¹ ®¬\ì¢4\\¼†¿1/»ˆÇ¬\ç){]¶ ¯\ò.yUYYn\ÌÊ™y\Ìz²\×e\ò*\ï’W••\åÆ¬œ™Ç¬\ç){]*‡o(ú\ğ—Çƒ¿»\îº+6\"¼\ÎÄ°\ñ\åp\ñ¹\Ô\ÆÀ±.ˆ\ó.\Äsiû\â´\í\×K¼Ê»\ä\Õ\\\ÚÎ¶_/y\ò*\ï’Wsi;?\Ú~½\ìƒ\ßÿ\Â?­~\ğÁ\ãù`­\Â\óOşS\ê\ğú\ñ9\Ô\ÊÀ±.ˆ\ó.\Äsk\ë\"µ­\×ÉŠ¼Ê»\ä\Õ\Ü\ÚÊ‘¶^\'+\ò*\ï’Wsk+G\Úz¬\íŞ½û‚¢ÿ\ìx\0x\ÕUW56t\Ï[¼Ş¹;*\Ã\ë†×\Ï	 V\ípAœw¹ ^H\Ó«M?¶\äU\Ş%¯\Òt4ıüÙ’Wy—¼ZH\Óy\Ò\ô\ó\÷JÑ‹¿®¨c“w:\îß¿?.%<\ßä›¯\÷ºø\\\0jg\à\Ø\Äy—\â…5u\Ñ\Ú\Ô\ó\ö‚¼Ê»\ä\ÕÂšÊ•¦·\äU\Ş%¯\ÖT®4\õ¼½6hr\è*üb—e{ux|\ôb\Î\Ã\ë\Å\ç\0\Ğ\Çv¸ Î»\\/¥\î‹×ºŸ¯w\äU\Ş%¯–Rw¾\Ôı|½#¯\ò.yµ”º\ó¥\î\çcB¸\ãp}\âŸW‡\nw;\îİ»w\ôø\ãÇ³Ä™\Â\ñ\áq\Ñ]gÿuxøµ\Zc\à\Ø\Äy—\â¥\Õu[\×\ó\ôš¼Ê»\ä\Õ\Ò\êÊ™º§\×\äU\Ş%¯–VW\Î\Ô\õ<\Ì~¦\â\æ/’‰…£={\öŒ\î¸\ã\Ñ<0z\ô\ÑGG\'O<;\\†¯\Ã\ö°ÿºë®›zlx¾\ğ¼~f#\Ğ:\Çv¸ Î»\\\×bÙ‹\Ùe\Ï&y•wÉ«Z,›7\Ë>M\ò*\ï’WµX6o–}<s\Z‡o(z\ôûJ‡‹\Ô}\áù\â\×\0hE¢x\õsAœw¹ ®Í¢µ‹>\ò*\ï’WµY4w}%\äU\Ş%¯j³h\î,ú8j0¦\è\Õ\÷u¦d8«\Â\ñû\Â\ã\ã\çh•c;\\\ç].ˆk5\ï\Å\í¼Ç³\ry•wÉ«ZÍ›?\ó\Ï6\äU\Ş%¯j5oş\Ì{<\rÙ½{\÷k‹ı’Á`\ğş\âÏƒE}¥¨—7‡‹\ß\Üüú\à\æşK\Â\ñ\ñs\0¬„c;\\\ç].ˆkW\õ\"·\êq\ÌA^\å]\òªvUs¨\êq\ÌA^\å]\òªvUs¨\êq¬@Ñ¿_8q7\ã…\ñ~€\Î0pl‡\â¼\Ëq#¶»\Ø\İn?’Wy—¼j\Ävy´\İ~$¯\ò.yÕˆ\í\òh»ı¬XÑ¿\ß31p¼\'\Ş\Ğ\ípAœw¹ n\ÌV½[m§\ò*\ï’W\Ù*—¶\ÚN\r\äU\Ş%¯\Z³U.mµˆ\înt—#\Ğm\ípAœw¹ nT|\ñM\Í\äU\Ş%¯\Z\çSü55“Wy—¼jTœO\ñ\×tPtw£»n3pl‡\â¼\Ëq\ã\ÆÁ\×oş\éb¸A\ò*\ï’W“W-’Wy—¼jœ¼J\Èw7º\Ë\è.\Çv¸ Î»\\·\Âß¼·D^\å]\òª\òª%\ò*\ï’W­Ø±\ÙÊ«w2–\Z\İ\åt—c;\\\ç].ˆ[\ó\êx\õ“Wy—¼j¼j¼Ê»\äU;\ôƒ\İ\î`,2\Æuaü8€•\òÓƒ¾r\êÔ©©)•~\ëúdqA|:^sH•¼Ê·\ä¹‘Wù–¼j~°û\ÂŒ%Æ¸\Ü\åt‹˜v9r\ä\É\'NL]L©\ô\ë±\Çûı\â‚ø\Ó\ñšCª\äU¾%¯È¼Ê·\äU{\ôƒi²n@\ç	ªv:t\è\âÃ‡?üø\ñ§ıM|U¬\ã\ñ¯~\õ«¿W\\­¨‹\â5‡TÉ«üJ^‘+y•_É«\ö\é\Ódİ€\ÎT\í	M\áoj‹:~&J¾\Â:†\õt1Lv\Âûz\óı-¯\ò(yE¶\Âûz\óı-¯\ò(y\Õ2ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğu;6ƒjG¼\0\0€¼\\¥Éº]†Œ\'Šº~\óOCG\0\0€1¸J“uºj<l\ã¯\0\0ÈœÁUš¬\ĞE[\r·\Ú\0\0@†®\Òdİ€®\Ùn¨¸\İ~\0\0\02ap•&\ëtI\Õab\Õ\ã\0\0\0H˜ÁUš¬\Ğ\ó\ç=\0\0€\Ä\\¥Éº\Ñk\Ï?ÿü?Ø¿ÿ{>\ğ|\î\æ›o~ú\Æo<\õ¿\ğ¯„oŒk¯½\ö¥ë¯¿ş…w¾\ó_{\Ï{\Şs\×\r7\Üğ¯‹‡¼*~j±\è\ğp\Ñ\Ç\0\0\0ƒ«4Y7z\éSŸúÔµ\ï{\ßûx\Û\Û\Ş6º\ñ\ÆGw\Şy\ç\è=úè££“\'O‚\ğgø:lû\ß\ñw¼r\õ\ÕWŸ¹\á†\î\Ş\Ø\Øx}üœ,lÙ¡á²\0\0 £®\Òd\İ\è•\Ïş\óÿ\Û?øÁ\'¯¹\æš\Ñş\á¾ş\õ¯Ÿ.V»úê«¿\õ\ö·¿ı\ã\Ã\á\ğ{\â\×`.u\r\ëz\0\0\0:\Ä\à*MÖ^F\ßş\'\ò\'ûÃ \ñ£ı\è\è\Å_Œg‰s	Ï³{\÷\îo^v\Ùeo_J\ê\Öı|\0\0\0¬˜ÁUš¬\ÙF¯ı\Ø\Ç>\ö\å_ü\Å_=z4.%<\ß5\×\\s\êê«¯¾9~]fjj8\Ø\Ô\ó\0\0°Wi²ndm4\Z½\öı\ïÿ³\ïz×»F\Ï>ûl</¬Ex\Şo¼\ñ›W\\q\Åm\ñ\ëSª\é¡`\Ó\Ï\0\0@K®\Òd\İ\È\Öh4ú\ö}\ìc„a\ã™3g\â9a­\Â\ó_ı\õ\Ï]z\é¥\ïŒÏƒ\óL\Ãoü¾r\ó\Ïe”=¡#\0\0@®\Òd\İ\ÈVø™¿\ôK¿\ÔØ±\ğ:o}\ë[_(¾©şM|.œ»¨@\á\ÏE‡³\Ç\Ğ\0\0 qWi²nd\éÁ¼(ü‚˜ºf\ãv\Â\ë]v\Ùe\Ï\îÜ¹\ó\Å\ç\Ôs\ñ\ğ/Ü‘\Âg\\ñ°°Š\Éaã¸®8\ïˆ\é\×\0\0 !Wi²nd\éƒü\à“\á·H¯Â‡>\ô¡\'‹o¬ßˆÏ©\ÇÊ†~e\Ã\Ây†eÿ\È\æ\öX\Ù\ë\0\0\0ƒ«4Y7²\ó©O}\ê\Úpw\ã/¼\Ï[^\÷\ò\Ë/~cc\ã\õ\ñ¹\õĞ¬a_\ÙĞ°\ÊĞ±\ìq[\r\Çf\0\0\0ep•&\ëFv\Ş\÷¾\÷=±oß¾xØª\Ûn»\í\Ñ\â›ko|n=Se\ÈW6<œ5t,;~»a\ãX•\ó\0\0 C®\Òd\İ\È\Ê/¼\ğ¯½\ö\Ú\ÑSO=\Ï\0[U¼ş\ßnllœ¸é¦›¾->Ç˜g¸W6D,:–Wu\Ø86\Ïy\0\0°bWi²nd\åş\èn¾\ñ\Æ\ãù\ßJ¼\õ­oıj\ñ\r\ö/\âsLEq\î\÷ua¼½‚E†ze\Ã\ÄÉ¡c\Ùşy‡c‹œ\0\0\0+`p•&\ëFVn½\õ\Ö/\Üy\ç\ñ\ìo%>ü\á¶øû\÷\ñ9¦\"„\Ãf\Í3x\\f˜W6T_‡»D\ã\í‹Ç–9O\0\0\0Zbp•&\ëFVn¾ù\æ§x\àx\ö·Gùü`0\ØŸc*&Uu\ñÊ†_Š¾^v\Ø8V\Çù\0\0\Ğ ƒ«4Y7²\òw¼\ã\ÔÑ£G\ã\Ù\ßJ|\éK_\nÿ¤ú3\ñ9¦¢d\à8k\ğX\ç\ğ®l\èX\÷°q¬\Î\ó\0\0 fWi²nd\å\Úk¯}\å™g‰g+q\ò\ä\É‹o°\'\âsLEÉ 1®\ñà±‰¡]øg\Ô\ñ\á\ë&~	O\ç\0\0@\r®\Òd\İ\È\Ê\å—_>zé¥—\â\Ù\ßJ\ç\ñBÉ.«Ú¹s\ç\è‚.!r}¼K˜u‡c\Ùo¯®C8ÿ0t|u¼\0\0€\Õ	½g¼\î³nd\åmo{\ÛK]¹\Ã\ñ\ë_ÿúY\Ï\ó\Ç{\Ö\Ïÿ\'\Õu\Ş!X6lŒ\ït¬{\èX\çù\0\0P#ƒ«4Y7²\òË¿ü\Ë/t\åg8~\ñ‹_¼=¯Ÿ\á\Z\'\Õ1´+6†Ÿ\ÙX\ö[ª\ë\Z:\Öq\Ş\0\0\04\Ä\à*MÖ¬¼\ë]\ï:Ö•\ßRı‰O|\â`&¿¥zÖ q\Ò2Ã»­†\ã¡b\Ùşe‡Ëœ/\0\0\0-0¸J“u#+7\İt\Ó]w\Şyg<û[‰\÷¾\÷½ûŠo°Ÿc*\æ4NZdˆW6L,ûm\Ôe\Ç-:t\\\ä<\0\0h™ÁUš¬Y¹\ñ\Æÿ—w¼\ã¯\ÄÃ¿xicc\ã\ó\Å7Ø¿ˆÏ±\æ\æ•\rË†ce\Ç\Ï;tœ\çü\0\0\0X!ƒ«4Y7²r\ÓM7}\Û[\ßú\Ö3O=\õT<\0l\Õ\ã?ş\É\â›\ëx8Ÿø{¢\ÊP¯lx8k\Ø8V\ö¸ªC\Ç*\ç\0\0@G\\¥Éº‘n¸\á\î}û\ö\Å3ÀVıÚ¯ı\Ú\ï\ß\\{\ãs\ë™YÃ½²¡a•a\ãX\Ù\ã·:\Î:\0\0\0:\È\à*MÖ\ìlll¼şê«¯ş\Ö/¼\Ï[\ñ\ì³\Ï~ºø\Æz*œG|n=´Õ\ïÊµÅ‡ceC\Ç+\Î;\â\ïlu\0\0\0t˜ÁUš¬Yzû\Û\ßş\ñ~\ô£\ñ,°\ÅkÿA\ñ\õ\ñ9\õXÙ°orX¸È°q¬\Ê\ó”½>\0\0\0	0¸J“u#K;w\îüG»w\ïş\æÑ£G\ãy`£\î¿ÿş\ğO©Ÿ\n¯ŸSÏ•\rı\Âp0Ü‘X6$œÇ¬\ç){]\0\0\0ap•&\ëF¶.»\ì²7¿\ímo;\õ\ì³\Ï\ÆsÁF<\õ\ÔS^|C=VÔ¿‰Ï…³\Úşµız\0\0\0\Ô\Ì\à*MÖ¬]}\õ\Õ7\ßx\ã\ß<s\æL<¬\Õ\éÓ§¿¸±±\ñ™\ápøo\ãs\à<m\r\Ûz\0\0\0\Zdp•&\ëF\ö®¸\âŠÛ®¿şúçšº\Óñ©§:†\Å7Sø‚l¯\éa`\Ó\Ï\0\0@K®\Òd\İ\è…K/½\ôW_}\õuÿL\ÇÍŸ\Ùø5w6Î­©¡`S\Ï\0\0À\n\\¥Éº\Ñ\ág+^v\Ùe\Ï~\èCz\ò\Å_Œg‡sy\î¹\ç>µùÛ¨Ÿ\ò3V\÷p°\î\ç\0\0`\Å®\Òd\İ\è•\ápø=Å›ş7.¿ü\ò\ç\÷w\÷Ñ¯ı\ë/\Å\Ã\Ä^z\â‰\'>y\ó\Í7ŸıM\Ô\áy\Â\óÅ¯Á\\\ê\Z\Ö\õ<\0\0\0tˆÁUš¬½´±±\ñú\âÍ¿w8>\õ\ó?ÿ\ó}ø\Ã~\ğÈ‘#ŸÿÒ—¾\ôµ§Ÿ~ú£\Ñ\èÅ§z\ê\è\Ã?|ÿ\Â{\ßû\Ş}\Åc>_<\æ¯\Ã\ã\Â\ã\ã\çda\Ë—}<\0\0\0ep•&\ëFß½j×®]ÿr8ş»Á`°¿ø†øtQ\Ç\Â7\ÆæŸŸ\Û\Ãşp\\8>~j±\è\Ğp\Ñ\Ç\0\0\0ƒ«4Y7 +\æ\Î{<\0\0\0‰1¸J“uº¤\ê±\êq\0\0\0$\Ì\à*M\Ö\r\èší†‰\Û\í\0\0 Wi²n@m5T\Üj;\0\0\02¸J“uº*.\Æ_\0\09ƒ«4Y7 \Ë\ÆC\Æ\ë7ÿ4l\0\0\èƒ«4Y7 \ëvl•a#\0\0@\Ï\\¥Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\0\0\0úI?˜&\ët \0\0\è\'ı`š¬\Ğy‚\n\0\0 Ÿ\ôƒi²n@\ç	*\0\0€~\Ò¦Éº\'¨\Ú1\Z¾\ã\èÑ£¿\÷\Ş{¿u\ğ\àÁÑT\âU¬\ã+Gy\òĞ¡C\Ç\ë\r)“Wù•¼`+úÁ4Y7 \óU;Š\æıÎ¢\Ù8qbt\êÔ©Ñ™3gT\â\Ö1¬\ç\áÃ‡Ÿ/\Zú‹\â5‡TÉ«üJ^°ı`š¬\Ğy‚ª\áN¡\Ğ\ì\ÅM J¿?şt\ÑÀ:^sH•¼Ê·\ä\01ı`š¬\Ğy‚ª\áŸ%ºS(\Ï\n\ëZ4\ğ§\ã5‡TÉ«|K^\Ó¦Éº\'¨\Ú~†V\Üø©|*¬o¼\æ4\â\Õ\ñ\ê\'¯\ò.y\Õ\Zy$A?˜&\ët jG\Õş\Ïı\Ì\ïŒş\Ä{\ÎVø\ï°->Nu«4\ğ­\ØQÔ‰\Í?i¼Ê»\äU+\äı`š¬\Ğy‚ªU\ZøŸ}b\ô\Ğ\İ\ï}\îo8¯Â¶°/>^u§4\ğ7\ï\×oş©‰o¼Ê»\äU\ã\äı`š¬\Ğy‚ªU\Zøc\ïŸj\Ş\Ç\õø\ÃwM¯ºS\ZøF\Åw\n\Å_S3y•wÉ«F\Åù\r\Ğ9úÁ4Y7 \óU;ª4\ğu\Ï-Sû¸Â¾øxÕ\ÒÀ7f«f}«\í\Ô@^\å]\òª1[\å\ÒV\Û:A?˜&\ët jG•ş¡7M5\î\ã\nû\â\ãUwJßˆ\íš\ô\í\ö³ y•wÉ«Fl—G\Û\íXı`š¬\Ğy‚ª\Zø¼K_»ª\Íy\Õã˜ƒ¼Ê»\äU\íª\æP\Õ\ã\0Z¥L“u:OPµ£J~\ËkÜ¸+ì‹W\İ)\r|­\æm\Ê\ç=mÈ«¼K^\Õj\Şü™\÷x€\Æ\é»m\÷\îİ¯-\Ö\è’Á`\ğş\âÏƒE}¥¨o†u\Ûü3|}psÿ%\áøø9\0V\ÂL;ª4\ğ|\òSû¸Â¾øxÕ\ÒÀ\×f\Ñf|\Ñ\ÇQB^\å]\òª6‹\æÎ¢h„~°›†\Ã\á\Ïk³¯¨3›\ÃÅª\ß?\'@«|À´£J\ò‰Ïú³_j\ŞÃ¶°/>^u§4\ğµX¶	_\ö\ñl’Wy—¼ªÅ²y³\ì\ãj£\ì–\ápø†bM\î+$.R\÷…\ç‹_ !ˆ\âmÔ¯J\ê+\÷\ß6\ÕÀ‡m\ñqª[¥_Z]\Íw]\Ï\Ók\ò*\ï’WK«+g\êz€¥\è»a\÷\î\İƒ\ß,\Ö\ã•xp¸gÏ\Ñw\Ü1z\àF>ú\è\è\äÉ“£ ü¾\Û\Ãşp\\ü\Ø\ğ|\áy\Ã\óÇ¯	\Ğ(0\í¨\ÔÀŸ>=z\ä/?4\ÕÀ‡ma\ß\Ô\ñª3¥_J\İMw\İ\Ï\×;\ò*\ï’WK©;_\ê~>€¹\éW¯Xƒ\×\r‡\Ã\ÏM\n766F{\÷\î=şø\ãg‡‹U…\ã\Ã\ã\Â\ã£Á\ãg\Ã\ëÄ¯\r\Ğ0\íØ®\ñ\Ù\'F_ş\ä­S\Íû¸Â¾pLü8Õ\ÒÀ/¬©f»©\ç\íy•wÉ«…5•+M=/@%úÁ\Õ\Z‡?T\Ô“\ÃÁ[n¹et\ìØ±x–8—\ğø\ğ<\Ñ\Ğ\ñXx½ø\0\Z\á¦[6\ğ§O?rh\ô…?ı•©¦=®pL8\Ö\İC\İ+\rüBšn²›~şlÉ«¼K^-¤\é<iúù¶¤\\p\Ç\á\ä°1Ü•¸ÿşxv¸”\ğ|\Ñİ\Ç\Â\ë\Æ\çP;0\í(kà·»Kh«r\÷P\÷J?·\É\æúUE]¹ù\ç2ÊG¿\0y•wÉ«¹\É+ kúÁ\Õ?Sq\òŸQ_u\ÕU£|0\Ö\"<oxş‰¡\ãgıLG q>`\ÚQ\ÖÀW¹Kh«\nŸO­®4\ğs‰›\÷\ß.*üÿş\\´‰Ÿ\õ<šø9É«¼K^\ÍE^\Ù\Ó®\Æ\æ/ˆ9wgcS\ÃÆ±\ğü“w:†×\Ï	 V>`\ÚQ\ÖÀ\ÇMù¼?ŸZ]i\à+‹›\é+\×şk\Ó=®¸ù®b²y\×\ç1ıº\Ì ¯\ò.yUYœ\ò\nÈ’~°}\Ã\á\ğ\r\Åÿ\ï/‡w\İuW<lDx‰»_\çŸ@m|À´£¬Wù”¾’²&º¬ù§‰/{üG6·\Ç\Ê^Ÿ\ò*\ï’W•”\åEY\Ş\È+ yúÁ\öÿŸ\ß7ü…_\ìÒ¦\è\É\ÜŸ@m|À´CŸwi\à·5«y.kÂ«4\ñeÛªy›ul’Wy—¼\ÚÖ¬œ(\Ëy$M?Ø®]»vı\ôx\àş‰ó²¿z^\á\õ&ÿiu8Ÿøj\á¦\Zø¼K?S•¦¹¬Ÿ\ÕÄ—¿]\ó>V\å|zM^\å]\òj¦*ùP–?\ò\nH–~°]\Åÿ\ßû\ÆÃ¾½{\÷\Æ\óÀV„×¸\Ëq_|\0µ\ğ\Ó\r|Ş¥\ß\Ò<\ÍrYS^\ÖÄ—Wµy›\ç¼zG^\å]\òjK\ó\äBY\É+ IúÁ\ölll|w\ñÿ\÷™\ñ°¯\í»\Ç\Â\ëNÏ„\óŠ\Ï`i>`–SüÿwOQ\Æ\Ûc\Zø¼+\ç¾\ê{¼\Ä\"MrYs>\ÙÄ—íŸ·y[\äü’Vu-\åU\Ş%¯J-’ey$¯€\ä\è\ëQ\å3¨\Ø\ÉxĞ·gÏxØª\ğú\ãs	\çŸ+À\Ò|À,g\"¤g~Àh\à\ó®\ÌøJ\ï\ñ\È2\ÍqY“¾ş¶’\í‹6\ïcËœgrª®¥¼Ê»\äÕ”er@^\É¹oc~U>ƒŠ\í·»ı\ö\Û\ã`«\Â\ëOœ\ó­\ñ¹,\Í\Ìr&Bz\æŒ>\ï\êI?\ó=>¡¦¸¬‰ÿR\ô\õ²\ÍûXç›„ªk)¯\ò.yu:¾ÿ\å´—\ñ6\æW\å3h8\Z\ï¿ÿşû\ã`«\Â\ë\Ï%œ\×\äy\Ô\Â\ÌrJ>XJ?`4\ğyW\Ï\Zø\Ò\÷ø¦:›\á²&¾\î\æ}¬\Î\óî¬’5,]Ky•wÉ«s\êü¾—W@²BN\ÆÛ˜_\Ég\Ï\ÔgP\ñ\ç\×\ÆÛ=\Z\Ï\0[^\â¿ı\ÏX˜\å”| \Äu\öFŸw\õ´?\ï=¾\ÖLşYb|§Pø:l¯[\ç\ß)%k\×Ùµ”Wy—¼’W\0“B>\ÆÛ˜_\ÉgN\\\á3\èo\Æ_?\ó\Ì3\ñ°U\á\õ\Ç\ç2_ˆÿ\÷\0,­$U¥Ï»\â\õ\î[\íÜ¹stÁ„‹\Õ\ë\ãŒYÂ¬;†&1C®ÿ·\õ±\äU\Ş¯w\ßJ^)¥”\êB½\ô\ÒK\ñ°U\á\õ\'\Î\ço\ã\0V,ş\à˜¨{\Öı\Å\ŞTO\ï:\ï=¾V\ï7e\Í{|\çP\İM|\ç\ßI%kXº–\ò*\ï’Wg\Õùı.¯\0¨\ô\î$ow‡#\03\Íú@™\Ôt¿6}G\Å\ÙJeÿ—¿ü\å\Ñş\àşü\Ïÿ|\ô£?ú££×¼\æ5£ù‘\İs\Ï=Sÿ[\ãú\Æ7¾1Ú±c\Çy\ÏW\å5ë¬5\ğ¥\ï\ñM;Ö–o‚Ëš\÷\ğ3\Ğ\Ê~\ëk]M|\ç\İyU\×R^M\ï›\Ü/¯º«\ê{|Óµ\å¿\ï\å\0gUùZ\÷3¨j\ÖÊ¤6\ZøYÛº¾ÿ·~\ë·FW\\q\Å\èo|\ã\è;¿\ó;Gw\ß}\÷\Ùı\ßÿı\ß?\õ¸Éº\÷\Ş{G?\ñ?q\ö\Øø5â¯·\ÚVG\õ¤ŸùŸ°cm\ñfx«\æ}Ü¤—\í_¶‰_\æ|“Ru-\å\Õ\ìıòª»ª¾\Ç\'\ìX[üû¿,\ä@OUù\ò[ª¨l\Ö\Ê$\rü\ìı—]v\Ù\è#ùÈ¹¯ÿ\â/ş\â\ìşÿ\ñ\ß\ò1\ã¯\ì\Ç~\ì\ìŸeû&¿\Şj[•y_\é=Ù±6S\\Öœ—ıv×²\ãm\â9\ÏdU]Ky5{¿¼ê®ª\ï\ñÈµùs ,‡\ä@Uù*\ö\ß:\ò\İ~û\í\ñ°U\á\õ\Ç\ç\Î+>W\0¡Ÿ½ÿ~\àF<\òÈ¹¯¿ë»¾k\ô}\ß\÷}gÿ\é\âV	u\ñ\Å?~v{¼/şz«muT\Î\rüv¬UoËš\ò²\æ}¬\ìøy›øyÎ¯W\ä\Õ\ìı\ò*K;Öª\çAYş\È+\0¶µ¾¾~\ÉxÈ·gÏxØªë®»î•‰\ã%\ñ¹\rü\Öû\Ç?mr_ø§‡aÿOş\äO;6®ø¹Ê¶m\õšu—~K;Ö¶o’Ëš\ñY\ÍûX\Ù\ãª6\ñUÎ«·\ä\Õ\Öû\åU\Öv¬mŸe¹#¯\0¨dcc\ã»\×\×\×ÏŒ}Ç‹ç€­¯;1l<\Î+>W\0¡\ßzÿø\ç¡M\îû›¿ù›³û\Ã/c({L\\a{¼/şz«mu”~¦k[7\ËeMx•\æ}¬\ì\ñ\Û5\ñ³Î‡5y5k¿¼\ÊŞµ­\ó¡,o\ä\0sY__\ß7\ö\íİ»7¶\"¼\î\ÄÀq_|\0$D¿\õşÉŸ‡~¡Â«_ı\êÑ¾}û\Î\îÿÙŸı\Ù\Ò\Ç\Ä¶\Çûâ¯·\ÚVGià·µc­¼i¾rms\í6k\æ}¬¬‰¿\â¼#ş\ÎV\çÁyµ\õ~y\Õ;\Ö\Ês\âÊµÍµ\Û,yÀ\Üv\í\Ú\õ\Ó\ãa\ß\Æ\ÆF\ëw9†\×‡\çş9u8ŸøHH\r|Y¥°\ò\ç¡\İs\Ï=£ş\á>\Û\Äÿ\ÔOı\Ô\è\èÑ£Sÿ[\Ë*~½\í^³\î\ÒÀW²cmºyl¾i\ŞÇª<O\Ù\ëSB^M\ï\ï—W½±cm:/ª\äLU§\ì\õ\È\Äúúú}\ã\ß-·\Ü\Ï^o\â\î\Æû\âs 1M7\ğjµ¥¯¬¬‰\Ív¸Ã§¬\éÇ¬\ç){]¶ ¯\ò.yUYYn\ÌÊ™y\Ìz²\× #\Ã\á\ğ\r\ë\ë\ë/w\İuW<lDx‰a\ã\Ë\á<\âs 1\Zø¼K?—¶›\é¶_/y\ò*\ï’Wsi;?\Ú~=\0Vd0ü\æ\ä?­~\ğÁ\ãù`­\Â\óOşS\ê\ğú\ñ9 \r|Ş¥Ÿ[[Mu[¯“y•wÉ«¹µ•#m½\0°{\÷\î\Ö\×\×?;\0^u\ÕU\r\Ã\ó¯w\î\Ê\ğº\á\õ\ãs A\Zø¼K¿¦›ë¦Ÿ?[\ò*\ï’Wi:Oš~~\0:h}}ıuE›¼\Óqÿşı\ñ¼p)\áù&\ïl\Ü|½\×\Å\ç@¢4\ğy—~aM5\ÙM=o/È«¼K^-¬©\\i\êyHÀp8ü¡É¡c¨\ğ‹]–ı\í\Õ\á\ñ\Ñ/ˆ9;l¯Ÿ\0	\ÓÀ\ç]\Zø¥\Ô\İl\×ı|½#¯\ò.yµ”º\ó¥\î\ç A›w:û\çÕ¡\Âİ{\÷\î=şø\ã\ñ,q¦p|x\\tW\ã\ÙF^\'~m\0§Ï»4\ğK««\é®\ëyzM^\å]\òjiu\åL]\Ï@\Â\ÏT\ÜüE2\ñ p´gÏ\Ñw\Ü1z\àF>ú\è\è\äÉ“g‡‹\á\Ï\ğu\Ø\ö_w\İuS\r\Ï\×\ÏlÈ”>\ï\ÒÀ\×b\Ù\æ{\ÙÇ³I^\å]\òª\Ë\æÍ² S\Ã\á\ğ\r\ë\ë\ë\÷•©û\Â\óÅ¯@F4\ğy—¾6‹6\á‹>\ò*\ï’WµY4w}\0=2f}}}_QgJ‰³*¿/<>~N\02¤Ï»4ğµš·Ÿ\÷x¶!¯\ò.yU«y\óg\Ş\ã\è¹İ»w¿v}}ı’Á`\ğş\âÏƒE}¥¨—7‡‹\ß\Üüú\à\æşK\Â\ñ\ñs\01\r|Ş¥¯]¥¦ü‚.x\ãZ…ã˜¼Ê»\äU\í*\å\ÕZ\õ\ã\0`K\ë\ë\ëN\Ü\Íxa¼€\ÑÀ\ç]\ZøF\Ìl\ÎÃ°\ñ-oy\Ë+ÅŸ?\ïc9\ò*\ï’W˜™Wk\Û\ï€J\Ö\×\×\ï™8\Ş\ï g4\ğy—¾1[5\ég·¿\å-où\ò\Æ\ÆÆGûX’¼Ê»\äUcf\æU\Év\0˜Ktw£»\ĞÀ\ç^\ZøF\Å\Íú¹¯‹¬\ß\Z‡ÿ\ç¹#©…¼Ê»\äU£¶Ì«sG\0À‚¢»\İ\å€>\÷\ÒÀ7nÜ´_¿ù\ç\Ùæ½¸Àº¦¨ß™<\åÉ«¼K^5®4¯\0`[\Ü\İ\è.G€¾\ÓÀ\ç]\ZøVL\İ)T\\\\ıOE}\á\ï¡\ò*\ï’W­w`‡ÿŸ\r¨E¸“±d\Ğ\è.G€¾\ÓÀ\ç]\ZøÖ¼z\ò‹k®¹\æ\ïX\ßxÓ›\Şt\Şv–#¯\ò.yÕÍ#\0,-\ÜÁX2dŒ\ë\Âøq\0\ôÀÁƒ_9u\ê\ÔT\ã§Ò¯b]Ÿ,\Zø\Ó\ñšÓ\â\â\êS»v\íú—\ñv\'¯\ò-y\ÕG\0\ê\î`,0\Æ\å.G€>:r\äÈ“\'Nœ˜jşTú\õ\Øcı~\ÑÀ:^s\Ú1~s8î‰·³8y•oÉ«\ö8\Ğ$Ÿ3\0œu\èĞ¡‹>üü\ñ\ãÇŸv\çPU¬\ã\ñ¯~\õ«¿W4\ï_+\ê¢x\ÍiGq±µ{8\Şogq\ò*¿’W\í\Ó\Ğ$Ÿ3\0œš¼pgIQg\Â\Ï\ĞÊµn»\í¶³·\õ\Ç\Û3¬°a=5\ï+4şùp8üÿ\â\í,\'¼¯7\ß\ßY\çUJ^µL#@“|\Î\0\Ğ;\á\ç‡ø\0¤-;w\îü\ö\âı\öâ¥—^ú]\ñ>€U\ñ9@“|\Î\0\Ğ+\ë\çÿµ\ãıĞ„\â½\öŸw\í\Ú\õ¯\â\í\0«¢ I>g\0\è•\ñİ›\å7¥ÑŠÁ`\ğ‹º!\Ş°*\ZA\0š\äs€Şˆ\înt—#­—\ïµ?ˆ·¬ŠF€&ùœ 7¢»\İ\åHkv\î\ÜùO‹\÷Ú£\ñv€U\Ñ\Ğ$Ÿ3\0\ôB¸“±d\Ø\è.G\Ú\òª\â}\ö\ÜÎ;ÿA¼`4‚\04\É\ç\0½\îd,4ºË‘\Ö‡\ÃCƒÁ\àg\ã\í\0«  I>g\0\È^¸ƒ±d\È×…\ñ\ã N\Ã\á\ğ?\ï³_‰·¬‚F€&ùœ {\áÆ’c\\\îr¤Q\Ã\ápW\ñ>\ÛoX \0M\ò9@/ù\0¤m¯/\Şw\Ç\â\í\0«\às€&ùœ —|\0²\n\Åû\î\äp8ü\Şx;@\Û|\Ğ$Ÿ3\0\ô’@V¡x\ß\İ]\ÔE\ñv€¶ù I>g\0\è%€¬B\ñ¾û\õ¢~5\Ş\Ğ6Ÿƒ\04\É\ç\0½\äU(\Şwÿ{Qoh›\ÏA\0š\äs€^\ò\È*\\z\é¥ÿ]\ñ\Şû\ëx;@\Û|\Ğ$Ÿ3\0\ô’@V%\Ã\à1\Ş\Ğ&Ÿƒ\04\É\ç\0½\äU	ÿ¤z8¾9\Ş\Ğ&Ÿƒ\04\É\ç\0½\äU)\Ş{7\õ\ë\ñv€6ù I>g\0\è%€¬J\ñŞ»¨¨»\ã\í\0m\ò9@“|\Î\0\ĞK>\0Y•\ápø½\Åû\ï\éx;@›|\Ğ$Ÿ3\0\ô’@V©xÿÛ¹s\çoh‹\ÏA\0š\äs€^\ò\È*\rƒÿ4w\Å\Û\Ú\âs€&ùœ —|\0²JƒÁ\à\Ã\á\ğ?\Ä\Û\Ú\âs€&ùœ —|\0²JƒÁ\àg‡\Ã\á¡x;@[|\Ğ$Ÿ3\0\ô’@V\éŠ+®ø‡\Å{\ğ¹\â?_\ïhƒ\ÏA\0š\äs€^\òÈª\ïÁ£;w\îü§\ñv€6ø I>g\0\è%€¬\Úp8üø`0¸4\Ş\ĞŸƒ\04\É\ç\0½\äU7\õ\ã\í\0m\ğ9@“|\Î\0\ĞK>\0Yµ]»vı«\â}ø—]v\Ù;..şû×Šú¿\ã\ã\0š\às€&ùœ —|\0²\n›¿,æ¢¢\Ş]\Ô\õJx/k0ü?\ñc\0š0™=J)¥T\ö\0@\ö|\0Ò¶\ápøÿ\Æaq\Çü\ëøq\0\0\0\0$ÀÀ‘¶\íÜ¹\ó\ïï»‡\â!\ãD~Ó›\Ş\ô\êøq\0\0\0\0$ÀÀ‘Uÿ¤x\ï=_2lw7Š\0\0\0 ¬\Êp8|\óz\ô³7ÿ6>\0\0\0€D8²J\Ã\á\ğ\ß\Å\ÇÁ`\ğc\ñq\0\0\0\0$\ÂÀ‘Uºé¦›¾m8˜8>¶\Å\Ç\0\0\0GVm8~O\ñ>|ls\àx¼\0\0\0€„8\Ò\Åû\ğG‹úVQG\â}\0\0\0\0$\ÄÀ‘®(Ş‹¿>·\0\0\0\Ç4F£\ï8z\ô\è\Ç\ï½\÷\Şo<xpt\àÀ•x\ëøÊ‘#G<t\è\Ğ\Å\ñz\0\0\0$\ÃÀ1MG½\óÈ‘#£\'NŒN:5:s\æŒJ¼\Â:†\õ<|ø\ğ\ó¸(^s\0\0\0€$8¦)\Ü\Ù†S\ñ\ĞJ¥_ÇúÀŸ\×\0\0\0 	i\nÿŒÚyVX\×œ\×\0\0\0 	i\n?\ó/T©|*¬o¼\æ\0\0\0\0I0pLSÕ\ã7;>:ú™\ß=ü‰\÷œ­\ğ\ßa[|œ\êV8\0\0\0\É2pLS•\ã‹\Ï>1z\è\îw>\÷\Ç7œWa[\Ø¯ºS\0\0\0@²\ÓTe\àx\ì\áıS\Ã\Æq=ş\ğ]SÇ«î”#\0\0\0,\Ç4U8ş\Õ=·L\r\Z\Ç\ö\ÅÇ«î”#\0\0\0,\Ç4U8>tà¦©A\ã¸Â¾øxÕ2p\0\0\0’e\à˜&Ç¼\ËÀ\0\0\0H–cšª\Ão¥\ã\nû\â\ãUw\ÊÀ\0\0\0H–cšªù\ä¦\ã\nû\â\ãUw\ÊÀ\0\0\0H–cšªO>\ñù\ÑC\ö«S\ÃÆ°-ì‹W\İ)G\0\0\0 Yiª2p\õ•ûo›\Z8†m\ñqª[e\à\0\0\0$\ËÀ1M•§Où\ËM\rÃ¶°o\êxÕ™2p\0\0\0’e\à˜¦\í/>û\Ä\èËŸ¼uj\Ø8®°/?Nu£\0\0€d8¦iË\ã\éÓ£\ã\Z}\áOej\ÈW8&\ën\Çî•#\0\0\0,\Ç4•\r·»«q«r·c\÷\ÊÀ\0\0\0H–cš\ÊU\îjÜª\Âc\ã\çS«+G\0\0\0 Yi*8\ÆC\Äy+~>µº2p\0\0\0’e\à˜¦²£Ê§\0\0€d8¦\ÉÀ1\ï2p\0\0\0’e\à˜&Ç¼\ËÀ\0\0\0H–cš\ó.G\0\0\0 Yi2pÌ»\0\0€d8¦\ÉÀ1\ï2p\0\0\0’e\à˜&Ç¼\ËÀ\0\0\0H–cš\ó.G\0\0\0 Yi2pÌ»\0\0€d…£J³\â!•Ê§\0\0\0h•;\ó.G\0\0\0\0ZU\×À±xªÒ²¿ı‹–#\0\0\0\0­ªs\à8k›ı\Ë\í_´\0\0\0h•\ã\ô—m[\õşE\ËÀ\0\0\0€V8NÿwÙ¶U\ï_´\0\0\0h•\ã\ô—m[\õşE\ËÀ\0\0\0€V8NÿwÙ¶U\ï_´\0\0\0h•\ã\ô—m[\õşE\ËÀ\0\0\0€V\Õ9p,+û\ëÙ¿h8\0\0\0Ğªºª›e\à\0\0\0@«\ó.G\0\0\0\0Ze\à˜w8\0\0\0\Ğ*Ç¼\ËÀşÿv\îµa \Ã\èSø–!w$„ÊœBra!H“JIc¬m\åZ\ZŞƒÿ\Ó},\0\0\0¤kOp\0\0\0 •\àX{‚#\0\0\0\0©\Ç\Ú\0\0\0H%8Ö\à\0\0\0@*Á±\öG\0\0\0\0R	µ\'8\0\0\0Jp¬=Á\0\0\0€T‚c\í	\0\0\0\0¤kOp\0\0\0 •\àX{‚#\0\0\0\0©\Ç\Ú\0\0\0H%8Ö\à\0\0\0@*Á±\öG\0\0\0\0Ru]\÷Ü¶\í-T\Ù\õ·\ß\õÇ›\0\0\0Ài\Æq|¬\ëú«\ìú›\çù+\"¾7\0\0\0€\Ó\ô}†\áwY–/kl¿\ã2M\ÓgD\Ü\÷}o\0\0\0\0§jQª½„\Û\÷\ßşü³Ë¯İ±\İSl\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0®\ï\Ë~\Ò \Ùü\â\0\0\0\0IEND®B`‚',1);
+/*!40000 ALTER TABLE `act_ge_bytearray` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ge_property`
+--
+
+DROP TABLE IF EXISTS `act_ge_property`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ge_property` (
+  `NAME_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `VALUE_` varchar(300) COLLATE utf8_bin DEFAULT NULL,
+  `REV_` int DEFAULT NULL,
+  PRIMARY KEY (`NAME_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ge_property`
+--
+
+LOCK TABLES `act_ge_property` WRITE;
+/*!40000 ALTER TABLE `act_ge_property` DISABLE KEYS */;
+INSERT INTO `act_ge_property` VALUES ('batch.schema.version','7.0.0.0',1),('cfg.execution-related-entities-count','true',1),('cfg.task-related-entities-count','true',1),('common.schema.version','7.0.0.0',1),('entitylink.schema.version','7.0.0.0',1),('eventsubscription.schema.version','7.0.0.0',1),('identitylink.schema.version','7.0.0.0',1),('job.schema.version','7.0.0.0',1),('next.dbid','1',1),('schema.history','create(7.0.0.0)',1),('schema.version','7.0.0.0',1),('task.schema.version','7.0.0.0',1),('variable.schema.version','7.0.0.0',1);
+/*!40000 ALTER TABLE `act_ge_property` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_hi_actinst`
+--
+
+DROP TABLE IF EXISTS `act_hi_actinst`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_hi_actinst` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT '1',
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `ACT_ID_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `TASK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `CALL_PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `ACT_NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `ACT_TYPE_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `ASSIGNEE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `START_TIME_` datetime(3) NOT NULL,
+  `END_TIME_` datetime(3) DEFAULT NULL,
+  `TRANSACTION_ORDER_` int DEFAULT NULL,
+  `DURATION_` bigint DEFAULT NULL,
+  `DELETE_REASON_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_HI_ACT_INST_START` (`START_TIME_`),
+  KEY `ACT_IDX_HI_ACT_INST_END` (`END_TIME_`),
+  KEY `ACT_IDX_HI_ACT_INST_PROCINST` (`PROC_INST_ID_`,`ACT_ID_`),
+  KEY `ACT_IDX_HI_ACT_INST_EXEC` (`EXECUTION_ID_`,`ACT_ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_hi_actinst`
+--
+
+LOCK TABLES `act_hi_actinst` WRITE;
+/*!40000 ALTER TABLE `act_hi_actinst` DISABLE KEYS */;
+INSERT INTO `act_hi_actinst` VALUES ('49e2a6a3-2057-11f1-8906-00ff4626f3bf',1,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','flow_pre_to_gateway',NULL,NULL,NULL,'sequenceFlow',NULL,'2026-03-15 18:11:09.903','2026-03-15 18:11:09.903',1,0,NULL,''),('49e2cdb4-2057-11f1-8906-00ff4626f3bf',1,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','preReviewGateway',NULL,NULL,'é¢„å®¡ç»“æœåˆ¤æ–­','exclusiveGateway',NULL,'2026-03-15 18:11:09.904','2026-03-15 18:11:09.904',2,0,NULL,''),('49e2cdb5-2057-11f1-8906-00ff4626f3bf',1,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','flow_pre_pass',NULL,NULL,'é€šè¿‡','sequenceFlow',NULL,'2026-03-15 18:11:09.904','2026-03-15 18:11:09.904',3,0,NULL,''),('49e2f4c6-2057-11f1-8906-00ff4626f3bf',3,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','initUpgradeTask','49e2f4c7-2057-11f1-8906-00ff4626f3bf',NULL,'åˆå®¡ï¼ˆå‡æœ¬ï¼‰','userTask','TEST_MD_001','2026-03-15 18:11:09.905','2026-03-15 18:18:34.861',4,444956,NULL,''),('531a019e-2058-11f1-8906-00ff4626f3bf',1,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','flow_init_upgrade_to_gateway',NULL,NULL,NULL,'sequenceFlow',NULL,'2026-03-15 18:18:34.862','2026-03-15 18:18:34.862',1,0,NULL,''),('531a28af-2058-11f1-8906-00ff4626f3bf',1,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','initUpgradeGateway',NULL,NULL,'åˆå®¡ç»“æœåˆ¤æ–­ï¼ˆå‡æœ¬ï¼‰','exclusiveGateway',NULL,'2026-03-15 18:18:34.863','2026-03-15 18:18:34.863',2,0,NULL,''),('531a28b0-2058-11f1-8906-00ff4626f3bf',1,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','flow_init_upgrade_pass',NULL,NULL,'é€šè¿‡','sequenceFlow',NULL,'2026-03-15 18:18:34.863','2026-03-15 18:18:34.863',3,0,NULL,''),('531a4fc1-2058-11f1-8906-00ff4626f3bf',3,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','finalUpgradeTask','531a4fc2-2058-11f1-8906-00ff4626f3bf',NULL,'ç»ˆå®¡ï¼ˆå‡æœ¬ï¼‰','userTask','TEST_ST_002','2026-03-15 18:18:34.864','2026-03-15 18:19:25.078',4,50214,NULL,''),('71088339-2058-11f1-8906-00ff4626f3bf',1,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','flow_final_upgrade_to_gateway',NULL,NULL,NULL,'sequenceFlow',NULL,'2026-03-15 18:19:25.079','2026-03-15 18:19:25.079',1,0,NULL,''),('7108aa4a-2058-11f1-8906-00ff4626f3bf',1,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','finalUpgradeGateway',NULL,NULL,'ç»ˆå®¡ç»“æœåˆ¤æ–­ï¼ˆå‡æœ¬ï¼‰','exclusiveGateway',NULL,'2026-03-15 18:19:25.080','2026-03-15 18:19:25.080',2,0,NULL,''),('7108aa4b-2058-11f1-8906-00ff4626f3bf',1,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','flow_final_upgrade_pass',NULL,NULL,'ç»ˆå®¡é€šè¿‡','sequenceFlow',NULL,'2026-03-15 18:19:25.080','2026-03-15 18:19:25.080',3,0,NULL,''),('7108d15c-2058-11f1-8906-00ff4626f3bf',1,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','passedEndEvent',NULL,NULL,'å®¡æŸ¥é€šè¿‡','endEvent',NULL,'2026-03-15 18:19:25.081','2026-03-15 18:19:25.084',4,3,NULL,''),('f27efa27-2056-11f1-8906-00ff4626f3bf',1,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','startEvent',NULL,NULL,'è¯¾é¢˜æäº¤','startEvent',NULL,'2026-03-15 18:08:43.288','2026-03-15 18:08:43.292',1,4,NULL,''),('f27fe488-2056-11f1-8906-00ff4626f3bf',1,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','flow_start_to_gateway',NULL,NULL,NULL,'sequenceFlow',NULL,'2026-03-15 18:08:43.294','2026-03-15 18:08:43.294',2,0,NULL,''),('f27fe489-2056-11f1-8906-00ff4626f3bf',1,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','categoryGateway',NULL,NULL,'è¯¾é¢˜ç±»å‹åˆ¤æ–­','exclusiveGateway',NULL,'2026-03-15 18:08:43.294','2026-03-15 18:08:43.323',3,29,NULL,''),('f284786a-2056-11f1-8906-00ff4626f3bf',1,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','flow_upgrade_to_pre',NULL,NULL,NULL,'sequenceFlow',NULL,'2026-03-15 18:08:43.324','2026-03-15 18:08:43.324',4,0,NULL,''),('f284786b-2056-11f1-8906-00ff4626f3bf',3,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf','preReviewTask','f284c68c-2056-11f1-8906-00ff4626f3bf',NULL,'é¢„å®¡','userTask','TEST_UT_001','2026-03-15 18:08:43.324','2026-03-15 18:11:09.902',5,146578,NULL,'');
+/*!40000 ALTER TABLE `act_hi_actinst` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_hi_attachment`
+--
+
+DROP TABLE IF EXISTS `act_hi_attachment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_hi_attachment` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `USER_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `DESCRIPTION_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TASK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `URL_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `CONTENT_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `TIME_` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_hi_attachment`
+--
+
+LOCK TABLES `act_hi_attachment` WRITE;
+/*!40000 ALTER TABLE `act_hi_attachment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_hi_attachment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_hi_comment`
+--
+
+DROP TABLE IF EXISTS `act_hi_comment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_hi_comment` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TIME_` datetime(3) NOT NULL,
+  `USER_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TASK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `ACTION_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `MESSAGE_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `FULL_MSG_` longblob,
+  PRIMARY KEY (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_hi_comment`
+--
+
+LOCK TABLES `act_hi_comment` WRITE;
+/*!40000 ALTER TABLE `act_hi_comment` DISABLE KEYS */;
+INSERT INTO `act_hi_comment` VALUES ('49db0580-2057-11f1-8906-00ff4626f3bf','event','2026-03-15 18:11:09.853',NULL,'f284c68c-2056-11f1-8906-00ff4626f3bf',NULL,'AddUserLink','TEST_UT_001_|_assignee',NULL),('5316cd4b-2058-11f1-8906-00ff4626f3bf','event','2026-03-15 18:18:34.841',NULL,'49e2f4c7-2057-11f1-8906-00ff4626f3bf',NULL,'AddUserLink','TEST_MD_001_|_assignee',NULL),('6434ab26-2058-11f1-8906-00ff4626f3bf','event','2026-03-15 18:19:03.558',NULL,'531a4fc2-2058-11f1-8906-00ff4626f3bf',NULL,'AddUserLink','TEST_ST_002_|_assignee',NULL);
+/*!40000 ALTER TABLE `act_hi_comment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_hi_detail`
+--
+
+DROP TABLE IF EXISTS `act_hi_detail`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_hi_detail` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `TYPE_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `TASK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `ACT_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `NAME_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `VAR_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `REV_` int DEFAULT NULL,
+  `TIME_` datetime(3) NOT NULL,
+  `BYTEARRAY_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `DOUBLE_` double DEFAULT NULL,
+  `LONG_` bigint DEFAULT NULL,
+  `TEXT_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `TEXT2_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_HI_DETAIL_PROC_INST` (`PROC_INST_ID_`),
+  KEY `ACT_IDX_HI_DETAIL_ACT_INST` (`ACT_INST_ID_`),
+  KEY `ACT_IDX_HI_DETAIL_TIME` (`TIME_`),
+  KEY `ACT_IDX_HI_DETAIL_NAME` (`NAME_`),
+  KEY `ACT_IDX_HI_DETAIL_TASK_ID` (`TASK_ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_hi_detail`
+--
+
+LOCK TABLES `act_hi_detail` WRITE;
+/*!40000 ALTER TABLE `act_hi_detail` DISABLE KEYS */;
+INSERT INTO `act_hi_detail` VALUES ('49e1bc42-2057-11f1-8906-00ff4626f3bf','VariableUpdate','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,'f284786b-2056-11f1-8906-00ff4626f3bf','preOutcome','string',0,'2026-03-15 18:11:09.897',NULL,NULL,NULL,'PASS',NULL),('5319655d-2058-11f1-8906-00ff4626f3bf','VariableUpdate','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,'49e2f4c6-2057-11f1-8906-00ff4626f3bf','initOutcome','string',0,'2026-03-15 18:18:34.858',NULL,NULL,NULL,'PASS',NULL),('7107e6f8-2058-11f1-8906-00ff4626f3bf','VariableUpdate','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,'531a4fc1-2058-11f1-8906-00ff4626f3bf','finalOutcome','string',0,'2026-03-15 18:19:25.075',NULL,NULL,NULL,'PASS',NULL),('f27ed30f-2056-11f1-8906-00ff4626f3bf','VariableUpdate','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,NULL,'topicId','string',0,'2026-03-15 18:08:43.287',NULL,NULL,NULL,'2033123215995334657',NULL),('f27efa21-2056-11f1-8906-00ff4626f3bf','VariableUpdate','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,NULL,'creatorId','string',0,'2026-03-15 18:08:43.288',NULL,NULL,NULL,'2024759015287861249',NULL),('f27efa23-2056-11f1-8906-00ff4626f3bf','VariableUpdate','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,NULL,'topicCategory','integer',0,'2026-03-15 18:08:43.288',NULL,NULL,1,'1',NULL),('f27efa25-2056-11f1-8906-00ff4626f3bf','VariableUpdate','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,NULL,'topicTitle','string',0,'2026-03-15 18:08:43.288',NULL,NULL,NULL,'åŸºäºSpring Bootä¸Vueçš„å¤–å–ç®¡ç†ç³»ç»Ÿ',NULL);
+/*!40000 ALTER TABLE `act_hi_detail` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_hi_entitylink`
+--
+
+DROP TABLE IF EXISTS `act_hi_entitylink`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_hi_entitylink` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `LINK_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CREATE_TIME_` datetime(3) DEFAULT NULL,
+  `SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_DEFINITION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `PARENT_ELEMENT_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `REF_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `REF_SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `REF_SCOPE_DEFINITION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `ROOT_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `ROOT_SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `HIERARCHY_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_HI_ENT_LNK_SCOPE` (`SCOPE_ID_`,`SCOPE_TYPE_`,`LINK_TYPE_`),
+  KEY `ACT_IDX_HI_ENT_LNK_REF_SCOPE` (`REF_SCOPE_ID_`,`REF_SCOPE_TYPE_`,`LINK_TYPE_`),
+  KEY `ACT_IDX_HI_ENT_LNK_ROOT_SCOPE` (`ROOT_SCOPE_ID_`,`ROOT_SCOPE_TYPE_`,`LINK_TYPE_`),
+  KEY `ACT_IDX_HI_ENT_LNK_SCOPE_DEF` (`SCOPE_DEFINITION_ID_`,`SCOPE_TYPE_`,`LINK_TYPE_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_hi_entitylink`
+--
+
+LOCK TABLES `act_hi_entitylink` WRITE;
+/*!40000 ALTER TABLE `act_hi_entitylink` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_hi_entitylink` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_hi_identitylink`
+--
+
+DROP TABLE IF EXISTS `act_hi_identitylink`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_hi_identitylink` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `GROUP_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `USER_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TASK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `CREATE_TIME_` datetime(3) DEFAULT NULL,
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_DEFINITION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_HI_IDENT_LNK_USER` (`USER_ID_`),
+  KEY `ACT_IDX_HI_IDENT_LNK_SCOPE` (`SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_HI_IDENT_LNK_SUB_SCOPE` (`SUB_SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_HI_IDENT_LNK_SCOPE_DEF` (`SCOPE_DEFINITION_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_HI_IDENT_LNK_TASK` (`TASK_ID_`),
+  KEY `ACT_IDX_HI_IDENT_LNK_PROCINST` (`PROC_INST_ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_hi_identitylink`
+--
+
+LOCK TABLES `act_hi_identitylink` WRITE;
+/*!40000 ALTER TABLE `act_hi_identitylink` DISABLE KEYS */;
+INSERT INTO `act_hi_identitylink` VALUES ('49dab75e-2057-11f1-8906-00ff4626f3bf',NULL,'assignee','TEST_UT_001','f284c68c-2056-11f1-8906-00ff4626f3bf','2026-03-15 18:11:09.851',NULL,NULL,NULL,NULL,NULL),('49db057f-2057-11f1-8906-00ff4626f3bf',NULL,'participant','TEST_UT_001',NULL,'2026-03-15 18:11:09.853','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,NULL,NULL,NULL),('49e2f4c8-2057-11f1-8906-00ff4626f3bf','MAJOR_DIRECTOR','candidate',NULL,'49e2f4c7-2057-11f1-8906-00ff4626f3bf','2026-03-15 18:11:09.905',NULL,NULL,NULL,NULL,NULL),('53167f29-2058-11f1-8906-00ff4626f3bf',NULL,'assignee','TEST_MD_001','49e2f4c7-2057-11f1-8906-00ff4626f3bf','2026-03-15 18:18:34.839',NULL,NULL,NULL,NULL,NULL),('5316cd4a-2058-11f1-8906-00ff4626f3bf',NULL,'participant','TEST_MD_001',NULL,'2026-03-15 18:18:34.841','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,NULL,NULL,NULL),('531a4fc3-2058-11f1-8906-00ff4626f3bf','SUPERVISOR_TEACHER','candidate',NULL,'531a4fc2-2058-11f1-8906-00ff4626f3bf','2026-03-15 18:18:34.864',NULL,NULL,NULL,NULL,NULL),('64345d04-2058-11f1-8906-00ff4626f3bf',NULL,'assignee','TEST_ST_002','531a4fc2-2058-11f1-8906-00ff4626f3bf','2026-03-15 18:19:03.556',NULL,NULL,NULL,NULL,NULL),('6434ab25-2058-11f1-8906-00ff4626f3bf',NULL,'participant','TEST_ST_002',NULL,'2026-03-15 18:19:03.558','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,NULL,NULL,NULL),('f284ed9d-2056-11f1-8906-00ff4626f3bf','UNIVERSITY_TEACHER','candidate',NULL,'f284c68c-2056-11f1-8906-00ff4626f3bf','2026-03-15 18:08:43.328',NULL,NULL,NULL,NULL,NULL);
+/*!40000 ALTER TABLE `act_hi_identitylink` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_hi_procinst`
+--
+
+DROP TABLE IF EXISTS `act_hi_procinst`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_hi_procinst` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT '1',
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `BUSINESS_KEY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `START_TIME_` datetime(3) NOT NULL,
+  `END_TIME_` datetime(3) DEFAULT NULL,
+  `DURATION_` bigint DEFAULT NULL,
+  `START_USER_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `START_ACT_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `END_ACT_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUPER_PROCESS_INSTANCE_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `DELETE_REASON_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  `NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CALLBACK_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CALLBACK_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `REFERENCE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `REFERENCE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `PROPAGATED_STAGE_INST_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `BUSINESS_STATUS_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  UNIQUE KEY `PROC_INST_ID_` (`PROC_INST_ID_`),
+  KEY `ACT_IDX_HI_PRO_INST_END` (`END_TIME_`),
+  KEY `ACT_IDX_HI_PRO_I_BUSKEY` (`BUSINESS_KEY_`),
+  KEY `ACT_IDX_HI_PRO_SUPER_PROCINST` (`SUPER_PROCESS_INSTANCE_ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_hi_procinst`
+--
+
+LOCK TABLES `act_hi_procinst` WRITE;
+/*!40000 ALTER TABLE `act_hi_procinst` DISABLE KEYS */;
+INSERT INTO `act_hi_procinst` VALUES ('f27e84ed-2056-11f1-8906-00ff4626f3bf',2,'f27e84ed-2056-11f1-8906-00ff4626f3bf','2033123215995334657','topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf','2026-03-15 18:08:43.285','2026-03-15 18:19:25.132',641847,NULL,'startEvent','passedEndEvent',NULL,NULL,'',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+/*!40000 ALTER TABLE `act_hi_procinst` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_hi_taskinst`
+--
+
+DROP TABLE IF EXISTS `act_hi_taskinst`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_hi_taskinst` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT '1',
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `TASK_DEF_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `TASK_DEF_KEY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_DEFINITION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `PROPAGATED_STAGE_INST_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `PARENT_TASK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `DESCRIPTION_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `OWNER_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `ASSIGNEE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `START_TIME_` datetime(3) NOT NULL,
+  `CLAIM_TIME_` datetime(3) DEFAULT NULL,
+  `END_TIME_` datetime(3) DEFAULT NULL,
+  `DURATION_` bigint DEFAULT NULL,
+  `DELETE_REASON_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `PRIORITY_` int DEFAULT NULL,
+  `DUE_DATE_` datetime(3) DEFAULT NULL,
+  `FORM_KEY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CATEGORY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  `LAST_UPDATED_TIME_` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_HI_TASK_SCOPE` (`SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_HI_TASK_SUB_SCOPE` (`SUB_SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_HI_TASK_SCOPE_DEF` (`SCOPE_DEFINITION_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_HI_TASK_INST_PROCINST` (`PROC_INST_ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_hi_taskinst`
+--
+
+LOCK TABLES `act_hi_taskinst` WRITE;
+/*!40000 ALTER TABLE `act_hi_taskinst` DISABLE KEYS */;
+INSERT INTO `act_hi_taskinst` VALUES ('49e2f4c7-2057-11f1-8906-00ff4626f3bf',3,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf',NULL,'initUpgradeTask','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf',NULL,NULL,NULL,NULL,NULL,'åˆå®¡ï¼ˆå‡æœ¬ï¼‰',NULL,'ä¸“ä¸šæ–¹å‘ä¸»ç®¡å¯¹é«˜èŒå‡æœ¬è¯¾é¢˜è¿›è¡Œåˆå®¡',NULL,'TEST_MD_001','2026-03-15 18:11:09.905','2026-03-15 18:18:34.834','2026-03-15 18:18:34.859',444954,NULL,50,NULL,NULL,NULL,'','2026-03-15 18:18:34.859'),('531a4fc2-2058-11f1-8906-00ff4626f3bf',3,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf',NULL,'finalUpgradeTask','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf',NULL,NULL,NULL,NULL,NULL,'ç»ˆå®¡ï¼ˆå‡æœ¬ï¼‰',NULL,'ç£å¯¼æ•™å¸ˆå¯¹é«˜èŒå‡æœ¬è¯¾é¢˜è¿›è¡Œç»ˆå®¡',NULL,'TEST_ST_002','2026-03-15 18:18:34.864','2026-03-15 18:19:03.552','2026-03-15 18:19:25.076',50212,NULL,50,NULL,NULL,NULL,'','2026-03-15 18:19:25.076'),('f284c68c-2056-11f1-8906-00ff4626f3bf',3,'topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf',NULL,'preReviewTask','f27e84ed-2056-11f1-8906-00ff4626f3bf','f27efa26-2056-11f1-8906-00ff4626f3bf',NULL,NULL,NULL,NULL,NULL,'é¢„å®¡',NULL,'é«˜æ ¡æ•™å¸ˆå¯¹é«˜èŒå‡æœ¬è¯¾é¢˜è¿›è¡Œé¢„å®¡',NULL,'TEST_UT_001','2026-03-15 18:08:43.324','2026-03-15 18:11:09.844','2026-03-15 18:11:09.899',146575,NULL,50,NULL,NULL,NULL,'','2026-03-15 18:11:09.899');
+/*!40000 ALTER TABLE `act_hi_taskinst` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_hi_tsk_log`
+--
+
+DROP TABLE IF EXISTS `act_hi_tsk_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_hi_tsk_log` (
+  `ID_` bigint NOT NULL AUTO_INCREMENT,
+  `TYPE_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `TASK_ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `TIME_STAMP_` timestamp(3) NOT NULL,
+  `USER_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `DATA_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_DEFINITION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  PRIMARY KEY (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_hi_tsk_log`
+--
+
+LOCK TABLES `act_hi_tsk_log` WRITE;
+/*!40000 ALTER TABLE `act_hi_tsk_log` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_hi_tsk_log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_hi_varinst`
+--
+
+DROP TABLE IF EXISTS `act_hi_varinst`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_hi_varinst` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT '1',
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `TASK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `NAME_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `VAR_TYPE_` varchar(100) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `BYTEARRAY_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `DOUBLE_` double DEFAULT NULL,
+  `LONG_` bigint DEFAULT NULL,
+  `TEXT_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `TEXT2_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `META_INFO_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `CREATE_TIME_` datetime(3) DEFAULT NULL,
+  `LAST_UPDATED_TIME_` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_HI_PROCVAR_NAME_TYPE` (`NAME_`,`VAR_TYPE_`),
+  KEY `ACT_IDX_HI_VAR_SCOPE_ID_TYPE` (`SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_HI_VAR_SUB_ID_TYPE` (`SUB_SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_HI_PROCVAR_PROC_INST` (`PROC_INST_ID_`),
+  KEY `ACT_IDX_HI_PROCVAR_TASK_ID` (`TASK_ID_`),
+  KEY `ACT_IDX_HI_PROCVAR_EXE` (`EXECUTION_ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_hi_varinst`
+--
+
+LOCK TABLES `act_hi_varinst` WRITE;
+/*!40000 ALTER TABLE `act_hi_varinst` DISABLE KEYS */;
+INSERT INTO `act_hi_varinst` VALUES ('49e16e21-2057-11f1-8906-00ff4626f3bf',0,'f27e84ed-2056-11f1-8906-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,'preOutcome','string',NULL,NULL,NULL,NULL,NULL,NULL,'PASS',NULL,NULL,'2026-03-15 18:11:09.895','2026-03-15 18:11:09.895'),('53193e4c-2058-11f1-8906-00ff4626f3bf',0,'f27e84ed-2056-11f1-8906-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,'initOutcome','string',NULL,NULL,NULL,NULL,NULL,NULL,'PASS',NULL,NULL,'2026-03-15 18:18:34.857','2026-03-15 18:18:34.857'),('7107bfe7-2058-11f1-8906-00ff4626f3bf',0,'f27e84ed-2056-11f1-8906-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,'finalOutcome','string',NULL,NULL,NULL,NULL,NULL,NULL,'PASS',NULL,NULL,'2026-03-15 18:19:25.074','2026-03-15 18:19:25.074'),('f27eabfe-2056-11f1-8906-00ff4626f3bf',0,'f27e84ed-2056-11f1-8906-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,'topicId','string',NULL,NULL,NULL,NULL,NULL,NULL,'2033123215995334657',NULL,NULL,'2026-03-15 18:08:43.287','2026-03-15 18:08:43.287'),('f27ed310-2056-11f1-8906-00ff4626f3bf',0,'f27e84ed-2056-11f1-8906-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,'creatorId','string',NULL,NULL,NULL,NULL,NULL,NULL,'2024759015287861249',NULL,NULL,'2026-03-15 18:08:43.287','2026-03-15 18:08:43.287'),('f27efa22-2056-11f1-8906-00ff4626f3bf',0,'f27e84ed-2056-11f1-8906-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,'topicCategory','integer',NULL,NULL,NULL,NULL,NULL,1,'1',NULL,NULL,'2026-03-15 18:08:43.288','2026-03-15 18:08:43.288'),('f27efa24-2056-11f1-8906-00ff4626f3bf',0,'f27e84ed-2056-11f1-8906-00ff4626f3bf','f27e84ed-2056-11f1-8906-00ff4626f3bf',NULL,'topicTitle','string',NULL,NULL,NULL,NULL,NULL,NULL,'åŸºäºSpring Bootä¸Vueçš„å¤–å–ç®¡ç†ç³»ç»Ÿ',NULL,NULL,'2026-03-15 18:08:43.288','2026-03-15 18:08:43.288');
+/*!40000 ALTER TABLE `act_hi_varinst` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_procdef_info`
+--
+
+DROP TABLE IF EXISTS `act_procdef_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_procdef_info` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `INFO_JSON_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  UNIQUE KEY `ACT_UNIQ_INFO_PROCDEF` (`PROC_DEF_ID_`),
+  KEY `ACT_IDX_INFO_PROCDEF` (`PROC_DEF_ID_`),
+  KEY `ACT_FK_INFO_JSON_BA` (`INFO_JSON_ID_`),
+  CONSTRAINT `ACT_FK_INFO_JSON_BA` FOREIGN KEY (`INFO_JSON_ID_`) REFERENCES `act_ge_bytearray` (`ID_`),
+  CONSTRAINT `ACT_FK_INFO_PROCDEF` FOREIGN KEY (`PROC_DEF_ID_`) REFERENCES `act_re_procdef` (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_procdef_info`
+--
+
+LOCK TABLES `act_procdef_info` WRITE;
+/*!40000 ALTER TABLE `act_procdef_info` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_procdef_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_re_deployment`
+--
+
+DROP TABLE IF EXISTS `act_re_deployment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_re_deployment` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CATEGORY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `KEY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  `DEPLOY_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `DERIVED_FROM_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `DERIVED_FROM_ROOT_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PARENT_DEPLOYMENT_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `ENGINE_VERSION_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_re_deployment`
+--
+
+LOCK TABLES `act_re_deployment` WRITE;
+/*!40000 ALTER TABLE `act_re_deployment` DISABLE KEYS */;
+INSERT INTO `act_re_deployment` VALUES ('517ae1ff-2031-11f1-ba76-00ff4626f3bf','SpringBootAutoDeployment',NULL,NULL,'','2026-03-15 05:39:21.767',NULL,NULL,'517ae1ff-2031-11f1-ba76-00ff4626f3bf',NULL);
+/*!40000 ALTER TABLE `act_re_deployment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_re_model`
+--
+
+DROP TABLE IF EXISTS `act_re_model`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_re_model` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `KEY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CATEGORY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CREATE_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `LAST_UPDATE_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `VERSION_` int DEFAULT NULL,
+  `META_INFO_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `DEPLOYMENT_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `EDITOR_SOURCE_VALUE_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `EDITOR_SOURCE_EXTRA_VALUE_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_FK_MODEL_SOURCE` (`EDITOR_SOURCE_VALUE_ID_`),
+  KEY `ACT_FK_MODEL_SOURCE_EXTRA` (`EDITOR_SOURCE_EXTRA_VALUE_ID_`),
+  KEY `ACT_FK_MODEL_DEPLOYMENT` (`DEPLOYMENT_ID_`),
+  CONSTRAINT `ACT_FK_MODEL_DEPLOYMENT` FOREIGN KEY (`DEPLOYMENT_ID_`) REFERENCES `act_re_deployment` (`ID_`),
+  CONSTRAINT `ACT_FK_MODEL_SOURCE` FOREIGN KEY (`EDITOR_SOURCE_VALUE_ID_`) REFERENCES `act_ge_bytearray` (`ID_`),
+  CONSTRAINT `ACT_FK_MODEL_SOURCE_EXTRA` FOREIGN KEY (`EDITOR_SOURCE_EXTRA_VALUE_ID_`) REFERENCES `act_ge_bytearray` (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_re_model`
+--
+
+LOCK TABLES `act_re_model` WRITE;
+/*!40000 ALTER TABLE `act_re_model` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_re_model` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_re_procdef`
+--
+
+DROP TABLE IF EXISTS `act_re_procdef`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_re_procdef` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `CATEGORY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `KEY_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `VERSION_` int NOT NULL,
+  `DEPLOYMENT_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `RESOURCE_NAME_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `DGRM_RESOURCE_NAME_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `DESCRIPTION_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `HAS_START_FORM_KEY_` tinyint DEFAULT NULL,
+  `HAS_GRAPHICAL_NOTATION_` tinyint DEFAULT NULL,
+  `SUSPENSION_STATE_` int DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  `ENGINE_VERSION_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `DERIVED_FROM_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `DERIVED_FROM_ROOT_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `DERIVED_VERSION_` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`ID_`),
+  UNIQUE KEY `ACT_UNIQ_PROCDEF` (`KEY_`,`VERSION_`,`DERIVED_VERSION_`,`TENANT_ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_re_procdef`
+--
+
+LOCK TABLES `act_re_procdef` WRITE;
+/*!40000 ALTER TABLE `act_re_procdef` DISABLE KEYS */;
+INSERT INTO `act_re_procdef` VALUES ('topic_review:1:51de37b2-2031-11f1-ba76-00ff4626f3bf',1,'http://www.flowable.org/processdef','è¯¾é¢˜å®¡æŸ¥æµç¨‹','topic_review',1,'517ae1ff-2031-11f1-ba76-00ff4626f3bf','E:\\gitHub\\completeSystem\\complete-backend\\target\\classes\\processes\\topic_review.bpmn20.xml','E:\\gitHub\\completeSystem\\complete-backend\\target\\classes\\processes\\topic_review.topic_review.png',NULL,0,1,1,'',NULL,NULL,NULL,0);
+/*!40000 ALTER TABLE `act_re_procdef` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ru_actinst`
+--
+
+DROP TABLE IF EXISTS `act_ru_actinst`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ru_actinst` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT '1',
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `ACT_ID_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `TASK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `CALL_PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `ACT_NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `ACT_TYPE_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `ASSIGNEE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `START_TIME_` datetime(3) NOT NULL,
+  `END_TIME_` datetime(3) DEFAULT NULL,
+  `DURATION_` bigint DEFAULT NULL,
+  `TRANSACTION_ORDER_` int DEFAULT NULL,
+  `DELETE_REASON_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_RU_ACTI_START` (`START_TIME_`),
+  KEY `ACT_IDX_RU_ACTI_END` (`END_TIME_`),
+  KEY `ACT_IDX_RU_ACTI_PROC` (`PROC_INST_ID_`),
+  KEY `ACT_IDX_RU_ACTI_PROC_ACT` (`PROC_INST_ID_`,`ACT_ID_`),
+  KEY `ACT_IDX_RU_ACTI_EXEC` (`EXECUTION_ID_`),
+  KEY `ACT_IDX_RU_ACTI_EXEC_ACT` (`EXECUTION_ID_`,`ACT_ID_`),
+  KEY `ACT_IDX_RU_ACTI_TASK` (`TASK_ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ru_actinst`
+--
+
+LOCK TABLES `act_ru_actinst` WRITE;
+/*!40000 ALTER TABLE `act_ru_actinst` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_ru_actinst` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ru_deadletter_job`
+--
+
+DROP TABLE IF EXISTS `act_ru_deadletter_job`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ru_deadletter_job` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `CATEGORY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TYPE_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `EXCLUSIVE_` tinyint(1) DEFAULT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROCESS_INSTANCE_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `ELEMENT_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `ELEMENT_NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_DEFINITION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CORRELATION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `EXCEPTION_STACK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `EXCEPTION_MSG_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `DUEDATE_` timestamp(3) NULL DEFAULT NULL,
+  `REPEAT_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `HANDLER_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `HANDLER_CFG_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `CUSTOM_VALUES_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `CREATE_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_DEADLETTER_JOB_EXCEPTION_STACK_ID` (`EXCEPTION_STACK_ID_`),
+  KEY `ACT_IDX_DEADLETTER_JOB_CUSTOM_VALUES_ID` (`CUSTOM_VALUES_ID_`),
+  KEY `ACT_IDX_DEADLETTER_JOB_CORRELATION_ID` (`CORRELATION_ID_`),
+  KEY `ACT_IDX_DJOB_SCOPE` (`SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_DJOB_SUB_SCOPE` (`SUB_SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_DJOB_SCOPE_DEF` (`SCOPE_DEFINITION_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_FK_DEADLETTER_JOB_EXECUTION` (`EXECUTION_ID_`),
+  KEY `ACT_FK_DEADLETTER_JOB_PROCESS_INSTANCE` (`PROCESS_INSTANCE_ID_`),
+  KEY `ACT_FK_DEADLETTER_JOB_PROC_DEF` (`PROC_DEF_ID_`),
+  CONSTRAINT `ACT_FK_DEADLETTER_JOB_CUSTOM_VALUES` FOREIGN KEY (`CUSTOM_VALUES_ID_`) REFERENCES `act_ge_bytearray` (`ID_`),
+  CONSTRAINT `ACT_FK_DEADLETTER_JOB_EXCEPTION` FOREIGN KEY (`EXCEPTION_STACK_ID_`) REFERENCES `act_ge_bytearray` (`ID_`),
+  CONSTRAINT `ACT_FK_DEADLETTER_JOB_EXECUTION` FOREIGN KEY (`EXECUTION_ID_`) REFERENCES `act_ru_execution` (`ID_`),
+  CONSTRAINT `ACT_FK_DEADLETTER_JOB_PROC_DEF` FOREIGN KEY (`PROC_DEF_ID_`) REFERENCES `act_re_procdef` (`ID_`),
+  CONSTRAINT `ACT_FK_DEADLETTER_JOB_PROCESS_INSTANCE` FOREIGN KEY (`PROCESS_INSTANCE_ID_`) REFERENCES `act_ru_execution` (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ru_deadletter_job`
+--
+
+LOCK TABLES `act_ru_deadletter_job` WRITE;
+/*!40000 ALTER TABLE `act_ru_deadletter_job` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_ru_deadletter_job` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ru_entitylink`
+--
+
+DROP TABLE IF EXISTS `act_ru_entitylink`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ru_entitylink` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `CREATE_TIME_` datetime(3) DEFAULT NULL,
+  `LINK_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_DEFINITION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `PARENT_ELEMENT_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `REF_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `REF_SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `REF_SCOPE_DEFINITION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `ROOT_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `ROOT_SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `HIERARCHY_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_ENT_LNK_SCOPE` (`SCOPE_ID_`,`SCOPE_TYPE_`,`LINK_TYPE_`),
+  KEY `ACT_IDX_ENT_LNK_REF_SCOPE` (`REF_SCOPE_ID_`,`REF_SCOPE_TYPE_`,`LINK_TYPE_`),
+  KEY `ACT_IDX_ENT_LNK_ROOT_SCOPE` (`ROOT_SCOPE_ID_`,`ROOT_SCOPE_TYPE_`,`LINK_TYPE_`),
+  KEY `ACT_IDX_ENT_LNK_SCOPE_DEF` (`SCOPE_DEFINITION_ID_`,`SCOPE_TYPE_`,`LINK_TYPE_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ru_entitylink`
+--
+
+LOCK TABLES `act_ru_entitylink` WRITE;
+/*!40000 ALTER TABLE `act_ru_entitylink` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_ru_entitylink` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ru_event_subscr`
+--
+
+DROP TABLE IF EXISTS `act_ru_event_subscr`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ru_event_subscr` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `EVENT_TYPE_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `EVENT_NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `ACTIVITY_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `CONFIGURATION_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CREATED_` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_DEFINITION_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `LOCK_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `LOCK_OWNER_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_EVENT_SUBSCR_CONFIG_` (`CONFIGURATION_`),
+  KEY `ACT_IDX_EVENT_SUBSCR_SCOPEREF_` (`SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_FK_EVENT_EXEC` (`EXECUTION_ID_`),
+  CONSTRAINT `ACT_FK_EVENT_EXEC` FOREIGN KEY (`EXECUTION_ID_`) REFERENCES `act_ru_execution` (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ru_event_subscr`
+--
+
+LOCK TABLES `act_ru_event_subscr` WRITE;
+/*!40000 ALTER TABLE `act_ru_event_subscr` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_ru_event_subscr` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ru_execution`
+--
+
+DROP TABLE IF EXISTS `act_ru_execution`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ru_execution` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `BUSINESS_KEY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `PARENT_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `SUPER_EXEC_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `ROOT_PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `ACT_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `IS_ACTIVE_` tinyint DEFAULT NULL,
+  `IS_CONCURRENT_` tinyint DEFAULT NULL,
+  `IS_SCOPE_` tinyint DEFAULT NULL,
+  `IS_EVENT_SCOPE_` tinyint DEFAULT NULL,
+  `IS_MI_ROOT_` tinyint DEFAULT NULL,
+  `SUSPENSION_STATE_` int DEFAULT NULL,
+  `CACHED_ENT_STATE_` int DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  `NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `START_ACT_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `START_TIME_` datetime(3) DEFAULT NULL,
+  `START_USER_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `LOCK_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `LOCK_OWNER_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `IS_COUNT_ENABLED_` tinyint DEFAULT NULL,
+  `EVT_SUBSCR_COUNT_` int DEFAULT NULL,
+  `TASK_COUNT_` int DEFAULT NULL,
+  `JOB_COUNT_` int DEFAULT NULL,
+  `TIMER_JOB_COUNT_` int DEFAULT NULL,
+  `SUSP_JOB_COUNT_` int DEFAULT NULL,
+  `DEADLETTER_JOB_COUNT_` int DEFAULT NULL,
+  `EXTERNAL_WORKER_JOB_COUNT_` int DEFAULT NULL,
+  `VAR_COUNT_` int DEFAULT NULL,
+  `ID_LINK_COUNT_` int DEFAULT NULL,
+  `CALLBACK_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CALLBACK_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `REFERENCE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `REFERENCE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `PROPAGATED_STAGE_INST_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `BUSINESS_STATUS_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_EXEC_BUSKEY` (`BUSINESS_KEY_`),
+  KEY `ACT_IDC_EXEC_ROOT` (`ROOT_PROC_INST_ID_`),
+  KEY `ACT_IDX_EXEC_REF_ID_` (`REFERENCE_ID_`),
+  KEY `ACT_FK_EXE_PROCINST` (`PROC_INST_ID_`),
+  KEY `ACT_FK_EXE_PARENT` (`PARENT_ID_`),
+  KEY `ACT_FK_EXE_SUPER` (`SUPER_EXEC_`),
+  KEY `ACT_FK_EXE_PROCDEF` (`PROC_DEF_ID_`),
+  CONSTRAINT `ACT_FK_EXE_PARENT` FOREIGN KEY (`PARENT_ID_`) REFERENCES `act_ru_execution` (`ID_`) ON DELETE CASCADE,
+  CONSTRAINT `ACT_FK_EXE_PROCDEF` FOREIGN KEY (`PROC_DEF_ID_`) REFERENCES `act_re_procdef` (`ID_`),
+  CONSTRAINT `ACT_FK_EXE_PROCINST` FOREIGN KEY (`PROC_INST_ID_`) REFERENCES `act_ru_execution` (`ID_`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ACT_FK_EXE_SUPER` FOREIGN KEY (`SUPER_EXEC_`) REFERENCES `act_ru_execution` (`ID_`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ru_execution`
+--
+
+LOCK TABLES `act_ru_execution` WRITE;
+/*!40000 ALTER TABLE `act_ru_execution` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_ru_execution` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ru_external_job`
+--
+
+DROP TABLE IF EXISTS `act_ru_external_job`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ru_external_job` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `CATEGORY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TYPE_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `LOCK_EXP_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `LOCK_OWNER_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `EXCLUSIVE_` tinyint(1) DEFAULT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROCESS_INSTANCE_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `ELEMENT_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `ELEMENT_NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_DEFINITION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CORRELATION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `RETRIES_` int DEFAULT NULL,
+  `EXCEPTION_STACK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `EXCEPTION_MSG_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `DUEDATE_` timestamp(3) NULL DEFAULT NULL,
+  `REPEAT_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `HANDLER_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `HANDLER_CFG_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `CUSTOM_VALUES_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `CREATE_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_EXTERNAL_JOB_EXCEPTION_STACK_ID` (`EXCEPTION_STACK_ID_`),
+  KEY `ACT_IDX_EXTERNAL_JOB_CUSTOM_VALUES_ID` (`CUSTOM_VALUES_ID_`),
+  KEY `ACT_IDX_EXTERNAL_JOB_CORRELATION_ID` (`CORRELATION_ID_`),
+  KEY `ACT_IDX_EJOB_SCOPE` (`SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_EJOB_SUB_SCOPE` (`SUB_SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_EJOB_SCOPE_DEF` (`SCOPE_DEFINITION_ID_`,`SCOPE_TYPE_`),
+  CONSTRAINT `ACT_FK_EXTERNAL_JOB_CUSTOM_VALUES` FOREIGN KEY (`CUSTOM_VALUES_ID_`) REFERENCES `act_ge_bytearray` (`ID_`),
+  CONSTRAINT `ACT_FK_EXTERNAL_JOB_EXCEPTION` FOREIGN KEY (`EXCEPTION_STACK_ID_`) REFERENCES `act_ge_bytearray` (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ru_external_job`
+--
+
+LOCK TABLES `act_ru_external_job` WRITE;
+/*!40000 ALTER TABLE `act_ru_external_job` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_ru_external_job` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ru_history_job`
+--
+
+DROP TABLE IF EXISTS `act_ru_history_job`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ru_history_job` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `LOCK_EXP_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `LOCK_OWNER_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `RETRIES_` int DEFAULT NULL,
+  `EXCEPTION_STACK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `EXCEPTION_MSG_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `HANDLER_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `HANDLER_CFG_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `CUSTOM_VALUES_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `ADV_HANDLER_CFG_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `CREATE_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  PRIMARY KEY (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ru_history_job`
+--
+
+LOCK TABLES `act_ru_history_job` WRITE;
+/*!40000 ALTER TABLE `act_ru_history_job` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_ru_history_job` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ru_identitylink`
+--
+
+DROP TABLE IF EXISTS `act_ru_identitylink`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ru_identitylink` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `GROUP_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `USER_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TASK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_DEFINITION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_IDENT_LNK_USER` (`USER_ID_`),
+  KEY `ACT_IDX_IDENT_LNK_GROUP` (`GROUP_ID_`),
+  KEY `ACT_IDX_IDENT_LNK_SCOPE` (`SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_IDENT_LNK_SUB_SCOPE` (`SUB_SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_IDENT_LNK_SCOPE_DEF` (`SCOPE_DEFINITION_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_ATHRZ_PROCEDEF` (`PROC_DEF_ID_`),
+  KEY `ACT_FK_TSKASS_TASK` (`TASK_ID_`),
+  KEY `ACT_FK_IDL_PROCINST` (`PROC_INST_ID_`),
+  CONSTRAINT `ACT_FK_ATHRZ_PROCEDEF` FOREIGN KEY (`PROC_DEF_ID_`) REFERENCES `act_re_procdef` (`ID_`),
+  CONSTRAINT `ACT_FK_IDL_PROCINST` FOREIGN KEY (`PROC_INST_ID_`) REFERENCES `act_ru_execution` (`ID_`),
+  CONSTRAINT `ACT_FK_TSKASS_TASK` FOREIGN KEY (`TASK_ID_`) REFERENCES `act_ru_task` (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ru_identitylink`
+--
+
+LOCK TABLES `act_ru_identitylink` WRITE;
+/*!40000 ALTER TABLE `act_ru_identitylink` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_ru_identitylink` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ru_job`
+--
+
+DROP TABLE IF EXISTS `act_ru_job`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ru_job` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `CATEGORY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TYPE_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `LOCK_EXP_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `LOCK_OWNER_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `EXCLUSIVE_` tinyint(1) DEFAULT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROCESS_INSTANCE_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `ELEMENT_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `ELEMENT_NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_DEFINITION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CORRELATION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `RETRIES_` int DEFAULT NULL,
+  `EXCEPTION_STACK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `EXCEPTION_MSG_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `DUEDATE_` timestamp(3) NULL DEFAULT NULL,
+  `REPEAT_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `HANDLER_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `HANDLER_CFG_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `CUSTOM_VALUES_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `CREATE_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_JOB_EXCEPTION_STACK_ID` (`EXCEPTION_STACK_ID_`),
+  KEY `ACT_IDX_JOB_CUSTOM_VALUES_ID` (`CUSTOM_VALUES_ID_`),
+  KEY `ACT_IDX_JOB_CORRELATION_ID` (`CORRELATION_ID_`),
+  KEY `ACT_IDX_JOB_SCOPE` (`SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_JOB_SUB_SCOPE` (`SUB_SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_JOB_SCOPE_DEF` (`SCOPE_DEFINITION_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_FK_JOB_EXECUTION` (`EXECUTION_ID_`),
+  KEY `ACT_FK_JOB_PROCESS_INSTANCE` (`PROCESS_INSTANCE_ID_`),
+  KEY `ACT_FK_JOB_PROC_DEF` (`PROC_DEF_ID_`),
+  CONSTRAINT `ACT_FK_JOB_CUSTOM_VALUES` FOREIGN KEY (`CUSTOM_VALUES_ID_`) REFERENCES `act_ge_bytearray` (`ID_`),
+  CONSTRAINT `ACT_FK_JOB_EXCEPTION` FOREIGN KEY (`EXCEPTION_STACK_ID_`) REFERENCES `act_ge_bytearray` (`ID_`),
+  CONSTRAINT `ACT_FK_JOB_EXECUTION` FOREIGN KEY (`EXECUTION_ID_`) REFERENCES `act_ru_execution` (`ID_`),
+  CONSTRAINT `ACT_FK_JOB_PROC_DEF` FOREIGN KEY (`PROC_DEF_ID_`) REFERENCES `act_re_procdef` (`ID_`),
+  CONSTRAINT `ACT_FK_JOB_PROCESS_INSTANCE` FOREIGN KEY (`PROCESS_INSTANCE_ID_`) REFERENCES `act_ru_execution` (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ru_job`
+--
+
+LOCK TABLES `act_ru_job` WRITE;
+/*!40000 ALTER TABLE `act_ru_job` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_ru_job` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ru_suspended_job`
+--
+
+DROP TABLE IF EXISTS `act_ru_suspended_job`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ru_suspended_job` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `CATEGORY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TYPE_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `EXCLUSIVE_` tinyint(1) DEFAULT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROCESS_INSTANCE_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `ELEMENT_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `ELEMENT_NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_DEFINITION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CORRELATION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `RETRIES_` int DEFAULT NULL,
+  `EXCEPTION_STACK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `EXCEPTION_MSG_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `DUEDATE_` timestamp(3) NULL DEFAULT NULL,
+  `REPEAT_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `HANDLER_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `HANDLER_CFG_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `CUSTOM_VALUES_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `CREATE_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_SUSPENDED_JOB_EXCEPTION_STACK_ID` (`EXCEPTION_STACK_ID_`),
+  KEY `ACT_IDX_SUSPENDED_JOB_CUSTOM_VALUES_ID` (`CUSTOM_VALUES_ID_`),
+  KEY `ACT_IDX_SUSPENDED_JOB_CORRELATION_ID` (`CORRELATION_ID_`),
+  KEY `ACT_IDX_SJOB_SCOPE` (`SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_SJOB_SUB_SCOPE` (`SUB_SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_SJOB_SCOPE_DEF` (`SCOPE_DEFINITION_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_FK_SUSPENDED_JOB_EXECUTION` (`EXECUTION_ID_`),
+  KEY `ACT_FK_SUSPENDED_JOB_PROCESS_INSTANCE` (`PROCESS_INSTANCE_ID_`),
+  KEY `ACT_FK_SUSPENDED_JOB_PROC_DEF` (`PROC_DEF_ID_`),
+  CONSTRAINT `ACT_FK_SUSPENDED_JOB_CUSTOM_VALUES` FOREIGN KEY (`CUSTOM_VALUES_ID_`) REFERENCES `act_ge_bytearray` (`ID_`),
+  CONSTRAINT `ACT_FK_SUSPENDED_JOB_EXCEPTION` FOREIGN KEY (`EXCEPTION_STACK_ID_`) REFERENCES `act_ge_bytearray` (`ID_`),
+  CONSTRAINT `ACT_FK_SUSPENDED_JOB_EXECUTION` FOREIGN KEY (`EXECUTION_ID_`) REFERENCES `act_ru_execution` (`ID_`),
+  CONSTRAINT `ACT_FK_SUSPENDED_JOB_PROC_DEF` FOREIGN KEY (`PROC_DEF_ID_`) REFERENCES `act_re_procdef` (`ID_`),
+  CONSTRAINT `ACT_FK_SUSPENDED_JOB_PROCESS_INSTANCE` FOREIGN KEY (`PROCESS_INSTANCE_ID_`) REFERENCES `act_ru_execution` (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ru_suspended_job`
+--
+
+LOCK TABLES `act_ru_suspended_job` WRITE;
+/*!40000 ALTER TABLE `act_ru_suspended_job` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_ru_suspended_job` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ru_task`
+--
+
+DROP TABLE IF EXISTS `act_ru_task`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ru_task` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `TASK_DEF_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_DEFINITION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `PROPAGATED_STAGE_INST_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `PARENT_TASK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `DESCRIPTION_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `TASK_DEF_KEY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `OWNER_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `ASSIGNEE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `DELEGATION_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PRIORITY_` int DEFAULT NULL,
+  `CREATE_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `DUE_DATE_` datetime(3) DEFAULT NULL,
+  `CATEGORY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUSPENSION_STATE_` int DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  `FORM_KEY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CLAIM_TIME_` datetime(3) DEFAULT NULL,
+  `IS_COUNT_ENABLED_` tinyint DEFAULT NULL,
+  `VAR_COUNT_` int DEFAULT NULL,
+  `ID_LINK_COUNT_` int DEFAULT NULL,
+  `SUB_TASK_COUNT_` int DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_TASK_CREATE` (`CREATE_TIME_`),
+  KEY `ACT_IDX_TASK_SCOPE` (`SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_TASK_SUB_SCOPE` (`SUB_SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_TASK_SCOPE_DEF` (`SCOPE_DEFINITION_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_FK_TASK_EXE` (`EXECUTION_ID_`),
+  KEY `ACT_FK_TASK_PROCINST` (`PROC_INST_ID_`),
+  KEY `ACT_FK_TASK_PROCDEF` (`PROC_DEF_ID_`),
+  CONSTRAINT `ACT_FK_TASK_EXE` FOREIGN KEY (`EXECUTION_ID_`) REFERENCES `act_ru_execution` (`ID_`),
+  CONSTRAINT `ACT_FK_TASK_PROCDEF` FOREIGN KEY (`PROC_DEF_ID_`) REFERENCES `act_re_procdef` (`ID_`),
+  CONSTRAINT `ACT_FK_TASK_PROCINST` FOREIGN KEY (`PROC_INST_ID_`) REFERENCES `act_ru_execution` (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ru_task`
+--
+
+LOCK TABLES `act_ru_task` WRITE;
+/*!40000 ALTER TABLE `act_ru_task` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_ru_task` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ru_timer_job`
+--
+
+DROP TABLE IF EXISTS `act_ru_timer_job`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ru_timer_job` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `CATEGORY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `TYPE_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `LOCK_EXP_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `LOCK_OWNER_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `EXCLUSIVE_` tinyint(1) DEFAULT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROCESS_INSTANCE_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `ELEMENT_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `ELEMENT_NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_DEFINITION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CORRELATION_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `RETRIES_` int DEFAULT NULL,
+  `EXCEPTION_STACK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `EXCEPTION_MSG_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `DUEDATE_` timestamp(3) NULL DEFAULT NULL,
+  `REPEAT_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `HANDLER_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `HANDLER_CFG_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `CUSTOM_VALUES_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `CREATE_TIME_` timestamp(3) NULL DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_TIMER_JOB_EXCEPTION_STACK_ID` (`EXCEPTION_STACK_ID_`),
+  KEY `ACT_IDX_TIMER_JOB_CUSTOM_VALUES_ID` (`CUSTOM_VALUES_ID_`),
+  KEY `ACT_IDX_TIMER_JOB_CORRELATION_ID` (`CORRELATION_ID_`),
+  KEY `ACT_IDX_TIMER_JOB_DUEDATE` (`DUEDATE_`),
+  KEY `ACT_IDX_TJOB_SCOPE` (`SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_TJOB_SUB_SCOPE` (`SUB_SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_TJOB_SCOPE_DEF` (`SCOPE_DEFINITION_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_FK_TIMER_JOB_EXECUTION` (`EXECUTION_ID_`),
+  KEY `ACT_FK_TIMER_JOB_PROCESS_INSTANCE` (`PROCESS_INSTANCE_ID_`),
+  KEY `ACT_FK_TIMER_JOB_PROC_DEF` (`PROC_DEF_ID_`),
+  CONSTRAINT `ACT_FK_TIMER_JOB_CUSTOM_VALUES` FOREIGN KEY (`CUSTOM_VALUES_ID_`) REFERENCES `act_ge_bytearray` (`ID_`),
+  CONSTRAINT `ACT_FK_TIMER_JOB_EXCEPTION` FOREIGN KEY (`EXCEPTION_STACK_ID_`) REFERENCES `act_ge_bytearray` (`ID_`),
+  CONSTRAINT `ACT_FK_TIMER_JOB_EXECUTION` FOREIGN KEY (`EXECUTION_ID_`) REFERENCES `act_ru_execution` (`ID_`),
+  CONSTRAINT `ACT_FK_TIMER_JOB_PROC_DEF` FOREIGN KEY (`PROC_DEF_ID_`) REFERENCES `act_re_procdef` (`ID_`),
+  CONSTRAINT `ACT_FK_TIMER_JOB_PROCESS_INSTANCE` FOREIGN KEY (`PROCESS_INSTANCE_ID_`) REFERENCES `act_ru_execution` (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ru_timer_job`
+--
+
+LOCK TABLES `act_ru_timer_job` WRITE;
+/*!40000 ALTER TABLE `act_ru_timer_job` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_ru_timer_job` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `act_ru_variable`
+--
+
+DROP TABLE IF EXISTS `act_ru_variable`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `act_ru_variable` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `TYPE_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `NAME_` varchar(255) COLLATE utf8_bin NOT NULL,
+  `EXECUTION_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `PROC_INST_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `TASK_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `BYTEARRAY_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `DOUBLE_` double DEFAULT NULL,
+  `LONG_` bigint DEFAULT NULL,
+  `TEXT_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `TEXT2_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  `META_INFO_` varchar(4000) COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  KEY `ACT_IDX_RU_VAR_SCOPE_ID_TYPE` (`SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_IDX_RU_VAR_SUB_ID_TYPE` (`SUB_SCOPE_ID_`,`SCOPE_TYPE_`),
+  KEY `ACT_FK_VAR_BYTEARRAY` (`BYTEARRAY_ID_`),
+  KEY `ACT_IDX_VARIABLE_TASK_ID` (`TASK_ID_`),
+  KEY `ACT_FK_VAR_EXE` (`EXECUTION_ID_`),
+  KEY `ACT_FK_VAR_PROCINST` (`PROC_INST_ID_`),
+  CONSTRAINT `ACT_FK_VAR_BYTEARRAY` FOREIGN KEY (`BYTEARRAY_ID_`) REFERENCES `act_ge_bytearray` (`ID_`),
+  CONSTRAINT `ACT_FK_VAR_EXE` FOREIGN KEY (`EXECUTION_ID_`) REFERENCES `act_ru_execution` (`ID_`),
+  CONSTRAINT `ACT_FK_VAR_PROCINST` FOREIGN KEY (`PROC_INST_ID_`) REFERENCES `act_ru_execution` (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `act_ru_variable`
+--
+
+LOCK TABLES `act_ru_variable` WRITE;
+/*!40000 ALTER TABLE `act_ru_variable` DISABLE KEYS */;
+/*!40000 ALTER TABLE `act_ru_variable` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `alert_info`
+--
+
+DROP TABLE IF EXISTS `alert_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `alert_info` (
+  `alert_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'é¢„è­¦IDï¼ˆé›ªèŠ±ç®—æ³•ï¼‰',
+  `alert_type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'é¢„è­¦ç±»å‹ï¼šSTUDENT_NOT_SELECTED/TOPIC_NO_APPLICANT/REVIEW_BACKLOG/PHASE_DEADLINE_NEAR/SELECTION_RATE_LOW',
+  `alert_level` tinyint NOT NULL DEFAULT '1' COMMENT 'é¢„è­¦çº§åˆ«ï¼š1-æç¤º 2-è­¦å‘Š 3-ä¸¥é‡',
+  `alert_title` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'é¢„è­¦æ ‡é¢˜',
+  `alert_content` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'é¢„è­¦è¯¦æƒ…',
+  `target_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å…³è”å¯¹è±¡IDï¼ˆè¯¾é¢˜ID/å­¦ç”ŸID/é˜¶æ®µä»£ç ï¼‰',
+  `target_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å…³è”å¯¹è±¡ç±»å‹ï¼šTOPIC/STUDENT/PHASE',
+  `is_read` tinyint NOT NULL DEFAULT '0' COMMENT 'æ˜¯å¦å·²è¯»ï¼š0-æœªè¯» 1-å·²è¯»',
+  `is_resolved` tinyint NOT NULL DEFAULT '0' COMMENT 'æ˜¯å¦å·²å¤„ç†ï¼š0-æœªå¤„ç† 1-å·²å¤„ç†',
+  `resolved_at` datetime DEFAULT NULL COMMENT 'å¤„ç†æ—¶é—´',
+  `deleted` tinyint NOT NULL DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼š0-æœªåˆ é™¤ 1-å·²åˆ é™¤',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`alert_id`),
+  KEY `idx_alert_type` (`alert_type`),
+  KEY `idx_alert_level` (`alert_level`),
+  KEY `idx_is_read` (`is_read`),
+  KEY `idx_is_resolved` (`is_resolved`),
+  KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ç³»ç»Ÿé¢„è­¦è®°å½•è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `alert_info`
+--
+
+LOCK TABLES `alert_info` WRITE;
+/*!40000 ALTER TABLE `alert_info` DISABLE KEYS */;
+/*!40000 ALTER TABLE `alert_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `defense_arrangement`
+--
+
+DROP TABLE IF EXISTS `defense_arrangement`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `defense_arrangement` (
+  `arrangement_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å®‰æ’ID',
+  `defense_type` tinyint NOT NULL COMMENT 'ç­”è¾©ç±»å‹: 1=å¼€é¢˜, 2=ä¸­æœŸ, 3=æ­£å¼, 4=äºŒæ¬¡',
+  `topic_category` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'è¯¾é¢˜ç±»åˆ«ï¼ˆé«˜èŒå‡æœ¬/3+1/å®éªŒç­ï¼‰',
+  `major_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¸“ä¸šID',
+  `defense_time` datetime NOT NULL COMMENT 'ç­”è¾©æ—¶é—´',
+  `defense_location` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ç­”è¾©åœ°ç‚¹',
+  `panel_teachers` json NOT NULL COMMENT 'ç­”è¾©å°ç»„æ•™å¸ˆIDåˆ—è¡¨ï¼ˆJSONæ•°ç»„ï¼Œè‡³å°‘1äººï¼‰',
+  `deadline` datetime DEFAULT NULL COMMENT 'æŠ¥å‘Šæäº¤æˆªæ­¢æ—¶é—´ï¼ˆä»…å¼€é¢˜/ä¸­æœŸä½¿ç”¨ï¼‰',
+  `cohort` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ¯•ä¸šå±Šåˆ«ï¼ˆå¦‚ï¼š2026å±Šï¼‰',
+  `enterprise_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ‰€å±ä¼ä¸šID',
+  `creator_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'åˆ›å»ºäººIDï¼ˆä¼ä¸šè´Ÿè´£äººï¼‰',
+  `status` tinyint DEFAULT '1' COMMENT 'çŠ¶æ€: 1=å¯ç”¨, 0=ç¦ç”¨',
+  `remark` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å¤‡æ³¨è¯´æ˜',
+  `is_deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤: 0=æ­£å¸¸, 1=åˆ é™¤',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`arrangement_id`),
+  KEY `idx_type_category` (`defense_type`,`topic_category`),
+  KEY `idx_enterprise` (`enterprise_id`),
+  KEY `idx_cohort` (`cohort`),
+  KEY `idx_defense_time` (`defense_time`),
+  KEY `idx_create_time` (`create_time`),
+  KEY `idx_major_id` (`major_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ç­”è¾©å®‰æ’è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `defense_arrangement`
+--
+
+LOCK TABLES `defense_arrangement` WRITE;
+/*!40000 ALTER TABLE `defense_arrangement` DISABLE KEYS */;
+INSERT INTO `defense_arrangement` VALUES ('2034620247834750977',1,'é«˜èŒå‡æœ¬',NULL,'2026-03-20 08:20:20','A306','[\"2024759015287861249\"]','2026-03-27 08:00:00','2026å±Š','E001','2024759015287861249',1,'',1,'2026-03-19 21:17:23','2026-03-19 22:05:34'),('2034634181790674946',1,'é«˜èŒå‡æœ¬','2028060890951094273','2026-03-18 22:12:34','A306','[\"2024759015287861249\", \"TEST_UT_001\", \"TEST_ET_001\"]','2026-03-28 22:12:40','2026å±Š','E001','2024759015287861249',1,'',1,'2026-03-19 22:12:45','2026-03-21 23:05:48'),('2035372415399346177',1,'é«˜èŒå‡æœ¬','2028060890951094273','2026-03-22 23:05:56','A306','[\"TEST_UT_001\", \"TEST_MD_001\", \"TEST_ET_001\"]','2026-03-28 23:06:03','2026å±Š','E001','2024759015287861249',1,'',1,'2026-03-21 23:06:14','2026-03-21 23:33:27'),('2035374331936227330',1,'é«˜èŒå‡æœ¬','2030292083968843777','2026-03-28 23:13:32','A306','[\"TEST_ET_001\", \"TEST_MD_001\", \"2024759015287861249\"]','2026-03-29 23:13:38','2026å±Š','E001','2024759015287861249',1,'',1,'2026-03-21 23:13:51','2026-03-21 23:33:25'),('2035379426480369665',1,'é«˜èŒå‡æœ¬','2028060890951094273','2026-03-29 23:33:32','A333','[\"TEST_ST_002\", \"TEST_MD_001\", \"TEST_ET_001\"]','2026-03-29 23:33:41','2026å±Š','E001','2024759015287861249',1,'',1,'2026-03-21 23:34:05','2026-03-21 23:41:25'),('2035381383693713410',1,'é«˜èŒå‡æœ¬','2028060890951094273','2026-03-28 23:41:30','A333','[\"TEST_MD_001\", \"TEST_UT_001\", \"TEST_ET_001\"]','2026-03-28 23:41:36','2026å±Š','E001','2024759015287861249',1,'',0,'2026-03-21 23:41:52','2026-03-21 23:41:52'),('2035385722197798913',1,'é«˜èŒå‡æœ¬','2028060890951094273','2026-03-22 23:58:45','b123','[\"TEST_ET_001\", \"2024759015287861249\", \"TEST_ST_002\"]','2026-03-22 23:58:53','2026å±Š','E001','2024759015287861249',1,'',0,'2026-03-21 23:59:06','2026-03-21 23:59:06');
+/*!40000 ALTER TABLE `defense_arrangement` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `document_access_log`
+--
+
+DROP TABLE IF EXISTS `document_access_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `document_access_log` (
+  `log_id` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'æ—¥å¿—ID',
+  `document_id` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'æ–‡æ¡£ID',
+  `accessor_id` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'è®¿é—®äººID',
+  `access_type` tinyint NOT NULL COMMENT 'è®¿é—®ç±»å‹: 1=é¢„è§ˆ, 2=ä¸‹è½½',
+  `access_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'è®¿é—®æ—¶é—´',
+  `ip_address` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'è®¿é—®IPåœ°å€',
+  PRIMARY KEY (`log_id`),
+  KEY `idx_doc_id` (`document_id`),
+  KEY `idx_accessor_id` (`accessor_id`),
+  KEY `idx_access_time` (`access_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='æ–‡æ¡£è®¿é—®æ—¥å¿—è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `document_access_log`
+--
+
+LOCK TABLES `document_access_log` WRITE;
+/*!40000 ALTER TABLE `document_access_log` DISABLE KEYS */;
+INSERT INTO `document_access_log` VALUES ('2035345232412872706','2035345222036164609','TEST_ST_001',1,'2026-03-21 21:18:13','127.0.0.1'),('2035345438445473793','2035345222036164609','TEST_ST_001',1,'2026-03-21 21:19:02','127.0.0.1'),('2035346700754817026','2035345222036164609','2024759015287861249',1,'2026-03-21 21:24:03','127.0.0.1'),('2035347256210690050','2035345222036164609','2024759015287861249',1,'2026-03-21 21:26:15','127.0.0.1'),('2035347605944340482','2035347573648199682','2024759015287861249',1,'2026-03-21 21:27:39','127.0.0.1'),('2035347876451782657','2035345222036164609','2024759015287861249',1,'2026-03-21 21:28:43','127.0.0.1'),('2035347920642969602','2035347573648199682','2024759015287861249',1,'2026-03-21 21:28:54','127.0.0.1'),('2035348066340507650','2035345222036164609','2024759015287861249',1,'2026-03-21 21:29:29','127.0.0.1'),('2035348437054066689','2035347573648199682','2024759015287861249',1,'2026-03-21 21:30:57','127.0.0.1'),('2035348452891758594','2035348422860541953','2024759015287861249',1,'2026-03-21 21:31:01','127.0.0.1'),('2035349549974884353','2035348422860541953','TEST_ST_001',1,'2026-03-21 21:35:22','127.0.0.1');
+/*!40000 ALTER TABLE `document_access_log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `document_info`
+--
+
+DROP TABLE IF EXISTS `document_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `document_info` (
+  `document_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ–‡æ¡£ID',
+  `student_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ‰€å±å­¦ç”ŸID',
+  `topic_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å…³è”è¯¾é¢˜ID',
+  `document_type` tinyint NOT NULL COMMENT 'æ–‡æ¡£ç±»å‹: 1=é¡¹ç›®ä»£ç , 2=è®ºæ–‡æ–‡æ¡£, 3=å¼€é¢˜æŠ¥å‘Š, 4=ä¸­æœŸæ£€æŸ¥è¡¨, 5=æ•™å¸ˆæ‰¹æ³¨æ–‡æ¡£',
+  `file_name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'åŸå§‹æ–‡ä»¶å',
+  `file_path` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'MinIOå­˜å‚¨è·¯å¾„',
+  `file_size` bigint NOT NULL COMMENT 'æ–‡ä»¶å¤§å°(å­—èŠ‚)',
+  `file_suffix` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ–‡ä»¶åç¼€(pdf/doc/docx/zipç­‰)',
+  `uploader_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¸Šä¼ äººID',
+  `version` int DEFAULT '1' COMMENT 'ç‰ˆæœ¬å·ï¼ˆåŒç±»å‹æ–‡æ¡£é€’å¢ï¼‰',
+  `is_latest` tinyint DEFAULT '1' COMMENT 'æ˜¯å¦æœ€æ–°ç‰ˆæœ¬: 1=æ˜¯, 0=å¦',
+  `remark` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å¤‡æ³¨ï¼ˆå¦‚ï¼šæ ¹æ®ç¬¬Xæ¬¡æŒ‡å¯¼æ„è§ä¿®æ”¹ï¼‰',
+  `is_deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤: 0=æ­£å¸¸, 1=åˆ é™¤',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`document_id`),
+  KEY `idx_student_topic` (`student_id`,`topic_id`),
+  KEY `idx_doc_type` (`document_type`),
+  KEY `idx_uploader` (`uploader_id`),
+  KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='æ–‡æ¡£ä¿¡æ¯è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `document_info`
+--
+
+LOCK TABLES `document_info` WRITE;
+/*!40000 ALTER TABLE `document_info` DISABLE KEYS */;
+INSERT INTO `document_info` VALUES ('2035345222036164609','TEST_ST_001','2030185910938710018',3,'æ¯•è®¾ä»»åŠ¡ä¹¦æ¨¡æ¿.pdf','documents/TEST_ST_001/3/1774099090402_æ¯•è®¾ä»»åŠ¡ä¹¦æ¨¡æ¿.pdf',221099,'pdf','TEST_ST_001',1,1,NULL,0,'2026-03-21 21:18:10','2026-03-21 21:18:10'),('2035347573648199682','TEST_ST_001','2030185910938710018',5,'1774099090402_æ¯•è®¾ä»»åŠ¡ä¹¦æ¨¡æ¿.pdf','documents/TEST_ST_001/5/1774099650803_1774099090402_æ¯•è®¾ä»»åŠ¡ä¹¦æ¨¡æ¿.pdf',231287,'pdf','2024759015287861249',1,0,'è¿™é‡Œéœ€è¦ä¿®æ”¹',0,'2026-03-21 21:27:31','2026-03-21 21:30:53'),('2035348422860541953','TEST_ST_001','2030185910938710018',5,'1774099090402_æ¯•è®¾ä»»åŠ¡ä¹¦æ¨¡æ¿2.pdf','documents/TEST_ST_001/5/1774099853582_1774099090402_æ¯•è®¾ä»»åŠ¡ä¹¦æ¨¡æ¿2.pdf',285386,'pdf','2024759015287861249',2,1,NULL,0,'2026-03-21 21:30:54','2026-03-21 21:30:54');
+/*!40000 ALTER TABLE `document_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `enterprise_info`
+--
+
+DROP TABLE IF EXISTS `enterprise_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `enterprise_info` (
+  `enterprise_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¼ä¸šID',
+  `enterprise_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¼ä¸šåç§°',
+  `enterprise_code` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¼ä¸šç¼–ç ',
+  `leader_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¼ä¸šè´Ÿè´£äººç”¨æˆ·IDï¼ˆå…³è” user_info.user_idï¼‰',
+  `contact_person` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'è”ç³»äºº',
+  `contact_phone` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'è”ç³»ç”µè¯',
+  `contact_email` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'è”ç³»é‚®ç®±',
+  `address` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¼ä¸šåœ°å€',
+  `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¼ä¸šç®€ä»‹',
+  `enterprise_status` tinyint DEFAULT '1' COMMENT 'çŠ¶æ€ï¼ˆ0-ç¦ç”¨ 1-æ­£å¸¸ï¼‰',
+  `deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`enterprise_id`),
+  UNIQUE KEY `uk_enterprise_name` (`enterprise_name`),
+  UNIQUE KEY `uk_enterprise_code` (`enterprise_code`),
+  KEY `idx_enterprise_status` (`enterprise_status`),
+  KEY `idx_enterprise_leader_id` (`leader_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ä¼ä¸šä¿¡æ¯è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `enterprise_info`
+--
+
+LOCK TABLES `enterprise_info` WRITE;
+/*!40000 ALTER TABLE `enterprise_info` DISABLE KEYS */;
+INSERT INTO `enterprise_info` VALUES ('E001','äº¬ä¸œ','DEMO001','TEST_EL_001','æä¼ä¸šè´Ÿè´£äºº','13800138002','enterprise.leader@example.com','åŒ—äº¬å¸‚æµ·æ·€åŒºä¸­å…³æ‘å¤§è¡—1å·','ä¸“æ³¨äºè½¯ä»¶å¼€å‘ä¸æŠ€æœ¯åŸ¹è®­çš„ç§‘æŠ€ä¼ä¸š',1,0,'2026-02-21 20:21:10','2026-02-21 20:28:42'),('E002','IBM','IBM4075','TEST_EL_002','å¶ä¼ä¸šè´Ÿè´£äºº','13800138005','enterprise.leader2@example.com','å¤©æ´¥å¸‚è¥¿é’åŒºå¤©æ´¥å¸‚å¤§å­¦è½¯ä»¶å­¦é™¢','ä¸“æ³¨äºåŸ¹è®­è½¯ä»¶å¼€å‘ä¸æŠ€æœ¯åŸ¹è®­äººå‘˜çš„ç§‘æŠ€ä¼ä¸š',1,0,'2026-02-21 20:26:48','2026-02-21 20:29:06');
+/*!40000 ALTER TABLE `enterprise_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `flw_channel_definition`
+--
+
+DROP TABLE IF EXISTS `flw_channel_definition`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `flw_channel_definition` (
+  `ID_` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `NAME_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `VERSION_` int DEFAULT NULL,
+  `KEY_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `CATEGORY_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `DEPLOYMENT_ID_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `CREATE_TIME_` datetime(3) DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `RESOURCE_NAME_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `DESCRIPTION_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `TYPE_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `IMPLEMENTATION_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  UNIQUE KEY `ACT_IDX_CHANNEL_DEF_UNIQ` (`KEY_`,`VERSION_`,`TENANT_ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `flw_channel_definition`
+--
+
+LOCK TABLES `flw_channel_definition` WRITE;
+/*!40000 ALTER TABLE `flw_channel_definition` DISABLE KEYS */;
+/*!40000 ALTER TABLE `flw_channel_definition` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `flw_ev_databasechangelog`
+--
+
+DROP TABLE IF EXISTS `flw_ev_databasechangelog`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `flw_ev_databasechangelog` (
+  `ID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `AUTHOR` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `FILENAME` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `DATEEXECUTED` datetime NOT NULL,
+  `ORDEREXECUTED` int NOT NULL,
+  `EXECTYPE` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `MD5SUM` varchar(35) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `DESCRIPTION` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `COMMENTS` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `TAG` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `LIQUIBASE` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `CONTEXTS` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `LABELS` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `DEPLOYMENT_ID` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `flw_ev_databasechangelog`
+--
+
+LOCK TABLES `flw_ev_databasechangelog` WRITE;
+/*!40000 ALTER TABLE `flw_ev_databasechangelog` DISABLE KEYS */;
+INSERT INTO `flw_ev_databasechangelog` VALUES ('1','flowable','org/flowable/eventregistry/db/liquibase/flowable-eventregistry-db-changelog.xml','2026-03-15 13:39:11',1,'EXECUTED','9:63268f536c469325acef35970312551b','createTable tableName=FLW_EVENT_DEPLOYMENT; createTable tableName=FLW_EVENT_RESOURCE; createTable tableName=FLW_EVENT_DEFINITION; createIndex indexName=ACT_IDX_EVENT_DEF_UNIQ, tableName=FLW_EVENT_DEFINITION; createTable tableName=FLW_CHANNEL_DEFIN...','',NULL,'4.24.0',NULL,NULL,'3553151424'),('2','flowable','org/flowable/eventregistry/db/liquibase/flowable-eventregistry-db-changelog.xml','2026-03-15 13:39:11',2,'EXECUTED','9:dcb58b7dfd6dbda66939123a96985536','addColumn tableName=FLW_CHANNEL_DEFINITION; addColumn tableName=FLW_CHANNEL_DEFINITION','',NULL,'4.24.0',NULL,NULL,'3553151424'),('3','flowable','org/flowable/eventregistry/db/liquibase/flowable-eventregistry-db-changelog.xml','2026-03-15 13:39:11',3,'EXECUTED','9:d0c05678d57af23ad93699991e3bf4f6','customChange','',NULL,'4.24.0',NULL,NULL,'3553151424');
+/*!40000 ALTER TABLE `flw_ev_databasechangelog` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `flw_ev_databasechangeloglock`
+--
+
+DROP TABLE IF EXISTS `flw_ev_databasechangeloglock`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `flw_ev_databasechangeloglock` (
+  `ID` int NOT NULL,
+  `LOCKED` tinyint(1) NOT NULL,
+  `LOCKGRANTED` datetime DEFAULT NULL,
+  `LOCKEDBY` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `flw_ev_databasechangeloglock`
+--
+
+LOCK TABLES `flw_ev_databasechangeloglock` WRITE;
+/*!40000 ALTER TABLE `flw_ev_databasechangeloglock` DISABLE KEYS */;
+INSERT INTO `flw_ev_databasechangeloglock` VALUES (1,0,NULL,NULL);
+/*!40000 ALTER TABLE `flw_ev_databasechangeloglock` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `flw_event_definition`
+--
+
+DROP TABLE IF EXISTS `flw_event_definition`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `flw_event_definition` (
+  `ID_` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `NAME_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `VERSION_` int DEFAULT NULL,
+  `KEY_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `CATEGORY_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `DEPLOYMENT_ID_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `RESOURCE_NAME_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `DESCRIPTION_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`ID_`),
+  UNIQUE KEY `ACT_IDX_EVENT_DEF_UNIQ` (`KEY_`,`VERSION_`,`TENANT_ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `flw_event_definition`
+--
+
+LOCK TABLES `flw_event_definition` WRITE;
+/*!40000 ALTER TABLE `flw_event_definition` DISABLE KEYS */;
+/*!40000 ALTER TABLE `flw_event_definition` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `flw_event_deployment`
+--
+
+DROP TABLE IF EXISTS `flw_event_deployment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `flw_event_deployment` (
+  `ID_` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `NAME_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `CATEGORY_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `DEPLOY_TIME_` datetime(3) DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `PARENT_DEPLOYMENT_ID_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `flw_event_deployment`
+--
+
+LOCK TABLES `flw_event_deployment` WRITE;
+/*!40000 ALTER TABLE `flw_event_deployment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `flw_event_deployment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `flw_event_resource`
+--
+
+DROP TABLE IF EXISTS `flw_event_resource`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `flw_event_resource` (
+  `ID_` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `NAME_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `DEPLOYMENT_ID_` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `RESOURCE_BYTES_` longblob,
+  PRIMARY KEY (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `flw_event_resource`
+--
+
+LOCK TABLES `flw_event_resource` WRITE;
+/*!40000 ALTER TABLE `flw_event_resource` DISABLE KEYS */;
+/*!40000 ALTER TABLE `flw_event_resource` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `flw_ru_batch`
+--
+
+DROP TABLE IF EXISTS `flw_ru_batch`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `flw_ru_batch` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `TYPE_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `SEARCH_KEY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SEARCH_KEY2_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CREATE_TIME_` datetime(3) NOT NULL,
+  `COMPLETE_TIME_` datetime(3) DEFAULT NULL,
+  `STATUS_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `BATCH_DOC_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  PRIMARY KEY (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `flw_ru_batch`
+--
+
+LOCK TABLES `flw_ru_batch` WRITE;
+/*!40000 ALTER TABLE `flw_ru_batch` DISABLE KEYS */;
+/*!40000 ALTER TABLE `flw_ru_batch` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `flw_ru_batch_part`
+--
+
+DROP TABLE IF EXISTS `flw_ru_batch_part`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `flw_ru_batch_part` (
+  `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `REV_` int DEFAULT NULL,
+  `BATCH_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `TYPE_` varchar(64) COLLATE utf8_bin NOT NULL,
+  `SCOPE_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `SUB_SCOPE_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `SCOPE_TYPE_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `SEARCH_KEY_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `SEARCH_KEY2_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `CREATE_TIME_` datetime(3) NOT NULL,
+  `COMPLETE_TIME_` datetime(3) DEFAULT NULL,
+  `STATUS_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `RESULT_DOC_ID_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `TENANT_ID_` varchar(255) COLLATE utf8_bin DEFAULT '',
+  PRIMARY KEY (`ID_`),
+  KEY `FLW_IDX_BATCH_PART` (`BATCH_ID_`),
+  CONSTRAINT `FLW_FK_BATCH_PART_PARENT` FOREIGN KEY (`BATCH_ID_`) REFERENCES `flw_ru_batch` (`ID_`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `flw_ru_batch_part`
+--
+
+LOCK TABLES `flw_ru_batch_part` WRITE;
+/*!40000 ALTER TABLE `flw_ru_batch_part` DISABLE KEYS */;
+/*!40000 ALTER TABLE `flw_ru_batch_part` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `guidance_record`
+--
+
+DROP TABLE IF EXISTS `guidance_record`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `guidance_record` (
+  `record_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æŒ‡å¯¼è®°å½•IDï¼ˆé›ªèŠ±IDï¼‰',
+  `student_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å­¦ç”Ÿç”¨æˆ·ID',
+  `teacher_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æŒ‡å¯¼æ•™å¸ˆID',
+  `topic_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å…³è”è¯¾é¢˜ID',
+  `guidance_type` tinyint NOT NULL COMMENT 'æŒ‡å¯¼ç±»å‹ï¼ˆ1-é¡¹ç›®æŒ‡å¯¼/ä¼ä¸šæ•™å¸ˆ  2-è®ºæ–‡æŒ‡å¯¼/é«˜æ ¡æ•™å¸ˆï¼‰',
+  `guidance_date` date NOT NULL COMMENT 'æŒ‡å¯¼æ—¥æœŸ',
+  `guidance_content` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æŒ‡å¯¼å†…å®¹ï¼ˆå¿…å¡«ï¼‰',
+  `guidance_method` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'æŒ‡å¯¼æ–¹å¼ï¼ˆçº¿ä¸Š/çº¿ä¸‹/é‚®ä»¶ç­‰ï¼‰',
+  `duration_hours` decimal(4,1) DEFAULT NULL COMMENT 'æŒ‡å¯¼æ—¶é•¿ï¼ˆå°æ—¶ï¼Œå¯é€‰ï¼‰',
+  `deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`record_id`),
+  KEY `idx_student_id` (`student_id`),
+  KEY `idx_teacher_id` (`teacher_id`),
+  KEY `idx_topic_id` (`topic_id`),
+  KEY `idx_type_date` (`guidance_type`,`guidance_date`),
+  CONSTRAINT `fk_gr_student` FOREIGN KEY (`student_id`) REFERENCES `user_info` (`user_id`),
+  CONSTRAINT `fk_gr_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `user_info` (`user_id`),
+  CONSTRAINT `fk_gr_topic` FOREIGN KEY (`topic_id`) REFERENCES `topic_info` (`topic_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='æŒ‡å¯¼è®°å½•è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `guidance_record`
+--
+
+LOCK TABLES `guidance_record` WRITE;
+/*!40000 ALTER TABLE `guidance_record` DISABLE KEYS */;
+/*!40000 ALTER TABLE `guidance_record` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `major_direction_info`
+--
+
+DROP TABLE IF EXISTS `major_direction_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `major_direction_info` (
+  `direction_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¸“ä¸šæ–¹å‘ID',
+  `enterprise_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ‰€å±ä¼ä¸šID',
+  `direction_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¸“ä¸šæ–¹å‘åç§°',
+  `direction_code` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¸“ä¸šæ–¹å‘ä»£ç ',
+  `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¸“ä¸šæ–¹å‘æè¿°',
+  `leader_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'æ–¹å‘è´Ÿè´£äººIDï¼ˆä¸“ä¸šæ–¹å‘ä¸»ç®¡ï¼‰',
+  `leader_name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'æ–¹å‘è´Ÿè´£äººå§“å',
+  `sort_order` int DEFAULT '0' COMMENT 'æ’åº',
+  `status` tinyint DEFAULT '1' COMMENT 'çŠ¶æ€ï¼ˆ1-å¯ç”¨ 0-ç¦ç”¨ï¼‰',
+  `deleted` tinyint DEFAULT '0' COMMENT 'åˆ é™¤æ ‡è®°ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`direction_id`),
+  KEY `idx_enterprise_id` (`enterprise_id`),
+  KEY `idx_direction_name` (`direction_name`),
+  KEY `idx_status` (`status`),
+  CONSTRAINT `fk_direction_enterprise` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise_info` (`enterprise_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ä¸“ä¸šæ–¹å‘ä¿¡æ¯è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `major_direction_info`
+--
+
+LOCK TABLES `major_direction_info` WRITE;
+/*!40000 ALTER TABLE `major_direction_info` DISABLE KEYS */;
+INSERT INTO `major_direction_info` VALUES ('2028057741800542209','E001','è½¯ä»¶å·¥ç¨‹','DEMO001D7937','è½¯ä»¶å·¥ç¨‹ç›¸å…³ä¸“ä¸š','TEST_EL_001','æä¼ä¸šè´Ÿè´£äºº',0,1,0,'2026-03-01 18:40:20','2026-03-01 18:40:20'),('2030292083893346305','E001','å¤§æ•°æ®æŠ€æœ¯åº”ç”¨','JD3031',NULL,NULL,NULL,0,1,0,'2026-03-07 22:38:48','2026-03-07 22:38:48'),('DIR_001','E002','è®¡ç®—æœºç§‘å­¦ä¸æŠ€æœ¯','CS','è®¡ç®—æœºç§‘å­¦ä¸æŠ€æœ¯æ–¹å‘ï¼ŒåŒ…æ‹¬è®¡ç®—æœºåŸºç¡€ç†è®ºã€ç®—æ³•ã€äººå·¥æ™ºèƒ½ç­‰',NULL,NULL,1,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('DIR_002','E002','è½¯ä»¶å·¥ç¨‹','SE','è½¯ä»¶å·¥ç¨‹æ–¹å‘ï¼ŒåŒ…æ‹¬è½¯ä»¶å¼€å‘ã€è½¯ä»¶æµ‹è¯•ã€é¡¹ç›®ç®¡ç†ç­‰','TEST_EL_002','å¶ä¼ä¸šè´Ÿè´£äºº',2,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('DIR_003','E002','ç½‘ç»œå·¥ç¨‹','NE','ç½‘ç»œå·¥ç¨‹æ–¹å‘ï¼ŒåŒ…æ‹¬ç½‘ç»œæ¶æ„ã€ç½‘ç»œå®‰å…¨ã€äº‘è®¡ç®—ç­‰',NULL,NULL,3,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15');
+/*!40000 ALTER TABLE `major_direction_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `major_info`
+--
+
+DROP TABLE IF EXISTS `major_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `major_info` (
+  `major_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¸“ä¸šID',
+  `direction_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ‰€å±ä¸“ä¸šæ–¹å‘ID',
+  `enterprise_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ‰€å±ä¼ä¸šID',
+  `major_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¸“ä¸šåç§°',
+  `major_code` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¸“ä¸šä»£ç ',
+  `degree_type` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å­¦ä½ç±»å‹ï¼ˆæœ¬ç§‘/ä¸“ç§‘ï¼‰',
+  `education_years` int DEFAULT '4' COMMENT 'å­¦åˆ¶ï¼ˆå¹´ï¼‰',
+  `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¸“ä¸šæè¿°',
+  `max_students` int DEFAULT '30' COMMENT 'æœ€å¤§æ‹›ç”Ÿäººæ•°',
+  `sort_order` int DEFAULT '0' COMMENT 'æ’åº',
+  `status` tinyint DEFAULT '1' COMMENT 'çŠ¶æ€ï¼ˆ1-å¯ç”¨ 0-ç¦ç”¨ï¼‰',
+  `deleted` tinyint DEFAULT '0' COMMENT 'åˆ é™¤æ ‡è®°ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`major_id`),
+  KEY `idx_direction_id` (`direction_id`),
+  KEY `idx_enterprise_id` (`enterprise_id`),
+  KEY `idx_major_name` (`major_name`),
+  KEY `idx_status` (`status`),
+  CONSTRAINT `fk_major_direction` FOREIGN KEY (`direction_id`) REFERENCES `major_direction_info` (`direction_id`),
+  CONSTRAINT `fk_major_enterprise` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise_info` (`enterprise_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ä¸“ä¸šä¿¡æ¯è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `major_info`
+--
+
+LOCK TABLES `major_info` WRITE;
+/*!40000 ALTER TABLE `major_info` DISABLE KEYS */;
+INSERT INTO `major_info` VALUES ('2028060890951094273','2028057741800542209','E001','Javaåç«¯','DEMO001D7937M8161','professional',2,'ä¸“æ³¨äºJavaåç«¯å¼€å‘çš„è½¯ä»¶äººå‘˜',30,0,1,0,'2026-03-01 18:52:51','2026-03-01 18:52:51'),('2030292083968843777','2030292083893346305','E001','å¤§æ•°æ®','DSJ0001','æœ¬ç§‘',4,NULL,30,0,1,0,'2026-03-07 22:38:48','2026-03-07 22:38:48'),('2034244832406282241','DIR_002','E002','Javaåç«¯','SEM4788','professional',3,'',30,0,1,0,'2026-03-18 20:25:37','2026-03-18 20:25:37'),('MAJ_001','DIR_001','E002','è®¡ç®—æœºç§‘å­¦ä¸æŠ€æœ¯','CS01','æœ¬ç§‘',4,'åŸ¹å…»è®¡ç®—æœºç§‘å­¦ä¸æŠ€æœ¯é¢†åŸŸçš„é«˜çº§äººæ‰',30,1,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('MAJ_002','DIR_001','E002','äººå·¥æ™ºèƒ½','CS02','professional',4,'åŸ¹å…»äººå·¥æ™ºèƒ½é¢†åŸŸçš„ä¸“ä¸šäººæ‰',30,2,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('MAJ_003','DIR_001','E002','å¤§æ•°æ®æŠ€æœ¯','CS03','æœ¬ç§‘',4,'åŸ¹å…»å¤§æ•°æ®åˆ†æä¸åº”ç”¨äººæ‰',30,3,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('MAJ_004','DIR_002','E002','è½¯ä»¶å·¥ç¨‹','SE01','æœ¬ç§‘',4,'åŸ¹å…»è½¯ä»¶å¼€å‘ã€æµ‹è¯•ã€ç»´æŠ¤çš„ä¸“ä¸šäººæ‰',30,1,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('MAJ_005','DIR_002','E002','ç§»åŠ¨åº”ç”¨å¼€å‘','SE02','æœ¬ç§‘',4,'åŸ¹å…»ç§»åŠ¨ç«¯åº”ç”¨å¼€å‘äººæ‰',30,2,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('MAJ_006','DIR_003','E002','ç½‘ç»œå·¥ç¨‹','NE01','æœ¬ç§‘',4,'åŸ¹å…»ç½‘ç»œè®¾è®¡ã€ç®¡ç†ã€å®‰å…¨çš„ä¸“ä¸šäººæ‰',30,1,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('MAJ_007','DIR_003','E002','ä¿¡æ¯å®‰å…¨','NE02','æœ¬ç§‘',4,'åŸ¹å…»ä¿¡æ¯å®‰å…¨é¢†åŸŸçš„ä¸“ä¸šäººæ‰',30,2,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15');
+/*!40000 ALTER TABLE `major_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `major_teacher`
+--
+
+DROP TABLE IF EXISTS `major_teacher`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `major_teacher` (
+  `id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¸»é”®ID',
+  `major_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¸“ä¸šID',
+  `user_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¼ä¸šè€å¸ˆç”¨æˆ·ID',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_major_user` (`major_id`,`user_id`),
+  KEY `idx_major_id` (`major_id`),
+  KEY `idx_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ä¸“ä¸š-ä¼ä¸šè€å¸ˆå…³è”è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `major_teacher`
+--
+
+LOCK TABLES `major_teacher` WRITE;
+/*!40000 ALTER TABLE `major_teacher` DISABLE KEYS */;
+INSERT INTO `major_teacher` VALUES ('2032770558856298497','2028060890951094273','2024759015287861249','2026-03-14 18:47:23'),('2034251502465351681','2034244832406282241','TEST_ET_001','2026-03-18 20:52:07');
+/*!40000 ALTER TABLE `major_teacher` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `midterm_check`
+--
+
+DROP TABLE IF EXISTS `midterm_check`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `midterm_check` (
+  `check_id` varchar(32) NOT NULL COMMENT 'æ£€æŸ¥è¡¨ID',
+  `student_id` varchar(32) NOT NULL COMMENT 'å­¦ç”ŸIDï¼ˆæ¯ä¸ªå­¦ç”Ÿä¸€ä»½ï¼‰',
+  `topic_id` varchar(32) NOT NULL COMMENT 'è¯¾é¢˜ID',
+  `arrangement_id` varchar(32) DEFAULT NULL COMMENT 'å¯¹åº”ä¸­æœŸç­”è¾©å®‰æ’IDï¼ˆå…³è”defense_arrangementï¼‰',
+  `enterprise_teacher_id` varchar(32) NOT NULL COMMENT 'å¡«å†™ä¼ä¸šæ•™å¸ˆID',
+  `completion_status` text COMMENT 'å®Œæˆæƒ…å†µï¼ˆä¼ä¸šæ•™å¸ˆå¡«å†™ï¼‰',
+  `existing_problems` text COMMENT 'å­˜åœ¨é—®é¢˜',
+  `next_plan` text COMMENT 'ä¸‹ä¸€æ­¥è®¡åˆ’',
+  `document_id` varchar(32) DEFAULT NULL COMMENT 'ä¸­æœŸæ£€æŸ¥è¡¨é™„ä»¶ï¼ˆå…³è”document_infoï¼‰',
+  `submit_status` tinyint DEFAULT '0' COMMENT 'æäº¤çŠ¶æ€: 0=è‰ç¨¿, 1=å·²æäº¤',
+  `review_status` tinyint DEFAULT '0' COMMENT 'é«˜æ ¡æ•™å¸ˆå®¡æŸ¥çŠ¶æ€: 0=æœªå®¡, 1=åˆæ ¼, 2=ä¸åˆæ ¼',
+  `review_comment` text COMMENT 'é«˜æ ¡æ•™å¸ˆå®¡æŸ¥æ„è§',
+  `reviewer_id` varchar(32) DEFAULT NULL COMMENT 'å®¡æŸ¥äººï¼ˆé«˜æ ¡æ•™å¸ˆIDï¼‰',
+  `review_time` datetime DEFAULT NULL COMMENT 'å®¡æŸ¥æ—¶é—´',
+  `is_deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤: 0=æ­£å¸¸, 1=åˆ é™¤',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`check_id`),
+  UNIQUE KEY `uk_student_id` (`student_id`),
+  KEY `idx_topic_id` (`topic_id`),
+  KEY `idx_enterprise_teacher` (`enterprise_teacher_id`),
+  KEY `idx_reviewer` (`reviewer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ä¸­æœŸæ£€æŸ¥è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `midterm_check`
+--
+
+LOCK TABLES `midterm_check` WRITE;
+/*!40000 ALTER TABLE `midterm_check` DISABLE KEYS */;
+/*!40000 ALTER TABLE `midterm_check` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `notification_action_log`
+--
+
+DROP TABLE IF EXISTS `notification_action_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `notification_action_log` (
+  `log_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ—¥å¿—ID',
+  `message_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ¶ˆæ¯ID',
+  `operator_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ“ä½œäººID',
+  `action_type` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ“ä½œç±»å‹ï¼šREAD/READ_ALL/PROCESS/DELETE',
+  `action_source` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'USER' COMMENT 'æ“ä½œæ¥æºï¼šUSER/SYSTEM',
+  `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼š0-æœªåˆ é™¤ 1-å·²åˆ é™¤',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`log_id`),
+  KEY `idx_message_id` (`message_id`),
+  KEY `idx_operator_id` (`operator_id`),
+  KEY `idx_action_type` (`action_type`),
+  KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ç«™å†…æ¶ˆæ¯æ“ä½œæ—¥å¿—è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `notification_action_log`
+--
+
+LOCK TABLES `notification_action_log` WRITE;
+/*!40000 ALTER TABLE `notification_action_log` DISABLE KEYS */;
+INSERT INTO `notification_action_log` VALUES ('2035378944470953985','2035374332003336193','2024759015287861249','READ','USER',0,'2026-03-21 23:32:11','2026-03-21 23:32:11'),('2035382316548866049','2035381383844708353','TEST_ST_001','READ','USER',0,'2026-03-21 23:45:35','2026-03-21 23:45:35'),('2035385566131941377','2035381383815348225','2024759015287861249','DELETE','USER',0,'2026-03-21 23:58:29','2026-03-21 23:58:29'),('2035385824601731073','2035381383844708353','TEST_ST_001','DELETE','USER',0,'2026-03-21 23:59:31','2026-03-21 23:59:31'),('2035385903744053249','2035385722696921089','2024759015287861249','PROCESS','USER',0,'2026-03-21 23:59:50','2026-03-21 23:59:50');
+/*!40000 ALTER TABLE `notification_action_log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `notification_message`
+--
+
+DROP TABLE IF EXISTS `notification_message`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `notification_message` (
+  `message_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ¶ˆæ¯ID',
+  `receiver_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ¥æ”¶äººID',
+  `category` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ¶ˆæ¯åˆ†ç±»',
+  `level` tinyint NOT NULL DEFAULT '1' COMMENT 'æ¶ˆæ¯çº§åˆ«ï¼š1-æ™®é€š 2-æé†’ 3-é‡è¦ 4-ç´§æ€¥',
+  `title` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ¶ˆæ¯æ ‡é¢˜',
+  `content` varchar(1000) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ¶ˆæ¯å†…å®¹',
+  `business_type` varchar(60) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¸šåŠ¡ç±»å‹',
+  `business_id` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¸šåŠ¡ID',
+  `business_route` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¸šåŠ¡è·³è½¬è·¯ç”±',
+  `dedup_key` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å»é‡é”®',
+  `message_status` tinyint NOT NULL DEFAULT '0' COMMENT 'æ¶ˆæ¯çŠ¶æ€ï¼š0-æœªè¯» 1-å·²è¯» 2-å·²å¤„ç†',
+  `read_time` datetime DEFAULT NULL COMMENT 'å·²è¯»æ—¶é—´',
+  `processed_time` datetime DEFAULT NULL COMMENT 'å¤„ç†æ—¶é—´',
+  `expire_time` datetime DEFAULT NULL COMMENT 'è¿‡æœŸæ—¶é—´',
+  `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼š0-æœªåˆ é™¤ 1-å·²åˆ é™¤',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`message_id`),
+  UNIQUE KEY `uk_receiver_dedup_deleted` (`receiver_id`,`dedup_key`,`is_deleted`),
+  KEY `idx_receiver_status` (`receiver_id`,`message_status`,`is_deleted`),
+  KEY `idx_category_level` (`category`,`level`),
+  KEY `idx_expire_time` (`expire_time`),
+  KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ç«™å†…æ¶ˆæ¯è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `notification_message`
+--
+
+LOCK TABLES `notification_message` WRITE;
+/*!40000 ALTER TABLE `notification_message` DISABLE KEYS */;
+INSERT INTO `notification_message` VALUES ('2035372415495815169','TEST_ET_001','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼šSun Mar 22 23:05:56 CST 2026ï¼Œåœ°ç‚¹ï¼šA306ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035372415399346177','/defense/my-report','defense:arrangement:2035372415399346177:TEST_ET_001',0,NULL,NULL,'2026-03-28 23:06:03',0,'2026-03-21 23:06:14','2026-03-21 23:06:14'),('2035372415520980993','TEST_UT_001','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼šSun Mar 22 23:05:56 CST 2026ï¼Œåœ°ç‚¹ï¼šA306ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035372415399346177','/defense/my-report','defense:arrangement:2035372415399346177:TEST_UT_001',0,NULL,NULL,'2026-03-28 23:06:03',0,'2026-03-21 23:06:14','2026-03-21 23:06:14'),('2035372415546146818','TEST_MD_001','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼šSun Mar 22 23:05:56 CST 2026ï¼Œåœ°ç‚¹ï¼šA306ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035372415399346177','/defense/my-report','defense:arrangement:2035372415399346177:TEST_MD_001',0,NULL,NULL,'2026-03-28 23:06:03',0,'2026-03-21 23:06:14','2026-03-21 23:06:14'),('2035374332003336193','2024759015287861249','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼šSat Mar 28 23:13:32 CST 2026ï¼Œåœ°ç‚¹ï¼šA306ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035374331936227330','/defense/my-report','defense:arrangement:2035374331936227330:2024759015287861249',1,'2026-03-21 23:32:11',NULL,'2026-03-29 23:13:38',0,'2026-03-21 23:13:51','2026-03-21 23:32:10'),('2035374332003336194','TEST_ET_001','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼šSat Mar 28 23:13:32 CST 2026ï¼Œåœ°ç‚¹ï¼šA306ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035374331936227330','/defense/my-report','defense:arrangement:2035374331936227330:TEST_ET_001',0,NULL,NULL,'2026-03-29 23:13:38',0,'2026-03-21 23:13:51','2026-03-21 23:13:51'),('2035374332003336195','TEST_MD_001','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼šSat Mar 28 23:13:32 CST 2026ï¼Œåœ°ç‚¹ï¼šA306ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035374331936227330','/defense/my-report','defense:arrangement:2035374331936227330:TEST_MD_001',0,NULL,NULL,'2026-03-29 23:13:38',0,'2026-03-21 23:13:51','2026-03-21 23:13:51'),('2035379426581032962','TEST_ST_002','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼šSun Mar 29 23:33:32 CST 2026ï¼Œåœ°ç‚¹ï¼šA333ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035379426480369665','/defense/my-report','defense:arrangement:2035379426480369665:TEST_ST_002',0,NULL,NULL,'2026-03-29 23:33:41',0,'2026-03-21 23:34:05','2026-03-21 23:34:05'),('2035379426622976001','TEST_ET_001','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼šSun Mar 29 23:33:32 CST 2026ï¼Œåœ°ç‚¹ï¼šA333ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035379426480369665','/defense/my-report','defense:arrangement:2035379426480369665:TEST_ET_001',0,NULL,NULL,'2026-03-29 23:33:41',0,'2026-03-21 23:34:05','2026-03-21 23:34:05'),('2035379426652336130','TEST_MD_001','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼šSun Mar 29 23:33:32 CST 2026ï¼Œåœ°ç‚¹ï¼šA333ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035379426480369665','/defense/my-report','defense:arrangement:2035379426480369665:TEST_MD_001',0,NULL,NULL,'2026-03-29 23:33:41',0,'2026-03-21 23:34:05','2026-03-21 23:34:05'),('2035381383815348225','2024759015287861249','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼šSat Mar 28 23:41:30 CST 2026ï¼Œåœ°ç‚¹ï¼šA333ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035381383693713410','/defense/my-report','defense:arrangement:2035381383693713410:2024759015287861249',0,NULL,NULL,'2026-03-28 23:41:36',1,'2026-03-21 23:41:52','2026-03-21 23:58:29'),('2035381383844708353','TEST_ST_001','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼šSat Mar 28 23:41:30 CST 2026ï¼Œåœ°ç‚¹ï¼šA333ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035381383693713410','/defense/my-report','defense:arrangement:2035381383693713410:TEST_ST_001',1,'2026-03-21 23:45:34',NULL,'2026-03-28 23:41:36',1,'2026-03-21 23:41:52','2026-03-21 23:59:30'),('2035381383869874178','TEST_ET_001','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼šSat Mar 28 23:41:30 CST 2026ï¼Œåœ°ç‚¹ï¼šA333ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035381383693713410','/defense/my-report','defense:arrangement:2035381383693713410:TEST_ET_001',0,NULL,NULL,'2026-03-28 23:41:36',0,'2026-03-21 23:41:52','2026-03-21 23:41:52'),('2035381383895040002','TEST_MD_001','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼šSat Mar 28 23:41:30 CST 2026ï¼Œåœ°ç‚¹ï¼šA333ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035381383693713410','/defense/my-report','defense:arrangement:2035381383693713410:TEST_MD_001',0,NULL,NULL,'2026-03-28 23:41:36',0,'2026-03-21 23:41:52','2026-03-21 23:41:52'),('2035381383920205826','TEST_UT_001','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼šSat Mar 28 23:41:30 CST 2026ï¼Œåœ°ç‚¹ï¼šA333ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035381383693713410','/defense/my-report','defense:arrangement:2035381383693713410:TEST_UT_001',0,NULL,NULL,'2026-03-28 23:41:36',0,'2026-03-21 23:41:52','2026-03-21 23:41:52'),('2035385722696921089','2024759015287861249','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼š2026-03-22 23:58ï¼Œåœ°ç‚¹ï¼šb123ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035385722197798913','/defense/arrangement/detail/2035385722197798913','defense:arrangement:2035385722197798913:2024759015287861249',2,'2026-03-21 23:59:49','2026-03-21 23:59:50','2026-03-22 23:58:53',0,'2026-03-21 23:59:07','2026-03-21 23:59:49'),('2035385722696921090','TEST_ST_001','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼š2026-03-22 23:58ï¼Œåœ°ç‚¹ï¼šb123ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035385722197798913','/defense/arrangement/detail/2035385722197798913','defense:arrangement:2035385722197798913:TEST_ST_001',0,NULL,NULL,'2026-03-22 23:58:53',0,'2026-03-21 23:59:07','2026-03-21 23:59:07'),('2035385722696921091','TEST_ST_002','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼š2026-03-22 23:58ï¼Œåœ°ç‚¹ï¼šb123ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035385722197798913','/defense/arrangement/detail/2035385722197798913','defense:arrangement:2035385722197798913:TEST_ST_002',0,NULL,NULL,'2026-03-22 23:58:53',0,'2026-03-21 23:59:07','2026-03-21 23:59:07'),('2035385722768224257','TEST_ET_001','DEFENSE',3,'å¼€é¢˜ç­”è¾©å®‰æ’å·²å‘å¸ƒ','ä½ çš„å¼€é¢˜ç­”è¾©å®‰æ’å·²å·²å‘å¸ƒï¼Œæ—¶é—´ï¼š2026-03-22 23:58ï¼Œåœ°ç‚¹ï¼šb123ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚','DEFENSE_ARRANGEMENT','2035385722197798913','/defense/arrangement/detail/2035385722197798913','defense:arrangement:2035385722197798913:TEST_ET_001',0,NULL,NULL,'2026-03-22 23:58:53',0,'2026-03-21 23:59:07','2026-03-21 23:59:07');
+/*!40000 ALTER TABLE `notification_message` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `notification_template`
+--
+
+DROP TABLE IF EXISTS `notification_template`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `notification_template` (
+  `template_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ¨¡æ¿ID',
+  `template_code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ¨¡æ¿ç¼–ç ï¼ˆå”¯ä¸€ï¼‰',
+  `template_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ¨¡æ¿åç§°',
+  `category` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ¶ˆæ¯åˆ†ç±»ï¼šREVIEW/DEFENSE/GUIDANCE/SELECTION/MIDTERM/SYSTEM',
+  `default_level` tinyint NOT NULL DEFAULT '1' COMMENT 'é»˜è®¤çº§åˆ«ï¼š1-æ™®é€š 2-æé†’ 3-é‡è¦ 4-ç´§æ€¥',
+  `title_template` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ ‡é¢˜æ¨¡æ¿',
+  `content_template` varchar(1000) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å†…å®¹æ¨¡æ¿',
+  `is_enabled` tinyint NOT NULL DEFAULT '1' COMMENT 'æ˜¯å¦å¯ç”¨ï¼š1-å¯ç”¨ 0-ç¦ç”¨',
+  `remark` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å¤‡æ³¨',
+  `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼š0-æœªåˆ é™¤ 1-å·²åˆ é™¤',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`template_id`),
+  UNIQUE KEY `uk_template_code` (`template_code`),
+  KEY `idx_category_enabled` (`category`,`is_enabled`),
+  KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ç«™å†…æ¶ˆæ¯æ¨¡æ¿è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `notification_template`
+--
+
+LOCK TABLES `notification_template` WRITE;
+/*!40000 ALTER TABLE `notification_template` DISABLE KEYS */;
+INSERT INTO `notification_template` VALUES ('fad7954d253511f187fc902e1697e95c','TOPIC_REVIEW_RESULT','è¯¾é¢˜å®¡æŸ¥ç»“æœé€šçŸ¥','REVIEW',3,'è¯¾é¢˜ã€Š{topicTitle}ã€‹å®¡æŸ¥ç»“æœæ›´æ–°','å®¡æŸ¥é˜¶æ®µï¼š{reviewStage}ï¼›å®¡æŸ¥ç»“æœï¼š{reviewResult}ï¼›å®¡æŸ¥äººï¼š{reviewerName}ã€‚è¯·åŠæ—¶æŸ¥çœ‹å¹¶å¤„ç†ã€‚',1,'è¯¾é¢˜å®¡æŸ¥æ„è§è§¦å‘',0,'2026-03-21 22:55:19','2026-03-21 22:55:19'),('fad79d15253511f187fc902e1697e95c','GUIDANCE_RECORD_CREATED','æŒ‡å¯¼è®°å½•æ–°å¢é€šçŸ¥','GUIDANCE',2,'ä½ æ”¶åˆ°ä¸€æ¡æ–°çš„{guidanceType}è®°å½•','æ•™å¸ˆ {teacherName} å·²ä¸ºè¯¾é¢˜ã€Š{topicTitle}ã€‹æ–°å¢æŒ‡å¯¼è®°å½•ï¼Œè¯·åŠæ—¶æŸ¥çœ‹å¹¶è·Ÿè¿›ã€‚',1,'æŒ‡å¯¼è®°å½•è§¦å‘',0,'2026-03-21 22:55:19','2026-03-21 22:55:19'),('fad79f2e253511f187fc902e1697e95c','TOPIC_SELECTION_RESULT','åŒé€‰ç»“æœé€šçŸ¥','SELECTION',3,'è¯¾é¢˜åŒé€‰ç»“æœå·²æ›´æ–°','è¯¾é¢˜ã€Š{topicTitle}ã€‹åŒé€‰ç»“æœï¼š{result}ï¼ˆç¡®è®¤æ•™å¸ˆï¼š{teacherName}ï¼‰ã€‚è¯·åŠæ—¶æŸ¥çœ‹ã€‚',1,'åŒé€‰ç¡®è®¤/æ‹’ç»è§¦å‘',0,'2026-03-21 22:55:19','2026-03-21 22:55:19'),('fad7a0d4253511f187fc902e1697e95c','DEFENSE_ARRANGEMENT_NOTICE','ç­”è¾©å®‰æ’é€šçŸ¥','DEFENSE',3,'{defenseType}å®‰æ’{action}','ä½ çš„{defenseType}å®‰æ’å·²{action}ï¼Œæ—¶é—´ï¼š{defenseTime}ï¼Œåœ°ç‚¹ï¼š{defenseLocation}ã€‚è¯·æŒ‰æ—¶å‚åŠ ã€‚',1,'ç­”è¾©å®‰æ’åˆ›å»º/æ›´æ–°è§¦å‘',0,'2026-03-21 22:55:19','2026-03-21 22:55:19'),('fad7a385253511f187fc902e1697e95c','MIDTERM_REVIEW_RESULT','ä¸­æœŸå®¡æŸ¥ç»“æœé€šçŸ¥','MIDTERM',3,'ä¸­æœŸæ£€æŸ¥å®¡æŸ¥ç»“æœå·²æ›´æ–°','ä½ çš„ä¸­æœŸæ£€æŸ¥å®¡æŸ¥ç»“æœï¼š{reviewResult}ã€‚å®¡æŸ¥æ„è§ï¼š{reviewComment}ã€‚è¯·åŠæ—¶æŸ¥çœ‹ã€‚',1,'ä¸­æœŸå®¡æŸ¥è§¦å‘',0,'2026-03-21 22:55:19','2026-03-21 22:55:19');
+/*!40000 ALTER TABLE `notification_template` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `opening_report`
+--
+
+DROP TABLE IF EXISTS `opening_report`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `opening_report` (
+  `report_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æŠ¥å‘ŠID',
+  `student_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å­¦ç”ŸIDï¼ˆä¸€ä¸ªå­¦ç”Ÿåªæœ‰ä¸€ä»½ï¼‰',
+  `topic_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'è¯¾é¢˜ID',
+  `arrangement_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å¯¹åº”ç­”è¾©å®‰æ’ID',
+  `student_name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å§“åå¿«ç…§',
+  `major_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¸“ä¸šå¿«ç…§',
+  `class_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ç­çº§å¿«ç…§',
+  `topic_title` varchar(300) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'é¢˜ç›®å¿«ç…§',
+  `advisor_names` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'æŒ‡å¯¼æ•™å¸ˆå§“åï¼ˆå¯å¤šåï¼Œé€—å·åˆ†éš”ï¼‰',
+  `report_date` date DEFAULT NULL COMMENT 'æŠ¥å‘Šæ—¥æœŸ',
+  `research_status` text COLLATE utf8mb4_unicode_ci COMMENT 'ä¸€-1 å›½å†…å¤–ç ”ç©¶ç°çŠ¶',
+  `purpose_significance` text COLLATE utf8mb4_unicode_ci COMMENT 'ä¸€-2 ç ”ç©¶ç›®çš„ã€æ„ä¹‰',
+  `research_content` text COLLATE utf8mb4_unicode_ci COMMENT 'ä¸€-3 ç ”ç©¶å†…å®¹',
+  `innovation_points` text COLLATE utf8mb4_unicode_ci COMMENT 'ä¸€-4 è¯¾é¢˜ç ”ç©¶åˆ›æ–°ç‚¹',
+  `problems_to_solve` text COLLATE utf8mb4_unicode_ci COMMENT 'ä¸€-5 æ‹Ÿè§£å†³é—®é¢˜',
+  `progress_expectation` longtext COLLATE utf8mb4_unicode_ci COMMENT 'äºŒ è¿›åº¦åŠé¢„æœŸç»“æœï¼ˆå•è¡¨æ–‡æœ¬ï¼‰',
+  `current_conditions` longtext COLLATE utf8mb4_unicode_ci COMMENT 'å®Œæˆé¢˜ç›®çš„ç°æœ‰æ¡ä»¶',
+  `advisor_opinion` text COLLATE utf8mb4_unicode_ci COMMENT 'å®¡æŸ¥æ„è§ï¼ˆæ–‡æœ¬ï¼‰',
+  `college_opinion` text COLLATE utf8mb4_unicode_ci COMMENT 'å­¦é™¢æ„è§ï¼ˆæ–‡æœ¬ï¼‰',
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT 'çŠ¶æ€: 0=è‰ç¨¿, 1=å·²å®šç¨¿',
+  `submit_time` datetime DEFAULT NULL COMMENT 'æäº¤æ—¶é—´',
+  `is_deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤: 0=æ­£å¸¸, 1=åˆ é™¤',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`report_id`),
+  UNIQUE KEY `uk_student_id` (`student_id`),
+  KEY `idx_topic_id` (`topic_id`),
+  KEY `idx_arrangement_id` (`arrangement_id`),
+  KEY `idx_status` (`status`),
+  KEY `idx_submit_time` (`submit_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='å¼€é¢˜æŠ¥å‘Šè¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `opening_report`
+--
+
+LOCK TABLES `opening_report` WRITE;
+/*!40000 ALTER TABLE `opening_report` DISABLE KEYS */;
+/*!40000 ALTER TABLE `opening_report` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `opening_task_book`
+--
+
+DROP TABLE IF EXISTS `opening_task_book`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `opening_task_book` (
+  `task_book_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä»»åŠ¡ä¹¦ID',
+  `student_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å­¦ç”ŸIDï¼ˆä¸€ä¸ªå­¦ç”Ÿä¸€ä»½ä»»åŠ¡ä¹¦ï¼‰',
+  `topic_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'è¯¾é¢˜ID',
+  `teacher_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ç¼–è¾‘æ•™å¸ˆIDï¼ˆä¼ä¸šæ•™å¸ˆï¼‰',
+  `content` longtext COLLATE utf8mb4_unicode_ci COMMENT 'ä»»åŠ¡ä¹¦æ­£æ–‡ï¼ˆå¯Œæ–‡æœ¬HTMLï¼‰',
+  `document_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä»»åŠ¡ä¹¦é™„ä»¶IDï¼ˆå…³è”document_infoï¼‰',
+  `is_deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤: 0=æ­£å¸¸, 1=åˆ é™¤',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`task_book_id`),
+  UNIQUE KEY `uk_student_id` (`student_id`),
+  KEY `idx_topic_id` (`topic_id`),
+  KEY `idx_teacher_id` (`teacher_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='å¼€é¢˜ä»»åŠ¡ä¹¦è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `opening_task_book`
+--
+
+LOCK TABLES `opening_task_book` WRITE;
+/*!40000 ALTER TABLE `opening_task_book` DISABLE KEYS */;
+INSERT INTO `opening_task_book` VALUES ('2035187752252735489','TEST_ST_001','2030185910938710018','2024759015287861249','<h2>æ¯•ä¸šè®¾è®¡ï¼ˆè®ºæ–‡ï¼‰ä»»åŠ¡ä¹¦</h2><h3>è¯¾é¢˜åç§°</h3><p>åŸºäºSpring Bootä¸Vueçš„æ¸¸æ³³é¦†ç®¡ç†ç³»ç»Ÿ</p><h3>æŒ‡å¯¼æ–¹å‘</h3><p>è½¯ä»¶å·¥ç¨‹</p><h3>é€‰é¢˜èƒŒæ™¯ä¸æ„ä¹‰</h3><p>éšç€å…¨æ°‘å¥èº«ç†å¿µçš„æ™®åŠï¼Œæ¸¸æ³³é¦†æˆä¸ºå¤§ä¼—ä¼‘é—²å¥èº«çš„é‡è¦åœºæ‰€ï¼Œä¼ ç»Ÿæ¸¸æ³³é¦†çš„äººå·¥ç®¡ç†æ¨¡å¼å­˜åœ¨æ•ˆç‡ä½ä¸‹ã€ä¿¡æ¯ç»Ÿè®¡ä¸åŠæ—¶ã€æœåŠ¡æµç¨‹ä¸è§„èŒƒç­‰é—®é¢˜ï¼Œå¦‚ä¼šå‘˜ä¿¡æ¯äººå·¥ç™»è®°ã€é—¨ç¥¨å”®å–çº¿ä¸‹æ“ä½œã€åœºé¦†é¢„çº¦æ— ç³»ç»ŸåŒ–ç®¡ç†ã€æ°´è´¨ä¸è®¾å¤‡ç»´æŠ¤è®°å½•é›¶æ•£ç­‰ï¼Œä¸ä»…å¢åŠ äº†ç®¡ç†äººå‘˜çš„å·¥ä½œè´Ÿæ‹…ï¼Œä¹Ÿé™ä½äº†ç”¨æˆ·çš„æ¶ˆè´¹ä½“éªŒï¼ŒåŒæ—¶éš¾ä»¥å®ç°åœºé¦†è¿è¥æ•°æ®çš„ç²¾ç»†åŒ–åˆ†æä¸ç®¡ç†ã€‚æœ¬è¯¾é¢˜æ—¨åœ¨è®¾è®¡å¹¶å®ç°ä¸€ä¸ªåŸºäº Spring Boot åç«¯ã€Vue å‰ç«¯çš„å‰åç«¯åˆ†ç¦»å¼æ¸¸æ³³é¦†ç®¡ç†ç³»ç»Ÿï¼Œé€šè¿‡ç³»ç»ŸåŒ–ã€æ•°å­—åŒ–çš„ç®¡ç†æ–¹å¼ï¼Œè§£å†³ä¼ ç»Ÿç®¡ç†çš„ç—›ç‚¹ï¼Œå®ç°æ¸¸æ³³é¦†ä¼šå‘˜ã€ç¥¨åŠ¡ã€åœºé¦†ã€è®¾å¤‡ã€æ°´è´¨ã€æ¶ˆè´¹ç­‰å…¨æµç¨‹çš„æ™ºèƒ½åŒ–ç®¡ç†ï¼Œæå‡åœºé¦†è¿è¥æ•ˆç‡ä¸æœåŠ¡è´¨é‡ï¼Œä¸ºæ¸¸æ³³é¦†è¿è¥æ–¹æä¾›æ•°æ®åŒ–çš„ç®¡ç†å†³ç­–ä¾æ®ã€‚<br/>æœ¬ç³»ç»Ÿé‡‡ç”¨å‰åç«¯åˆ†ç¦»æ¶æ„ï¼Œåç«¯ä½¿ç”¨ Spring Boot æ­å»ºé«˜æ•ˆã€ç¨³å®šçš„æœåŠ¡æ¥å£ï¼Œå‰ç«¯é‡‡ç”¨ Vue æ„å»ºåŠ¨æ€ã€å“åº”å¼çš„ç”¨æˆ·æ“ä½œç•Œé¢ï¼Œæ•°æ®åº“é€‰ç”¨ MySQL å­˜å‚¨ä¸šåŠ¡æ•°æ®ï¼ŒRedis æå‡ç³»ç»Ÿç¼“å­˜ä¸è®¿é—®æ€§èƒ½ã€‚å›´ç»•æ™®é€šç”¨æˆ·ã€ä¼šå‘˜ç”¨æˆ·ã€æ¸¸æ³³é¦†ç®¡ç†å‘˜ã€ç³»ç»Ÿè¶…çº§ç®¡ç†å‘˜å››ç±»æ ¸å¿ƒç”¨æˆ·ï¼Œé€šè¿‡æ¨¡å—åŒ–è®¾è®¡å®ç°æ¸¸æ³³é¦†æ—¥å¸¸è¿è¥çš„å…¨æµç¨‹ç®¡ç†ï¼Œæ‰“é€ æ“ä½œä¾¿æ·ã€åŠŸèƒ½å®Œå–„ã€æ•°æ®å¯è§†åŒ–çš„æ¸¸æ³³é¦†ç®¡ç†å¹³å°ã€‚</p><h3>è¯¾é¢˜å†…å®¹ç®€è¿°</h3><p>ç³»ç»Ÿå›´ç»•æ¸¸æ³³é¦†è¿è¥ç®¡ç†çš„æ ¸å¿ƒä¸šåŠ¡ï¼Œåˆ’åˆ†å…­å¤§æ ¸å¿ƒåŠŸèƒ½æ¨¡å—ï¼Œå„æ¨¡å—åŠŸèƒ½å¦‚ä¸‹ï¼š<br/>(1) ä¼šå‘˜ä¸ç”¨æˆ·ç®¡ç†å­æ¨¡å—ï¼šå®ç°æ™®é€šç”¨æˆ·æ³¨å†Œç™»å½•ã€ä¼šå‘˜ç­‰çº§å¼€é€šä¸ç»­è´¹ã€ä¼šå‘˜ä¿¡æ¯æ¡£æ¡ˆç®¡ç†ï¼ˆå«æ¶ˆè´¹è®°å½•ã€ä¸ªäººä¿¡æ¯ï¼‰ã€ä¼šå‘˜æƒç›ŠæŸ¥è¯¢ï¼Œæ”¯æŒç®¡ç†å‘˜å¯¹ç”¨æˆ·ä¸ä¼šå‘˜ä¿¡æ¯çš„å¢åˆ æ”¹æŸ¥ã€æƒé™åˆ†é…åŠä¿¡æ¯å®¡æ ¸ã€‚<br/>(2) ç¥¨åŠ¡ä¸é¢„çº¦ç®¡ç†å­æ¨¡å—ï¼šæä¾›çº¿ä¸Šé—¨ç¥¨è´­ä¹°ã€åœºé¦†æ—¶æ®µé¢„çº¦ï¼ˆæ³³æ± ã€æ›´è¡£å®¤ã€åŸ¹è®­åœºåœ°ï¼‰ã€é¢„çº¦ä¿¡æ¯ä¿®æ”¹ä¸å–æ¶ˆåŠŸèƒ½ï¼Œç®¡ç†å‘˜å¯è®¾ç½®é—¨ç¥¨ç±»å‹ä¸ä»·æ ¼ã€ç®¡æ§åœºé¦†é¢„çº¦æ—¶æ®µä¸å®¹é‡ï¼Œç³»ç»Ÿè‡ªåŠ¨ç»Ÿè®¡ç¥¨åŠ¡é”€å”®ä¸åœºé¦†é¢„çº¦æ•°æ®ã€‚<br/>(3) åœºé¦†ä¸è®¾å¤‡ç®¡ç†å­æ¨¡å—ï¼šå¯¹æ¸¸æ³³é¦†å„åŠŸèƒ½åŒºåŸŸï¼ˆæ³³æ± åŒºã€åŸ¹è®­åŒºã€ä¼‘é—²åŒºï¼‰è¿›è¡ŒçŠ¶æ€ç®¡ç†ï¼Œå®ç°è®¾å¤‡ï¼ˆè¿‡æ»¤ç³»ç»Ÿã€æ¶ˆæ¯’è®¾å¤‡ã€æ•‘ç”Ÿè®¾å¤‡ï¼‰çš„æ¡£æ¡ˆå½•å…¥ã€ç»´æŠ¤è®°å½•æäº¤ã€æ•…éšœæŠ¥ä¿®ä¸å¤„ç†è·Ÿè¸ªï¼Œç³»ç»Ÿç”Ÿæˆè®¾å¤‡ç»´æŠ¤æ—¶é—´çº¿ï¼Œæé†’ç®¡ç†å‘˜å®šæœŸç»´æŠ¤ã€‚<br/>(4) æ°´è´¨ç›‘æµ‹ä¸ç®¡ç†å­æ¨¡å—ï¼šç®¡ç†äººå‘˜å®šæœŸåœ¨çº¿æäº¤æ³³æ± æ°´è´¨æ£€æµ‹æ•°æ®ï¼ˆPH å€¼ã€ä½™æ°¯å«é‡ã€æ°´æ¸©ç­‰ï¼‰ï¼Œç³»ç»Ÿç”Ÿæˆæ°´è´¨ç›‘æµ‹æŠ¥è¡¨ä¸è¶‹åŠ¿å›¾ï¼Œå½“æ°´è´¨æŒ‡æ ‡è¶…æ ‡æ—¶ï¼Œè‡ªåŠ¨å‘é€é¢„è­¦æé†’ï¼ŒåŒæ—¶è®°å½•æ°´è´¨è°ƒèŠ‚ä¸æ¶ˆæ¯’æ“ä½œæ—¥å¿—ã€‚<br/>(5) æ¶ˆè´¹ä¸è´¢åŠ¡ç®¡ç†å­æ¨¡å—ï¼šæ•´åˆçº¿ä¸Šçº¿ä¸‹æ¶ˆè´¹è®°å½•ï¼ˆé—¨ç¥¨ã€ä¼šå‘˜ã€åŸ¹è®­ã€å•†å“æ¶ˆè´¹ï¼‰ï¼Œå®ç°æ¶ˆè´¹æ˜ç»†æŸ¥è¯¢ã€è´¢åŠ¡æŠ¥è¡¨è‡ªåŠ¨ç”Ÿæˆï¼ˆæ—¥ / æœˆ / å¹´è¥æ”¶ï¼‰ï¼Œæ”¯æŒç®¡ç†å‘˜å¯¹æ¶ˆè´¹æ•°æ®çš„ç»Ÿè®¡ã€å¯¼å‡ºä¸åˆ†æï¼Œç²¾å‡†æŠŠæ§åœºé¦†è¿è¥æ”¶ç›Šã€‚<br/>(6) æ•°æ®å¯è§†åŒ–ä¸é¢„è­¦å­æ¨¡å—ï¼šä»¥å›¾è¡¨ï¼ˆæŸ±çŠ¶å›¾ã€æŠ˜çº¿å›¾ã€é¥¼å›¾ï¼‰å½¢å¼å±•ç¤ºåœºé¦†è¿è¥æ ¸å¿ƒæ•°æ®ï¼ˆè¥æ”¶ã€ä¼šå‘˜å¢é•¿ã€åœºé¦†ä½¿ç”¨ç‡ã€æ°´è´¨åˆæ ¼ç‡ï¼‰ï¼Œé’ˆå¯¹è®¾å¤‡ç»´æŠ¤åˆ°æœŸã€æ°´è´¨è¶…æ ‡ã€é¢„çº¦æ»¡é¢ç­‰æƒ…å†µï¼Œç³»ç»Ÿè‡ªåŠ¨å‘ç›¸å…³ç®¡ç†äººå‘˜å‘é€æé†’æ¶ˆæ¯ï¼Œå®ç°è¿è¥é£é™©çš„æå‰å¹²é¢„ã€‚<br/>é€šè¿‡å„æ¨¡å—çš„ååŒå·¥ä½œï¼Œå®ç°æ¸¸æ³³é¦†ä»ç”¨æˆ·æœåŠ¡åˆ°è¿è¥ç®¡ç†çš„å…¨æ–¹ä½ã€æ•°æ®é©±åŠ¨çš„æ™ºèƒ½åŒ–ç®¡æ§ï¼Œå½»åº•è§£å†³ä¼ ç»Ÿäººå·¥ç®¡ç†çš„å¼Šç«¯ï¼Œæå‡åœºé¦†è¿è¥æ•ˆç‡ä¸æœåŠ¡ä½“éªŒã€‚</p><h3>ä¸“ä¸šçŸ¥è¯†ç»¼åˆè®­ç»ƒæƒ…å†µ</h3><p>è¯¥è¯¾é¢˜è¦†ç›–è½¯ä»¶å·¥ç¨‹ä»éœ€æ±‚åˆ†æã€ç³»ç»Ÿè®¾è®¡ã€æŠ€æœ¯é€‰å‹ã€ç¼–ç å®ç°åˆ°æµ‹è¯•éƒ¨ç½²çš„å®Œæ•´ç”Ÿå‘½å‘¨æœŸï¼Œæ˜¯å¯¹è½¯ä»¶å·¥ç¨‹ä¸“ä¸šæ‰€å­¦çŸ¥è¯†çš„å…¨é¢ã€ç³»ç»Ÿçš„ç»¼åˆè®­ç»ƒä¸å®è·µã€‚<br/>åç«¯å¼€å‘ä¸­ï¼Œç»¼åˆåº”ç”¨ Java ç¼–ç¨‹è¯­è¨€ã€MySQL æ•°æ®åº“è®¾è®¡ä¸ä¼˜åŒ–ã€Spring Boot æ¡†æ¶æ­å»ºæœåŠ¡ã€MyBatis-Plus å®ç°æ•°æ®æŒä¹…åŒ–ã€Redis åšç¼“å­˜ä¼˜åŒ–ï¼Œå¼ºåŒ–åç«¯æ¥å£å¼€å‘ã€æƒé™æ§åˆ¶ã€ä¸šåŠ¡é€»è¾‘å®ç°çš„ä¸“ä¸šèƒ½åŠ›ï¼›<br/>å‰ç«¯å¼€å‘ä¸­ï¼Œä½¿ç”¨ Vue æ¡†æ¶æ„å»ºå‰ç«¯é¡¹ç›®ï¼Œç»“åˆ Ant Design ç»„ä»¶åº“å®ç°é¡µé¢å¿«é€Ÿè®¾è®¡ä¸äº¤äº’å¼€å‘ï¼ŒæŒæ¡å‰ç«¯è·¯ç”±ã€ç»„ä»¶å°è£…ã€å‰åç«¯æ•°æ®äº¤äº’çš„æ ¸å¿ƒæŠ€æœ¯ï¼›<br/>åŒæ—¶èåˆè½¯ä»¶è®¾è®¡æ¨¡å¼ã€æ•°æ®åº“å»ºæ¨¡ã€å‰åç«¯åˆ†ç¦»æ¶æ„è®¾è®¡ã€ç³»ç»Ÿæµ‹è¯•ä¸ä¼˜åŒ–ç­‰ä¸“ä¸šçŸ¥è¯†ï¼Œå®ç°å‰åç«¯çš„æ— ç¼äº’é€šä¸ç³»ç»Ÿæ•´ä½“è®¾è®¡ï¼Œæ˜¯å¯¹å­¦ç”Ÿä¸“ä¸šç¼–ç¨‹èƒ½åŠ›ã€ç³»ç»Ÿè®¾è®¡èƒ½åŠ›ã€é—®é¢˜è§£å†³èƒ½åŠ›çš„æå…·ä»·å€¼çš„ç»¼åˆè®­ç»ƒä¸å…¨é¢è€ƒæ ¸ã€‚</p><h3>å·¥ä½œé‡æ€»å‘¨æ•°</h3><p>16</p>',NULL,0,'2026-03-21 10:52:27','2026-03-21 10:52:27');
+/*!40000 ALTER TABLE `opening_task_book` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `permission_info`
+--
+
+DROP TABLE IF EXISTS `permission_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `permission_info` (
+  `permission_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æƒé™ID',
+  `parent_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT 'çˆ¶çº§æƒé™ID',
+  `permission_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æƒé™åç§°',
+  `permission_code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æƒé™ç¼–ç ',
+  `permission_type` tinyint DEFAULT '1' COMMENT 'æƒé™ç±»å‹ï¼ˆ1-èœå• 2-æŒ‰é’® 3-æ¥å£ï¼‰',
+  `path` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'è·¯ç”±è·¯å¾„',
+  `icon` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å›¾æ ‡',
+  `sort_order` int DEFAULT '0' COMMENT 'æ’åºå·',
+  `permission_status` tinyint DEFAULT '1' COMMENT 'æƒé™çŠ¶æ€ï¼ˆ0-ç¦ç”¨ 1-æ­£å¸¸ï¼‰',
+  `deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`permission_id`),
+  UNIQUE KEY `uk_permission_code` (`permission_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='æƒé™ä¿¡æ¯è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `permission_info`
+--
+
+LOCK TABLES `permission_info` WRITE;
+/*!40000 ALTER TABLE `permission_info` DISABLE KEYS */;
+INSERT INTO `permission_info` VALUES ('100','0','ä»ªè¡¨ç›˜','dashboard:view',1,'/dashboard','DashboardOutlined',1,1,0,'2026-02-21 15:38:37','2026-02-21 15:38:37'),('1100','0','åŒé€‰ç®¡ç†','selection:manage',1,'/topic-selection','SelectOutlined',50,1,0,'2026-03-14 14:57:51','2026-03-14 14:57:51'),('1101','1100','å¯é€‰è¯¾é¢˜','selection:available',1,'/topic-selection/list',NULL,1,1,0,'2026-03-14 14:57:51','2026-03-14 14:57:51'),('1102','1100','é€‰æŠ¥è¯¾é¢˜','selection:apply',2,NULL,NULL,2,1,0,'2026-03-14 14:57:51','2026-03-14 14:57:51'),('1103','1100','åˆ é™¤é€‰æŠ¥','selection:delete',2,NULL,NULL,3,1,0,'2026-03-14 14:57:51','2026-03-14 14:57:51'),('1104','1100','æˆ‘çš„é€‰æŠ¥','selection:my',1,'/topic-selection/my',NULL,4,1,0,'2026-03-14 14:57:51','2026-03-14 14:57:51'),('200','0','ç”¨æˆ·ç®¡ç†','user:manage',1,'/user','UserOutlined',2,1,0,'2026-02-21 15:38:37','2026-02-21 15:38:37'),('201','200','ç”¨æˆ·åˆ—è¡¨','user:view',1,'/user','TeamOutlined',1,1,0,'2026-02-21 15:38:37','2026-02-21 15:38:37'),('2011','201','åˆ›å»ºç”¨æˆ·','user:create',2,NULL,NULL,1,1,0,'2026-02-21 15:38:37','2026-02-21 15:38:37'),('2012','201','ç¼–è¾‘ç”¨æˆ·','user:edit',2,NULL,NULL,2,1,0,'2026-02-21 15:38:37','2026-02-21 15:38:37'),('2013','201','åˆ é™¤ç”¨æˆ·','user:delete',2,NULL,NULL,3,1,0,'2026-02-21 15:38:37','2026-02-21 15:38:37'),('2014','201','é‡ç½®å¯†ç ','user:reset-password',2,NULL,NULL,4,1,0,'2026-02-21 15:38:37','2026-02-21 15:38:37'),('202','200','è§’è‰²æƒé™','role:view',1,'/user/role','SafetyCertificateOutlined',2,1,0,'2026-02-21 15:38:37','2026-02-21 15:38:37'),('2021','202','åˆ›å»ºè§’è‰²','role:create',2,NULL,NULL,1,1,0,'2026-02-21 15:38:37','2026-02-21 15:38:37'),('2022','202','ç¼–è¾‘è§’è‰²','role:edit',2,NULL,NULL,2,1,0,'2026-02-21 15:38:37','2026-02-21 15:38:37'),('2023','202','åˆ é™¤è§’è‰²','role:delete',2,NULL,NULL,3,1,0,'2026-02-21 15:38:37','2026-02-21 15:38:37'),('2024','202','åˆ†é…æƒé™','role:assign-permission',2,NULL,NULL,4,1,0,'2026-02-21 15:38:37','2026-02-21 15:38:37'),('300','0','ä¸ªäººä¸­å¿ƒ','profile:view',1,'/profile','UserOutlined',3,1,0,'2026-02-21 15:38:37','2026-02-21 15:38:37'),('400','0','è¯¾é¢˜ç®¡ç†','topic:manage',1,'/topic','FileTextOutlined',4,1,0,'2026-02-22 18:58:36','2026-02-22 18:58:36'),('401','400','è¯¾é¢˜åˆ—è¡¨','topic:view',1,'/topic/list','UnorderedListOutlined',1,1,0,'2026-02-22 18:58:36','2026-02-22 18:58:36'),('4011','401','åˆ›å»ºè¯¾é¢˜','topic:create',2,NULL,NULL,1,1,0,'2026-02-22 18:58:36','2026-02-22 18:58:36'),('4012','401','ç¼–è¾‘è¯¾é¢˜','topic:edit',2,NULL,NULL,2,1,0,'2026-02-22 18:58:36','2026-02-22 18:58:36'),('4013','401','åˆ é™¤è¯¾é¢˜','topic:delete',2,NULL,NULL,3,1,0,'2026-02-22 18:58:36','2026-02-22 18:58:36'),('4014','401','æäº¤è¯¾é¢˜','topic:submit',2,NULL,NULL,4,1,0,'2026-02-22 18:58:36','2026-02-22 18:58:36'),('4015','401','æ’¤å›è¯¾é¢˜','topic:withdraw',2,NULL,NULL,5,1,0,'2026-02-22 18:58:36','2026-02-22 18:58:36'),('4016','401','ç­¾åå®¡æ ¸','topic:sign',2,NULL,NULL,6,1,0,'2026-02-22 18:58:36','2026-02-22 18:58:36'),('500','0','ä¼ä¸šç®¡ç†','enterprise',1,'/enterprise','BankOutlined',5,1,0,'2026-02-22 19:45:25','2026-02-22 19:45:25'),('501','500','ä¼ä¸šåˆ—è¡¨','enterprise:view',1,'/enterprise','UnorderedListOutlined',1,1,0,'2026-02-22 19:45:25','2026-02-22 19:45:25'),('5011','501','åˆ›å»ºä¼ä¸š','enterprise:create',2,NULL,NULL,1,1,0,'2026-02-22 19:45:25','2026-02-22 19:45:25'),('5012','501','ç¼–è¾‘ä¼ä¸š','enterprise:edit',2,NULL,NULL,2,1,0,'2026-02-22 19:45:25','2026-02-22 19:45:25'),('5013','501','åˆ é™¤ä¼ä¸š','enterprise:delete',2,NULL,NULL,3,1,0,'2026-02-22 19:45:25','2026-02-22 19:45:25'),('5014','501','ç®¡ç†ä¼ä¸šçŠ¶æ€','enterprise:status',2,NULL,NULL,4,1,0,'2026-02-22 19:45:25','2026-02-22 19:45:25'),('5015','501','å¯¼å‡ºä¼ä¸šæ•°æ®','enterprise:export',2,NULL,NULL,5,1,0,'2026-02-22 19:45:25','2026-02-22 19:45:25'),('505','500','å¾…ç¡®è®¤é€‰æŠ¥','selection:teacher:list',1,'/topic-selection/teacher',NULL,5,1,0,'2026-03-15 08:37:25','2026-03-15 08:37:25'),('506','500','ç¡®è®¤äººé€‰','selection:teacher:confirm',2,NULL,NULL,6,1,0,'2026-03-15 08:37:25','2026-03-15 08:37:25'),('507','500','æ‹’ç»äººé€‰','selection:teacher:reject',2,NULL,NULL,7,1,0,'2026-03-15 08:37:25','2026-03-15 08:37:25'),('508','500','å¯¼å‡ºç¡®è®¤å­¦ç”Ÿ','selection:teacher:export',2,NULL,NULL,8,1,0,'2026-03-15 08:37:25','2026-03-15 08:37:25'),('510','500','åŒé€‰å®¡æ ¸æ¦‚è§ˆ','selection:leader:overview',1,'/topic-selection/leader',NULL,10,1,0,'2026-03-15 08:37:26','2026-03-15 08:37:26'),('511','500','å¯¼å‡ºé€‰é¢˜ä¿¡æ¯','selection:leader:export',2,NULL,NULL,11,1,0,'2026-03-15 08:37:26','2026-03-15 08:37:26'),('512','500','æŒ‡æ´¾æ•™å¸ˆ','selection:leader:assign',2,NULL,NULL,12,1,0,'2026-03-15 08:37:26','2026-03-15 08:37:26'),('513','500','æŒ‡å¯¼å­¦ç”Ÿé€‰é¢˜','selection:univ:view',1,'/topic-selection/univ-teacher',NULL,13,1,0,'2026-03-15 10:11:09','2026-03-15 10:11:09'),('514','500','å¯¼å‡ºé€‰é¢˜ç»“æœ','selection:univ:export',2,NULL,NULL,14,1,0,'2026-03-15 10:11:09','2026-03-15 10:11:09'),('520','0','å­¦æ ¡ç®¡ç†','school',1,'/school','ReadOutlined',6,1,0,'2026-02-22 21:54:28','2026-02-22 21:54:28'),('521','520','å­¦æ ¡åˆ—è¡¨','school:view',1,'/school','UnorderedListOutlined',1,1,0,'2026-02-22 21:54:28','2026-02-22 21:54:28'),('5211','521','åˆ›å»ºå­¦æ ¡','school:create',2,NULL,NULL,1,1,0,'2026-02-22 21:54:28','2026-02-22 21:54:28'),('5212','521','ç¼–è¾‘å­¦æ ¡','school:edit',2,NULL,NULL,2,1,0,'2026-02-22 21:54:28','2026-02-22 21:54:28'),('5213','521','åˆ é™¤å­¦æ ¡','school:delete',2,NULL,NULL,3,1,0,'2026-02-22 21:54:28','2026-02-22 21:54:28'),('5214','521','ç®¡ç†å­¦æ ¡çŠ¶æ€','school:status',2,NULL,NULL,4,1,0,'2026-02-22 21:54:28','2026-02-22 21:54:28'),('5215','521','å¯¼å‡ºå­¦æ ¡æ•°æ®','school:export',2,NULL,NULL,5,1,0,'2026-02-22 21:54:28','2026-02-22 21:54:28'),('540','0','æ•™å¸ˆé…å¯¹ç®¡ç†','teacher_relation:manage',1,'/system/teacher-relation','TeamOutlined',9,1,0,'2026-03-08 11:49:22','2026-03-08 11:49:22'),('541','540','æ–¹å‘åˆ†é…','teacher_relation:major:view',1,'/system/teacher-relation/major','ApartmentOutlined',1,1,0,'2026-03-08 11:49:22','2026-03-08 11:49:22'),('5411','541','æ–°å¢æ–¹å‘åˆ†é…','teacher_relation:major:create',2,NULL,NULL,1,1,0,'2026-03-08 11:49:22','2026-03-08 11:49:22'),('5412','541','ç¼–è¾‘æ–¹å‘åˆ†é…','teacher_relation:major:edit',2,NULL,NULL,2,1,0,'2026-03-08 11:49:22','2026-03-08 11:49:22'),('5413','541','åˆ é™¤æ–¹å‘åˆ†é…','teacher_relation:major:delete',2,NULL,NULL,3,1,0,'2026-03-08 11:49:22','2026-03-08 11:49:22'),('542','540','ç²¾ç¡®é…å¯¹','teacher_relation:pair:view',1,'/system/teacher-relation/pair','SwapOutlined',2,1,0,'2026-03-08 11:49:22','2026-03-08 11:49:22'),('5421','542','æ–°å¢ç²¾ç¡®é…å¯¹','teacher_relation:pair:create',2,NULL,NULL,1,1,0,'2026-03-08 11:49:22','2026-03-08 11:49:22'),('5422','542','ç¼–è¾‘ç²¾ç¡®é…å¯¹','teacher_relation:pair:edit',2,NULL,NULL,2,1,0,'2026-03-08 11:49:22','2026-03-08 11:49:22'),('5423','542','åˆ é™¤ç²¾ç¡®é…å¯¹','teacher_relation:pair:delete',2,NULL,NULL,3,1,0,'2026-03-08 11:49:22','2026-03-08 11:49:22'),('543','540','è¦†ç›–æ£€æŸ¥','teacher_relation:coverage:view',1,'/system/teacher-relation/coverage','CheckCircleOutlined',3,1,0,'2026-03-08 11:49:22','2026-03-08 11:49:22'),('600','0','è¯¾é¢˜å®¡æŸ¥','topic:review',1,'/topic/review','AuditOutlined',6,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('601','600','å¾…å®¡è¯¾é¢˜','topic:review:pending',1,'/topic/review/pending','UnorderedListOutlined',1,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('6011','601','é¢„å®¡è¯¾é¢˜','topic:review:pre',2,NULL,NULL,1,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('6012','601','åˆå®¡è¯¾é¢˜','topic:review:init',2,NULL,NULL,2,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('6013','601','ç»ˆå®¡è¯¾é¢˜','topic:review:final',2,NULL,NULL,3,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('6014','601','æ‰¹é‡å®¡æ‰¹','topic:review:batch',2,NULL,NULL,4,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('6015','601','ä¿®æ”¹å®¡æ‰¹','topic:review:modify',2,NULL,NULL,5,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('602','600','å®¡æŸ¥å†å²','topic:review:history',1,'/topic/review/history','HistoryOutlined',2,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('6021','602','æŸ¥çœ‹å†å²','topic:review:history:view',2,NULL,NULL,1,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('603','600','ç»¼åˆæ„è§','topic:review:opinion',1,'/topic/review/opinion','CommentOutlined',3,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('6031','603','æäº¤ç»¼åˆæ„è§','topic:review:opinion:submit',2,NULL,NULL,1,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('6032','603','æŸ¥çœ‹ç»¼åˆæ„è§','topic:review:opinion:view',2,NULL,NULL,2,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('6033','603','åˆ é™¤ç»¼åˆæ„è§','topic:review:opinion:delete',2,NULL,NULL,3,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('604','600','å®¡æŸ¥ç»Ÿè®¡','topic:review:stats',1,'/topic/review/stats','BarChartOutlined',4,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('6041','604','æŸ¥çœ‹æ•™å¸ˆç»Ÿè®¡','topic:review:stats:teacher',2,NULL,NULL,1,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('6042','604','æ£€æŸ¥æäº¤èµ„æ ¼','topic:review:stats:check',2,NULL,NULL,2,1,0,'2026-02-23 23:15:09','2026-02-23 23:15:09'),('700','200','ä¸“ä¸šç®¡ç†','enterprise:major',1,'/enterprise/major','BookOutlined',2,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('7001','700','æŸ¥çœ‹ä¸“ä¸š','enterprise:major:view',2,NULL,NULL,1,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('7002','700','æ·»åŠ ä¸“ä¸šæ–¹å‘','enterprise:major:direction:add',2,NULL,NULL,2,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('7003','700','ç¼–è¾‘ä¸“ä¸šæ–¹å‘','enterprise:major:direction:edit',2,NULL,NULL,3,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('7004','700','åˆ é™¤ä¸“ä¸šæ–¹å‘','enterprise:major:direction:delete',2,NULL,NULL,4,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('7005','700','æ·»åŠ ä¸“ä¸š','enterprise:major:add',2,NULL,NULL,5,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('7006','700','ç¼–è¾‘ä¸“ä¸š','enterprise:major:edit',2,NULL,NULL,6,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('7007','700','åˆ é™¤ä¸“ä¸š','enterprise:major:delete',2,NULL,NULL,7,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('7008','700','å¯ç”¨/ç¦ç”¨','enterprise:major:status',2,NULL,NULL,8,1,0,'2026-03-01 15:55:15','2026-03-01 15:55:15'),('800','0','è´¨é‡ç›‘æ§','monitor:view',1,'/monitor','BarChartOutlined',10,1,0,'2026-03-15 12:16:16','2026-03-15 12:16:16'),('801','800','ç›‘æ§ä»ªè¡¨ç›˜','monitor:dashboard:view',2,NULL,NULL,1,1,0,'2026-03-15 12:16:16','2026-03-15 12:16:16'),('8011','801','åˆå§‹åŒ–é˜¶æ®µ','phase:init',2,NULL,NULL,1,1,0,'2026-03-07 10:59:43','2026-03-07 10:59:43'),('8012','801','åˆ‡æ¢é˜¶æ®µ','phase:switch',2,NULL,NULL,2,1,0,'2026-03-07 10:59:43','2026-03-07 10:59:43'),('802','800','é¢„è­¦ä¸­å¿ƒ','monitor:alert:view',2,NULL,NULL,2,1,0,'2026-03-15 12:16:16','2026-03-15 12:16:16'),('803','800','å¤„ç†é¢„è­¦','monitor:alert:resolve',2,NULL,NULL,3,1,0,'2026-03-15 12:16:16','2026-03-15 12:16:16'),('900','0','è¿‡ç¨‹ç®¡ç†','guidance:manage',1,'/guidance','FormOutlined',50,1,0,'2026-03-16 20:01:29','2026-03-16 20:01:29'),('901','900','å­¦ç”ŸæŒ‡å¯¼','guidance:teacher',1,'/guidance/teacher','SolutionOutlined',1,1,0,'2026-03-16 20:01:29','2026-03-16 20:01:29'),('902','900','æ–°å¢æŒ‡å¯¼è®°å½•','guidance:create',2,NULL,NULL,2,1,0,'2026-03-16 20:01:29','2026-03-16 20:01:29'),('903','900','åˆ é™¤æŒ‡å¯¼è®°å½•','guidance:delete',2,NULL,NULL,3,1,0,'2026-03-16 20:01:29','2026-03-16 20:01:29'),('904','900','æˆ‘çš„æŒ‡å¯¼è®°å½•','guidance:student',1,'/guidance/student','ReadOutlined',4,1,0,'2026-03-16 20:01:29','2026-03-16 20:01:29'),('905','900','æŸ¥çœ‹æŒ‡å¯¼è®°å½•','guidance:view',2,NULL,NULL,5,1,0,'2026-03-16 20:01:29','2026-03-16 20:01:29'),('906','900','æŒ‡å¯¼è®°å½•æ€»è§ˆ','guidance:leader',1,'/guidance/leader','ProfileOutlined',6,1,0,'2026-03-16 20:01:29','2026-03-16 20:01:29'),('907','900','å¯¼å‡ºæŒ‡å¯¼è®°å½•','guidance:export',2,NULL,NULL,7,1,0,'2026-03-16 20:01:29','2026-03-16 20:01:29'),('920','0','æ–‡æ¡£ç®¡ç†','document:menu',1,'/document','file-text',920,1,0,'2026-03-16 22:25:56','2026-03-16 22:25:56'),('921','920','ä¸Šä¼ æ–‡æ¡£','document:upload',2,NULL,NULL,921,1,0,'2026-03-16 22:25:56','2026-03-16 22:25:56'),('922','920','æŸ¥çœ‹æ–‡æ¡£','document:view',2,NULL,NULL,922,1,0,'2026-03-16 22:25:56','2026-03-16 22:25:56'),('923','920','ä¸‹è½½æ–‡æ¡£','document:download',2,NULL,NULL,923,1,0,'2026-03-16 22:25:56','2026-03-16 22:25:56'),('924','920','åˆ é™¤æ–‡æ¡£','document:delete',2,NULL,NULL,924,1,0,'2026-03-16 22:25:56','2026-03-16 22:25:56'),('925','920','æ•™å¸ˆä¸Šä¼ æ‰¹æ³¨','document:upload:teacher',2,NULL,NULL,925,1,0,'2026-03-16 22:25:56','2026-03-16 22:25:56'),('926','920','å­¦ç”Ÿæ–‡æ¡£ä¸­å¿ƒ','document:student',2,'/document/student',NULL,926,1,0,'2026-03-16 22:25:56','2026-03-16 22:25:56'),('927','920','æ•™å¸ˆæ–‡æ¡£æŸ¥çœ‹','document:teacher',2,'/document/teacher',NULL,927,1,0,'2026-03-16 22:25:56','2026-03-16 22:25:56'),('940','0','å¼€é¢˜ç­”è¾©ç®¡ç†','defense:menu',1,'/defense','form',940,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('941','940','æŸ¥çœ‹ç­”è¾©å®‰æ’åˆ—è¡¨','defense:arrangement:list',2,NULL,NULL,941,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('942','940','æŸ¥çœ‹ç­”è¾©å®‰æ’è¯¦æƒ…','defense:arrangement:detail',2,NULL,NULL,942,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('943','940','åˆ›å»ºç­”è¾©å®‰æ’','defense:arrangement:create',2,NULL,NULL,943,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('944','940','æ›´æ–°ç­”è¾©å®‰æ’','defense:arrangement:update',2,NULL,NULL,944,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('945','940','åˆ é™¤ç­”è¾©å®‰æ’','defense:arrangement:delete',2,NULL,NULL,945,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('946','940','ç­”è¾©å®‰æ’èœå•','defense:arrangement:menu',1,'/defense/arrangement',NULL,946,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('947','940','ä»»åŠ¡ä¹¦èœå•','defense:taskbook:menu',1,'/defense/taskbook',NULL,947,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('948','940','æŸ¥çœ‹ä»»åŠ¡ä¹¦è¯¦æƒ…','defense:taskbook:detail',2,NULL,NULL,948,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('949','940','ä¿å­˜ä»»åŠ¡ä¹¦','defense:taskbook:save',2,NULL,NULL,949,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('950','940','å¼€é¢˜æŠ¥å‘Šèœå•','defense:report:menu',1,'/defense/report',NULL,950,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('951','940','æŸ¥çœ‹å¼€é¢˜æŠ¥å‘Šåˆ—è¡¨','defense:report:list',2,NULL,NULL,951,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('952','940','æŸ¥çœ‹å¼€é¢˜æŠ¥å‘Šè¯¦æƒ…','defense:report:detail',2,NULL,NULL,952,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('953','940','æäº¤å¼€é¢˜æŠ¥å‘Š','defense:report:submit',2,NULL,NULL,953,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('954','940','æŸ¥çœ‹æˆ‘çš„å¼€é¢˜æŠ¥å‘Š','defense:report:my',2,'/defense/my-report',NULL,954,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('955','940','å®¡æŸ¥å¼€é¢˜æŠ¥å‘Š','defense:report:review',2,NULL,NULL,955,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('956','940','æˆ‘çš„ä»»åŠ¡ä¹¦èœå•','defense:taskbook:my',1,'/defense/my-taskbook',NULL,956,1,0,'2026-03-17 19:39:49','2026-03-17 19:39:49'),('960','0','æ¶ˆæ¯ä¸­å¿ƒ','notification:menu',1,'/notification/center','BellOutlined',960,1,0,'2026-03-17 20:38:46','2026-03-21 22:56:06'),('961','960','æŸ¥çœ‹æ¶ˆæ¯','notification:view',2,NULL,NULL,961,1,0,'2026-03-17 20:38:46','2026-03-21 22:56:06'),('962','961','æ ‡è®°å·²è¯»','notification:read',2,NULL,NULL,962,1,0,'2026-03-17 20:38:46','2026-03-21 22:56:06'),('963','961','æ ‡è®°å¤„ç†','notification:process',2,NULL,NULL,963,1,0,'2026-03-17 20:38:46','2026-03-21 22:56:06'),('964','961','åˆ é™¤æ¶ˆæ¯','notification:delete',2,NULL,NULL,964,1,0,'2026-03-17 20:38:46','2026-03-21 22:56:06'),('965','961','ä¸­æœŸæ£€æŸ¥è¯¦æƒ…(ä¼ä¸š)','midterm:enterprise:detail',2,NULL,NULL,5,1,0,'2026-03-17 20:38:46','2026-03-17 20:38:46'),('966','960','ä¸­æœŸæ£€æŸ¥å®¡æŸ¥','midterm:univ:menu',1,'/midterm/univ',NULL,6,1,0,'2026-03-17 20:38:46','2026-03-17 20:38:46'),('967','966','ä¸­æœŸæ£€æŸ¥åˆ—è¡¨(é«˜æ ¡)','midterm:univ:list',2,NULL,NULL,1,1,0,'2026-03-17 20:38:46','2026-03-17 20:38:46'),('968','966','ä¸­æœŸæ£€æŸ¥å®¡æŸ¥(é«˜æ ¡)','midterm:univ:review',2,NULL,NULL,2,1,0,'2026-03-17 20:38:46','2026-03-17 20:38:46'),('969','966','ä¸­æœŸæ£€æŸ¥è¯¦æƒ…(é«˜æ ¡)','midterm:univ:detail',2,NULL,NULL,3,1,0,'2026-03-17 20:38:46','2026-03-17 20:38:46'),('970','960','æˆ‘çš„ä¸­æœŸæ£€æŸ¥','midterm:student:menu',1,'/midterm/student',NULL,7,1,0,'2026-03-17 20:38:46','2026-03-17 20:38:46'),('971','970','æŸ¥çœ‹ä¸­æœŸæ£€æŸ¥(å­¦ç”Ÿ)','midterm:student:view',2,NULL,NULL,1,1,0,'2026-03-17 20:38:46','2026-03-17 20:38:46'),('972','960','ä¸­æœŸæ£€æŸ¥ç®¡ç†(ç®¡ç†)','midterm:admin:menu',1,'/midterm/admin',NULL,8,1,0,'2026-03-17 20:38:46','2026-03-17 20:38:46'),('973','972','ä¸­æœŸæ£€æŸ¥åˆ—è¡¨(ç®¡ç†)','midterm:admin:list',2,NULL,NULL,1,1,0,'2026-03-17 20:38:46','2026-03-17 20:38:46'),('974','972','ä¸­æœŸæ£€æŸ¥è¯¦æƒ…(ç®¡ç†)','midterm:admin:detail',2,NULL,NULL,2,1,0,'2026-03-17 20:38:46','2026-03-17 20:38:46');
+/*!40000 ALTER TABLE `permission_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `role_info`
+--
+
+DROP TABLE IF EXISTS `role_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `role_info` (
+  `role_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'è§’è‰²ID',
+  `role_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'è§’è‰²åç§°',
+  `role_code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'è§’è‰²ç¼–ç ',
+  `role_desc` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'è§’è‰²æè¿°',
+  `sort_order` int DEFAULT '0' COMMENT 'æ’åºå·',
+  `role_status` tinyint DEFAULT '1' COMMENT 'è§’è‰²çŠ¶æ€ï¼ˆ0-ç¦ç”¨ 1-æ­£å¸¸ï¼‰',
+  `deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`role_id`),
+  UNIQUE KEY `uk_role_code` (`role_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='è§’è‰²ä¿¡æ¯è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `role_info`
+--
+
+LOCK TABLES `role_info` WRITE;
+/*!40000 ALTER TABLE `role_info` DISABLE KEYS */;
+INSERT INTO `role_info` VALUES ('1','ç³»ç»Ÿç®¡ç†å‘˜','SYSTEM_ADMIN','ç³»ç»Ÿé…ç½®ã€ç”¨æˆ·ç®¡ç†ã€äº¤å‰è¯„é˜…åˆ†é…',1,1,0,'2026-02-20 15:58:49','2026-02-20 15:58:49'),('2','ç£å¯¼æ•™å¸ˆ','SUPERVISOR_TEACHER','æ¯•ä¸šè®¾è®¡è¯¾é¢˜ç»ˆå®¡ï¼Œè¯¾é¢˜å®¡æŸ¥æœ€åç¯èŠ‚',2,1,0,'2026-02-20 15:58:49','2026-02-20 15:58:49'),('3','é«˜æ ¡æ•™å¸ˆ','UNIVERSITY_TEACHER','è¯¾é¢˜é¢„å®¡ï¼ˆé«˜èŒå‡æœ¬ï¼‰è¯¾é¢˜ç»ˆå®¡(3+1/å®éªŒç­)ã€å­¦ç”Ÿæ¯•è®¾æŒ‡å¯¼ã€è®ºæ–‡å®¡æŸ¥ã€æˆç»©è¯„è¯­è¯„å®š',3,1,0,'2026-02-20 15:58:49','2026-02-24 11:48:13'),('4','ä¼ä¸šè´Ÿè´£äºº','ENTERPRISE_LEADER','ä¼ä¸šç«¯æ¯•è®¾å·¥ä½œç»Ÿç­¹ç®¡ç†',4,1,0,'2026-02-20 15:58:49','2026-02-20 15:58:49'),('5','ä¸“ä¸šæ–¹å‘ä¸»ç®¡','MAJOR_DIRECTOR','æ¯•ä¸šè®¾è®¡è¯¾é¢˜åˆå®¡ï¼Œä¼ä¸šæ•™å¸ˆæŒ‡å¯¼è®°å½•å®¡æŸ¥',5,1,0,'2026-02-20 15:58:49','2026-02-20 15:58:49'),('6','ä¼ä¸šæ•™å¸ˆ','ENTERPRISE_TEACHER','è¯¾é¢˜ç”³æŠ¥ã€å­¦ç”Ÿé€‰é¢˜ç¡®è®¤ã€æ¯•è®¾å…¨ç¨‹æŒ‡å¯¼',6,1,0,'2026-02-20 15:58:49','2026-02-20 15:58:49'),('7','å­¦ç”Ÿ','STUDENT','å®Œæˆæ¯•ä¸šè®¾è®¡å…¨æµç¨‹æ“ä½œæ‰§è¡Œ',7,1,0,'2026-02-20 15:58:49','2026-02-20 15:58:49');
+/*!40000 ALTER TABLE `role_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `role_permission`
+--
+
+DROP TABLE IF EXISTS `role_permission`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `role_permission` (
+  `id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¸»é”®ID',
+  `role_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'è§’è‰²ID',
+  `permission_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æƒé™ID',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_role_permission` (`role_id`,`permission_id`),
+  KEY `idx_role_id` (`role_id`),
+  KEY `idx_permission_id` (`permission_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='è§’è‰²æƒé™å…³è”è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `role_permission`
+--
+
+LOCK TABLES `role_permission` WRITE;
+/*!40000 ALTER TABLE `role_permission` DISABLE KEYS */;
+INSERT INTO `role_permission` VALUES ('01b04afe21f611f18fd6902e1697e95c','4','940','2026-03-17 19:39:49'),('01b069d321f611f18fd6902e1697e95c','4','941','2026-03-17 19:39:49'),('01b06dce21f611f18fd6902e1697e95c','4','942','2026-03-17 19:39:49'),('01b06f2121f611f18fd6902e1697e95c','4','943','2026-03-17 19:39:49'),('01b0709921f611f18fd6902e1697e95c','4','944','2026-03-17 19:39:49'),('01b071c421f611f18fd6902e1697e95c','4','945','2026-03-17 19:39:49'),('01b072b721f611f18fd6902e1697e95c','4','946','2026-03-17 19:39:49'),('01b073a321f611f18fd6902e1697e95c','4','947','2026-03-17 19:39:49'),('01b0748621f611f18fd6902e1697e95c','4','948','2026-03-17 19:39:49'),('01b0755f21f611f18fd6902e1697e95c','4','950','2026-03-17 19:39:49'),('01b0764121f611f18fd6902e1697e95c','4','951','2026-03-17 19:39:49'),('01b0774421f611f18fd6902e1697e95c','4','952','2026-03-17 19:39:49'),('01b0782e21f611f18fd6902e1697e95c','4','955','2026-03-17 19:39:49'),('01b5bb0e21f611f18fd6902e1697e95c','6','940','2026-03-17 19:39:49'),('01b5cff221f611f18fd6902e1697e95c','6','942','2026-03-17 19:39:49'),('01b5d37b21f611f18fd6902e1697e95c','6','947','2026-03-17 19:39:49'),('01b5d52e21f611f18fd6902e1697e95c','6','948','2026-03-17 19:39:49'),('01b5d6aa21f611f18fd6902e1697e95c','6','949','2026-03-17 19:39:49'),('01b5d82021f611f18fd6902e1697e95c','6','950','2026-03-17 19:39:49'),('01b5d9e021f611f18fd6902e1697e95c','6','951','2026-03-17 19:39:49'),('01b5db8621f611f18fd6902e1697e95c','6','952','2026-03-17 19:39:49'),('01b5dcf921f611f18fd6902e1697e95c','6','955','2026-03-17 19:39:49'),('01bacc6821f611f18fd6902e1697e95c','7','940','2026-03-17 19:39:49'),('01bad4fd21f611f18fd6902e1697e95c','7','942','2026-03-17 19:39:49'),('01bad75a21f611f18fd6902e1697e95c','7','947','2026-03-17 19:39:49'),('01bad86b21f611f18fd6902e1697e95c','7','948','2026-03-17 19:39:49'),('01bad95821f611f18fd6902e1697e95c','7','956','2026-03-17 19:39:49'),('01bada5a21f611f18fd6902e1697e95c','7','950','2026-03-17 19:39:49'),('01badb5c21f611f18fd6902e1697e95c','7','952','2026-03-17 19:39:49'),('01badc5a21f611f18fd6902e1697e95c','7','953','2026-03-17 19:39:49'),('01badd5a21f611f18fd6902e1697e95c','7','954','2026-03-17 19:39:49'),('01c0f0b421f611f18fd6902e1697e95c','1','940','2026-03-17 19:39:50'),('01c10de321f611f18fd6902e1697e95c','1','942','2026-03-17 19:39:50'),('01c10f1621f611f18fd6902e1697e95c','1','943','2026-03-17 19:39:50'),('01c1102321f611f18fd6902e1697e95c','1','944','2026-03-17 19:39:50'),('01c1113821f611f18fd6902e1697e95c','1','945','2026-03-17 19:39:50'),('01c1134b21f611f18fd6902e1697e95c','1','947','2026-03-17 19:39:50'),('01c1144021f611f18fd6902e1697e95c','1','948','2026-03-17 19:39:50'),('01c1152c21f611f18fd6902e1697e95c','1','949','2026-03-17 19:39:50'),('01c1161f21f611f18fd6902e1697e95c','1','950','2026-03-17 19:39:50'),('01c1170621f611f18fd6902e1697e95c','1','951','2026-03-17 19:39:50'),('01c117f521f611f18fd6902e1697e95c','1','952','2026-03-17 19:39:50'),('01c118e221f611f18fd6902e1697e95c','1','953','2026-03-17 19:39:50'),('01c11a0621f611f18fd6902e1697e95c','1','954','2026-03-17 19:39:50'),('01c11af321f611f18fd6902e1697e95c','1','955','2026-03-17 19:39:50'),('01c11be421f611f18fd6902e1697e95c','1','956','2026-03-17 19:39:50'),('07462e6d1f6b11f18fd6902e1697e95c','7','500','2026-03-14 13:59:56'),('07462f041f6b11f18fd6902e1697e95c','7','501','2026-03-14 13:59:56'),('07762f6a1f6b11f18fd6902e1697e95c','1','500','2026-03-14 13:59:57'),('07762fdc1f6b11f18fd6902e1697e95c','1','501','2026-03-14 13:59:57'),('1','1','100','2026-02-21 15:38:37'),('10','1','2021','2026-02-21 15:38:37'),('100','6','100','2026-02-22 18:58:36'),('101','6','300','2026-02-22 18:58:36'),('102','6','400','2026-02-22 18:58:36'),('103','6','401','2026-02-22 18:58:36'),('104','6','4011','2026-02-22 18:58:36'),('105','6','4012','2026-02-22 18:58:36'),('106','6','4013','2026-02-22 18:58:36'),('107','6','4014','2026-02-22 18:58:36'),('108','6','4015','2026-02-22 18:58:36'),('11','1','2022','2026-02-21 15:38:37'),('12','1','2023','2026-02-21 15:38:37'),('13','1','2024','2026-02-21 15:38:37'),('14','1','400','2026-02-22 18:58:36'),('15','1','401','2026-02-22 18:58:36'),('16','1','4011','2026-02-22 18:58:36'),('17','1','4012','2026-02-22 18:58:36'),('1706f1f4253611f187fc902e1697e95c','4','960','2026-03-21 22:56:06'),('17071822253611f187fc902e1697e95c','5','960','2026-03-21 22:56:06'),('170721ed253611f187fc902e1697e95c','2','960','2026-03-21 22:56:06'),('170cbba5253611f187fc902e1697e95c','4','961','2026-03-21 22:56:07'),('170cc6c8253611f187fc902e1697e95c','5','961','2026-03-21 22:56:07'),('170cc852253611f187fc902e1697e95c','7','961','2026-03-21 22:56:07'),('170cc9aa253611f187fc902e1697e95c','2','961','2026-03-21 22:56:07'),('170ccd39253611f187fc902e1697e95c','3','961','2026-03-21 22:56:07'),('1710207d253611f187fc902e1697e95c','4','962','2026-03-21 22:56:07'),('17102c2d253611f187fc902e1697e95c','5','962','2026-03-21 22:56:07'),('17102dc6253611f187fc902e1697e95c','7','962','2026-03-21 22:56:07'),('17102f16253611f187fc902e1697e95c','2','962','2026-03-21 22:56:07'),('171032cb253611f187fc902e1697e95c','3','962','2026-03-21 22:56:07'),('17157ba0253611f187fc902e1697e95c','4','963','2026-03-21 22:56:07'),('17158793253611f187fc902e1697e95c','5','963','2026-03-21 22:56:07'),('1715894c253611f187fc902e1697e95c','7','963','2026-03-21 22:56:07'),('17158a93253611f187fc902e1697e95c','2','963','2026-03-21 22:56:07'),('17158db8253611f187fc902e1697e95c','3','963','2026-03-21 22:56:07'),('17190700253611f187fc902e1697e95c','4','964','2026-03-21 22:56:07'),('17191261253611f187fc902e1697e95c','5','964','2026-03-21 22:56:07'),('171913ee253611f187fc902e1697e95c','7','964','2026-03-21 22:56:07'),('17191541253611f187fc902e1697e95c','2','964','2026-03-21 22:56:07'),('17191858253611f187fc902e1697e95c','3','964','2026-03-21 22:56:07'),('18','1','4013','2026-02-22 18:58:36'),('19','1','4014','2026-02-22 18:58:36'),('1e2f3b571f7311f18fd6902e1697e95c','7','1100','2026-03-14 14:57:51'),('1e32da401f7311f18fd6902e1697e95c','7','1101','2026-03-14 14:57:51'),('1e378de41f7311f18fd6902e1697e95c','7','1102','2026-03-14 14:57:51'),('1e3dd1131f7311f18fd6902e1697e95c','7','1103','2026-03-14 14:57:51'),('1e412a341f7311f18fd6902e1697e95c','7','1104','2026-03-14 14:57:51'),('2','1','200','2026-02-21 15:38:37'),('20','1','4015','2026-02-22 18:58:36'),('200','4','100','2026-02-22 18:58:36'),('201','4','300','2026-02-22 18:58:36'),('202','4','400','2026-02-22 18:58:36'),('2026136588479627266','3','100','2026-02-24 11:26:21'),('2026136588504793090','3','300','2026-02-24 11:26:21'),('2026136588504793091','3','400','2026-02-24 11:26:21'),('2026136588504793092','3','401','2026-02-24 11:26:21'),('2026136588529958913','3','4016','2026-02-24 11:26:21'),('2026136588529958914','3','600','2026-02-24 11:26:21'),('2026136588529958915','3','601','2026-02-24 11:26:21'),('2026136588555124737','3','6012','2026-02-24 11:26:21'),('2026136588555124738','3','6014','2026-02-24 11:26:21'),('2026136588555124739','3','6015','2026-02-24 11:26:21'),('2026136588555124740','3','602','2026-02-24 11:26:21'),('2026136588580290562','3','6021','2026-02-24 11:26:21'),('2026136588580290563','3','603','2026-02-24 11:26:21'),('2026136588580290564','3','6031','2026-02-24 11:26:21'),('2026136588580290565','3','6032','2026-02-24 11:26:21'),('2026136588605456386','3','6033','2026-02-24 11:26:21'),('203','4','401','2026-02-22 18:58:36'),('204','4','4016','2026-02-22 18:58:36'),('21','1','4016','2026-02-22 18:58:36'),('23b22bed200711f18fd6902e1697e95c','6','500','2026-03-15 08:37:26'),('23b7503c200711f18fd6902e1697e95c','6','505','2026-03-15 08:37:26'),('23bcf85c200711f18fd6902e1697e95c','6','506','2026-03-15 08:37:26'),('23c1defc200711f18fd6902e1697e95c','6','507','2026-03-15 08:37:26'),('23c7dd31200711f18fd6902e1697e95c','6','508','2026-03-15 08:37:26'),('23d09fec200711f18fd6902e1697e95c','4','500','2026-03-15 08:37:26'),('23d621c0200711f18fd6902e1697e95c','4','510','2026-03-15 08:37:26'),('23daa965200711f18fd6902e1697e95c','4','511','2026-03-15 08:37:26'),('23e16416200711f18fd6902e1697e95c','4','512','2026-03-15 08:37:26'),('23e8d45b200711f18fd6902e1697e95c','1','505','2026-03-15 08:37:26'),('23ecffaa200711f18fd6902e1697e95c','1','510','2026-03-15 08:37:26'),('3','1','300','2026-02-21 15:38:37'),('3b725ad5201411f18fd6902e1697e95c','3','500','2026-03-15 10:11:09'),('3b76397a201411f18fd6902e1697e95c','3','513','2026-03-15 10:11:09'),('3b79a919201411f18fd6902e1697e95c','3','514','2026-03-15 10:11:09'),('3b80b44b201411f18fd6902e1697e95c','1','513','2026-03-15 10:11:09'),('3df1808721fe11f18fd6902e1697e95c','6','960','2026-03-17 20:38:46'),('3df196b821fe11f18fd6902e1697e95c','6','961','2026-03-17 20:38:46'),('3df1987a21fe11f18fd6902e1697e95c','6','962','2026-03-17 20:38:46'),('3df210fd21fe11f18fd6902e1697e95c','6','963','2026-03-17 20:38:46'),('3df212fd21fe11f18fd6902e1697e95c','6','964','2026-03-17 20:38:46'),('3df2146021fe11f18fd6902e1697e95c','6','965','2026-03-17 20:38:46'),('3df635a421fe11f18fd6902e1697e95c','3','960','2026-03-17 20:38:47'),('3df63d3321fe11f18fd6902e1697e95c','3','966','2026-03-17 20:38:47'),('3df63e9e21fe11f18fd6902e1697e95c','3','967','2026-03-17 20:38:47'),('3df63fb321fe11f18fd6902e1697e95c','3','968','2026-03-17 20:38:47'),('3df640b721fe11f18fd6902e1697e95c','3','969','2026-03-17 20:38:47'),('3df9645021fe11f18fd6902e1697e95c','7','960','2026-03-17 20:38:47'),('3df96bad21fe11f18fd6902e1697e95c','7','970','2026-03-17 20:38:47'),('3df96d0e21fe11f18fd6902e1697e95c','7','971','2026-03-17 20:38:47'),('3dfe9b1421fe11f18fd6902e1697e95c','1','960','2026-03-17 20:38:47'),('3dfea6c621fe11f18fd6902e1697e95c','1','961','2026-03-17 20:38:47'),('3dfea8fe21fe11f18fd6902e1697e95c','1','962','2026-03-17 20:38:47'),('3dfeaaae21fe11f18fd6902e1697e95c','1','963','2026-03-17 20:38:47'),('3dfeac4721fe11f18fd6902e1697e95c','1','964','2026-03-17 20:38:47'),('3dfec49f21fe11f18fd6902e1697e95c','1','965','2026-03-17 20:38:47'),('3dfec69e21fe11f18fd6902e1697e95c','1','966','2026-03-17 20:38:47'),('3dfec7ae21fe11f18fd6902e1697e95c','1','967','2026-03-17 20:38:47'),('3dfec8b221fe11f18fd6902e1697e95c','1','968','2026-03-17 20:38:47'),('3dfec9c221fe11f18fd6902e1697e95c','1','969','2026-03-17 20:38:47'),('3dfecaba21fe11f18fd6902e1697e95c','1','970','2026-03-17 20:38:47'),('3dfecbab21fe11f18fd6902e1697e95c','1','971','2026-03-17 20:38:47'),('3dfeccbd21fe11f18fd6902e1697e95c','1','972','2026-03-17 20:38:47'),('3dfecde121fe11f18fd6902e1697e95c','1','973','2026-03-17 20:38:47'),('3dfecec521fe11f18fd6902e1697e95c','1','974','2026-03-17 20:38:47'),('4','1','201','2026-02-21 15:38:37'),('400','5','100','2026-02-22 18:58:36'),('401','5','300','2026-02-22 18:58:36'),('402','5','400','2026-02-22 18:58:36'),('403','5','401','2026-02-22 18:58:36'),('404','5','4016','2026-02-22 18:58:36'),('5','1','202','2026-02-21 15:38:37'),('500','2','100','2026-02-22 18:58:36'),('501','2','300','2026-02-22 18:58:36'),('502','2','400','2026-02-22 18:58:36'),('503','2','401','2026-02-22 18:58:36'),('504','2','4016','2026-02-22 18:58:36'),('505','1','5014','2026-02-22 19:45:25'),('506','1','5015','2026-02-22 19:45:25'),('520','1','520','2026-02-22 21:54:28'),('521','1','521','2026-02-22 21:54:28'),('522','1','5211','2026-02-22 21:54:28'),('523','1','5212','2026-02-22 21:54:28'),('524','1','5213','2026-02-22 21:54:28'),('525','1','5214','2026-02-22 21:54:28'),('526','1','5215','2026-02-22 21:54:28'),('6','1','2011','2026-02-21 15:38:37'),('600','7','100','2026-02-22 18:58:36'),('601','7','300','2026-02-22 18:58:36'),('602','7','400','2026-02-22 18:58:36'),('603','7','401','2026-02-22 18:58:36'),('604','1','604','2026-02-23 23:15:09'),('605','1','6011','2026-02-23 23:15:09'),('606','1','6012','2026-02-23 23:15:09'),('607','1','6013','2026-02-23 23:15:09'),('608','1','6014','2026-02-23 23:15:09'),('609','1','6015','2026-02-23 23:15:09'),('610','1','6021','2026-02-23 23:15:09'),('611','1','6031','2026-02-23 23:15:09'),('612','1','6032','2026-02-23 23:15:09'),('613','1','6033','2026-02-23 23:15:09'),('614','1','6041','2026-02-23 23:15:09'),('615','1','6042','2026-02-23 23:15:09'),('620','2','600','2026-02-23 23:15:09'),('621','2','601','2026-02-23 23:15:09'),('622','2','602','2026-02-23 23:15:09'),('623','2','6011','2026-02-23 23:15:09'),('624','2','6014','2026-02-23 23:15:09'),('625','2','6015','2026-02-23 23:15:09'),('626','2','6021','2026-02-23 23:15:09'),('627','2','6032','2026-02-23 23:15:09'),('650','4','600','2026-02-23 23:15:09'),('651','4','601','2026-02-23 23:15:09'),('652','4','602','2026-02-23 23:15:09'),('653','4','603','2026-02-23 23:15:09'),('654','4','604','2026-02-23 23:15:09'),('655','4','6013','2026-02-23 23:15:09'),('656','4','6014','2026-02-23 23:15:09'),('657','4','6015','2026-02-23 23:15:09'),('658','4','6021','2026-02-23 23:15:09'),('659','4','6031','2026-02-23 23:15:09'),('660','4','6032','2026-02-23 23:15:09'),('661','4','6033','2026-02-23 23:15:09'),('662','4','6041','2026-02-23 23:15:09'),('663','4','6042','2026-02-23 23:15:09'),('670','5','600','2026-02-23 23:15:09'),('671','5','602','2026-02-23 23:15:09'),('672','5','6021','2026-02-23 23:15:09'),('673','5','6032','2026-02-23 23:15:09'),('674','5','6042','2026-02-23 23:15:09'),('680','6','600','2026-02-23 23:15:09'),('681','6','604','2026-02-23 23:15:09'),('682','6','6041','2026-02-23 23:15:09'),('7','1','2012','2026-02-21 15:38:37'),('700','4','700','2026-03-01 15:55:15'),('701','4','7001','2026-03-01 15:55:15'),('702','4','7002','2026-03-01 15:55:15'),('703','4','7003','2026-03-01 15:55:15'),('704','4','7004','2026-03-01 15:55:15'),('705','4','7005','2026-03-01 15:55:15'),('706','4','7006','2026-03-01 15:55:15'),('707','4','7007','2026-03-01 15:55:15'),('708','4','7008','2026-03-01 15:55:15'),('710','1','700','2026-03-01 15:55:15'),('711','1','7001','2026-03-01 15:55:15'),('712','1','7002','2026-03-01 15:55:15'),('713','1','7003','2026-03-01 15:55:15'),('714','1','7004','2026-03-01 15:55:15'),('715','1','7005','2026-03-01 15:55:15'),('716','1','7006','2026-03-01 15:55:15'),('717','1','7007','2026-03-01 15:55:15'),('718','1','7008','2026-03-01 15:55:15'),('8','1','2013','2026-02-21 15:38:37'),('803','1','8011','2026-03-07 11:08:56'),('804','1','8012','2026-03-07 11:08:56'),('810','2','800','2026-03-07 11:08:56'),('811','2','801','2026-03-07 11:08:56'),('820','3','800','2026-03-07 11:08:56'),('821','3','801','2026-03-07 11:08:56'),('840','5','800','2026-03-07 11:08:56'),('841','5','801','2026-03-07 11:08:56'),('850','6','800','2026-03-07 11:08:56'),('851','6','801','2026-03-07 11:08:56'),('860','7','800','2026-03-07 11:08:56'),('861','7','801','2026-03-07 11:08:56'),('9','1','2014','2026-02-21 15:38:37'),('900','1','540','2026-03-08 11:49:22'),('901','1','541','2026-03-08 11:49:22'),('902','1','542','2026-03-08 11:49:22'),('903','1','543','2026-03-08 11:49:22'),('904','1','5411','2026-03-08 11:49:22'),('905','1','5412','2026-03-08 11:49:22'),('906','1','5413','2026-03-08 11:49:22'),('907','1','5421','2026-03-08 11:49:22'),('908','1','5422','2026-03-08 11:49:22'),('909','1','5423','2026-03-08 11:49:22'),('910','4','540','2026-03-08 11:49:22'),('911','4','541','2026-03-08 11:49:22'),('912','4','542','2026-03-08 11:49:22'),('913','4','543','2026-03-08 11:49:22'),('920','3','540','2026-03-08 11:49:22'),('921','3','543','2026-03-08 11:49:22'),('b61882c6202511f18fd6902e1697e95c','1','800','2026-03-15 12:16:16'),('b6188c91202511f18fd6902e1697e95c','1','801','2026-03-15 12:16:16'),('b6188eec202511f18fd6902e1697e95c','1','802','2026-03-15 12:16:16'),('b61890b2202511f18fd6902e1697e95c','1','803','2026-03-15 12:16:16'),('b61fb79c202511f18fd6902e1697e95c','4','800','2026-03-15 12:16:16'),('b61fbfad202511f18fd6902e1697e95c','4','801','2026-03-15 12:16:16'),('b61fc115202511f18fd6902e1697e95c','4','802','2026-03-15 12:16:16'),('ddeaec60212f11f18fd6902e1697e95c','6','900','2026-03-16 20:01:29'),('ddebf55e212f11f18fd6902e1697e95c','6','901','2026-03-16 20:01:29'),('dded5c74212f11f18fd6902e1697e95c','6','902','2026-03-16 20:01:29'),('ddee8595212f11f18fd6902e1697e95c','6','903','2026-03-16 20:01:29'),('ddef9f1a212f11f18fd6902e1697e95c','6','905','2026-03-16 20:01:29'),('ddf089e3212f11f18fd6902e1697e95c','3','900','2026-03-16 20:01:29'),('ddf151fc212f11f18fd6902e1697e95c','3','901','2026-03-16 20:01:29'),('ddf24de3212f11f18fd6902e1697e95c','3','902','2026-03-16 20:01:29'),('ddf34cd3212f11f18fd6902e1697e95c','3','903','2026-03-16 20:01:29'),('ddf4396d212f11f18fd6902e1697e95c','3','905','2026-03-16 20:01:29'),('ddf545c4212f11f18fd6902e1697e95c','7','900','2026-03-16 20:01:29'),('ddf608c8212f11f18fd6902e1697e95c','7','904','2026-03-16 20:01:29'),('ddf6debc212f11f18fd6902e1697e95c','7','905','2026-03-16 20:01:29'),('ddf7f694212f11f18fd6902e1697e95c','4','900','2026-03-16 20:01:29'),('ddf8c552212f11f18fd6902e1697e95c','4','905','2026-03-16 20:01:29'),('ddf9a5f5212f11f18fd6902e1697e95c','4','906','2026-03-16 20:01:29'),('ddfa7ba7212f11f18fd6902e1697e95c','4','907','2026-03-16 20:01:29'),('ddfb8165212f11f18fd6902e1697e95c','1','900','2026-03-16 20:01:29'),('ddfc51fb212f11f18fd6902e1697e95c','1','901','2026-03-16 20:01:29'),('ddfd322b212f11f18fd6902e1697e95c','1','902','2026-03-16 20:01:29'),('ddfe0a56212f11f18fd6902e1697e95c','1','903','2026-03-16 20:01:29'),('ddfee12a212f11f18fd6902e1697e95c','1','904','2026-03-16 20:01:29'),('ddffb78e212f11f18fd6902e1697e95c','1','905','2026-03-16 20:01:29'),('de00ac55212f11f18fd6902e1697e95c','1','906','2026-03-16 20:01:29'),('de01800b212f11f18fd6902e1697e95c','1','907','2026-03-16 20:01:29'),('ee6c6fe7214411f18fd6902e1697e95c','7','920','2026-03-16 22:32:16'),('ee6c7e57214411f18fd6902e1697e95c','7','921','2026-03-16 22:32:16'),('ee6c8067214411f18fd6902e1697e95c','7','922','2026-03-16 22:32:16'),('ee6c81ad214411f18fd6902e1697e95c','7','923','2026-03-16 22:32:16'),('ee6c82d4214411f18fd6902e1697e95c','7','924','2026-03-16 22:32:16'),('ee6c83d8214411f18fd6902e1697e95c','7','926','2026-03-16 22:32:16'),('ee71e2f2214411f18fd6902e1697e95c','6','920','2026-03-16 22:32:16'),('ee71e9d1214411f18fd6902e1697e95c','6','922','2026-03-16 22:32:16'),('ee71eb27214411f18fd6902e1697e95c','6','923','2026-03-16 22:32:16'),('ee71ec3e214411f18fd6902e1697e95c','6','925','2026-03-16 22:32:16'),('ee71ed4d214411f18fd6902e1697e95c','6','927','2026-03-16 22:32:16'),('ee77c853214411f18fd6902e1697e95c','3','920','2026-03-16 22:32:16'),('ee77d38a214411f18fd6902e1697e95c','3','922','2026-03-16 22:32:16'),('ee77d5e0214411f18fd6902e1697e95c','3','923','2026-03-16 22:32:16'),('ee77d79d214411f18fd6902e1697e95c','3','925','2026-03-16 22:32:16'),('ee77da24214411f18fd6902e1697e95c','3','927','2026-03-16 22:32:16'),('ee7e3fd3214411f18fd6902e1697e95c','4','920','2026-03-16 22:32:16'),('ee7e475e214411f18fd6902e1697e95c','4','922','2026-03-16 22:32:16'),('ee7e48be214411f18fd6902e1697e95c','4','923','2026-03-16 22:32:16'),('ee7e49e2214411f18fd6902e1697e95c','4','927','2026-03-16 22:32:16'),('ee81b894214411f18fd6902e1697e95c','5','920','2026-03-16 22:32:16'),('ee81bf3e214411f18fd6902e1697e95c','5','922','2026-03-16 22:32:16'),('ee81c092214411f18fd6902e1697e95c','5','923','2026-03-16 22:32:16'),('ee81c1c9214411f18fd6902e1697e95c','5','927','2026-03-16 22:32:16'),('ee84d9b6214411f18fd6902e1697e95c','2','920','2026-03-16 22:32:16'),('ee84e828214411f18fd6902e1697e95c','2','922','2026-03-16 22:32:16'),('ee84ea59214411f18fd6902e1697e95c','2','923','2026-03-16 22:32:16'),('ee84eb8b214411f18fd6902e1697e95c','2','927','2026-03-16 22:32:16'),('ee89a7c8214411f18fd6902e1697e95c','1','920','2026-03-16 22:32:16'),('ee89ae7a214411f18fd6902e1697e95c','1','921','2026-03-16 22:32:16'),('ee89afcb214411f18fd6902e1697e95c','1','922','2026-03-16 22:32:16'),('ee89b0ef214411f18fd6902e1697e95c','1','923','2026-03-16 22:32:16'),('ee89b1f6214411f18fd6902e1697e95c','1','924','2026-03-16 22:32:16'),('ee89b301214411f18fd6902e1697e95c','1','925','2026-03-16 22:32:16'),('ee89b3da214411f18fd6902e1697e95c','1','926','2026-03-16 22:32:16'),('ee89b4d2214411f18fd6902e1697e95c','1','927','2026-03-16 22:32:16');
+/*!40000 ALTER TABLE `role_permission` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `school_info`
+--
+
+DROP TABLE IF EXISTS `school_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `school_info` (
+  `school_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å­¦æ ¡ID',
+  `school_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å­¦æ ¡åç§°',
+  `school_code` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å­¦æ ¡ç¼–ç ',
+  `address` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'è¯¦ç»†åœ°å€',
+  `contact_person` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'è”ç³»äºº',
+  `contact_phone` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'è”ç³»ç”µè¯',
+  `school_email` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å­¦æ ¡é‚®ç®±',
+  `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å­¦æ ¡ç®€ä»‹',
+  `school_status` tinyint DEFAULT '1' COMMENT 'çŠ¶æ€ï¼ˆ0-ç¦ç”¨ 1-æ­£å¸¸ï¼‰',
+  `deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`school_id`),
+  UNIQUE KEY `uk_school_name` (`school_name`),
+  UNIQUE KEY `uk_school_code` (`school_code`),
+  KEY `idx_school_status` (`school_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='å­¦æ ¡ä¿¡æ¯è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `school_info`
+--
+
+LOCK TABLES `school_info` WRITE;
+/*!40000 ALTER TABLE `school_info` DISABLE KEYS */;
+INSERT INTO `school_info` VALUES ('S001','å¤©æ´¥å¤§å­¦è½¯ä»¶å­¦é™¢','TJU001','å¤©æ´¥å¸‚å—å¼€åŒºå«æ´¥è·¯92å·','ç‹è€å¸ˆ','022-12345678','software@tju.edu.cn','å¤©æ´¥å¤§å­¦è½¯ä»¶å­¦é™¢æ˜¯ä¸€æ‰€åŸ¹å…»é«˜çº§è½¯ä»¶äººæ‰çš„å­¦é™¢',1,0,'2026-02-22 21:53:45','2026-02-22 21:53:45'),('S002','å¤©æ´¥èŒä¸šæŠ€æœ¯å¸ˆèŒƒå¤§å­¦','TUTE001','å¤©æ´¥å¸‚æ²³è¥¿åŒºå¤§æ²½å—è·¯','æè€å¸ˆ','022-88888888','info@tute.edu.cn','å¤©æ´¥èŒä¸šæŠ€æœ¯å¸ˆèŒƒå¤§å­¦æ˜¯ä¸€æ‰€åŸ¹å…»èŒä¸šæ•™è‚²å¸ˆèµ„çš„é«˜æ ¡',1,0,'2026-02-22 21:53:45','2026-02-22 21:53:45'),('S003','å¤©æ´¥å¤§å­¦åŒ–å·¥å­¦é™¢','TJU002','å¤©æ´¥å¸‚æ´¥å—åŒºæ´¥å—å¤§é“','å¼ è€å¸ˆ','022-99999999','info@tju.edu.cn','å¤©æ´¥å¤§å­¦åŒ–å·¥å­¦é™¢æ˜¯ä¸€æ‰€åŸ¹å…»åŒ–å·¥äººæ‰çš„å­¦é™¢',1,0,'2026-02-22 21:53:45','2026-02-22 21:53:45');
+/*!40000 ALTER TABLE `school_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `system_phase_config`
+--
+
+DROP TABLE IF EXISTS `system_phase_config`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `system_phase_config` (
+  `phase_id` int NOT NULL AUTO_INCREMENT COMMENT 'é˜¶æ®µä¸»é”®',
+  `phase_code` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'é˜¶æ®µä»£ç ',
+  `phase_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'é˜¶æ®µä¸­æ–‡å',
+  `phase_order` int NOT NULL COMMENT 'é˜¶æ®µåºå·ï¼ˆ1/2/3/4ï¼‰',
+  `phase_description` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'é˜¶æ®µæè¿°',
+  `phase_icon` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'å‰ç«¯å±•ç¤ºå›¾æ ‡',
+  `phase_color` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'å‰ç«¯å±•ç¤ºé¢œè‰²',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  PRIMARY KEY (`phase_id`),
+  UNIQUE KEY `uk_phase_code` (`phase_code`),
+  UNIQUE KEY `uk_phase_order` (`phase_order`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='ç³»ç»Ÿé˜¶æ®µé…ç½®è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `system_phase_config`
+--
+
+LOCK TABLES `system_phase_config` WRITE;
+/*!40000 ALTER TABLE `system_phase_config` DISABLE KEYS */;
+INSERT INTO `system_phase_config` VALUES (1,'TOPIC_DECLARATION','è¯¾é¢˜ç”³æŠ¥é˜¶æ®µ',1,'ä¼ä¸šæ•™å¸ˆåˆ›å»ºè¯¾é¢˜ã€ä¸‰çº§å®¡æŸ¥æµç¨‹ï¼ˆé¢„å®¡â†’åˆå®¡â†’ç»ˆå®¡ï¼‰','FormOutlined','#1890ff',0,'2026-03-07 10:58:32'),(2,'TOPIC_SELECTION','è¯¾é¢˜åŒé€‰é˜¶æ®µ',2,'å­¦ç”Ÿé€‰æŠ¥è¯¾é¢˜ã€æ•™å¸ˆç¡®è®¤äººé€‰ã€è´Ÿè´£äººå®¡æŸ¥åŒé€‰ç»“æœ','TeamOutlined','#52c41a',0,'2026-03-07 10:58:32'),(3,'TOPIC_GUIDANCE','è¯¾é¢˜æŒ‡å¯¼é˜¶æ®µ',3,'é¡¹ç›®æŒ‡å¯¼ã€è®ºæ–‡æŒ‡å¯¼ã€æ–‡æ¡£æäº¤ã€å¼€é¢˜/ä¸­æœŸç­”è¾©','EditOutlined','#faad14',0,'2026-03-07 10:58:32'),(4,'GRADUATION_DEFENSE','æ¯•è®¾ç­”è¾©é˜¶æ®µ',4,'ç­”è¾©èµ„æ ¼å®¡æŸ¥ã€æ­£å¼/äºŒæ¬¡ç­”è¾©ã€æˆç»©è¯„å®šã€æ–‡æ¡£æ‰“å°','TrophyOutlined','#f5222d',0,'2026-03-07 10:58:32');
+/*!40000 ALTER TABLE `system_phase_config` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `system_phase_record`
+--
+
+DROP TABLE IF EXISTS `system_phase_record`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `system_phase_record` (
+  `record_id` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'è®°å½•ID',
+  `cohort` varchar(20) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'æ¯•ä¸šå±Šåˆ«ï¼ˆå¦‚ï¼š2026å±Šï¼‰',
+  `phase_code` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'å½“å‰é˜¶æ®µä»£ç ',
+  `phase_order` int NOT NULL COMMENT 'å½“å‰é˜¶æ®µåºå·',
+  `previous_phase_code` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'å‰ä¸€é˜¶æ®µä»£ç ï¼ˆé¦–ä¸ªé˜¶æ®µä¸ºNULLï¼‰',
+  `switch_time` datetime NOT NULL COMMENT 'åˆ‡æ¢æ—¶é—´',
+  `operator_id` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'æ“ä½œäººIDï¼ˆç®¡ç†å‘˜ï¼‰',
+  `operator_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'æ“ä½œäººå§“å',
+  `switch_reason` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'åˆ‡æ¢åŸå› /å¤‡æ³¨',
+  `is_current` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'æ˜¯å¦ä¸ºå½“å‰ç”Ÿæ•ˆè®°å½•ï¼ˆä»…ä¸€æ¡ä¸º1ï¼‰',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  PRIMARY KEY (`record_id`),
+  KEY `idx_phase_code` (`phase_code`),
+  KEY `idx_is_current` (`is_current`),
+  KEY `idx_cohort_current` (`cohort`,`is_current`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='ç³»ç»Ÿé˜¶æ®µåˆ‡æ¢è®°å½•è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `system_phase_record`
+--
+
+LOCK TABLES `system_phase_record` WRITE;
+/*!40000 ALTER TABLE `system_phase_record` DISABLE KEYS */;
+INSERT INTO `system_phase_record` VALUES ('2030151518258225154','2026å±Š','TOPIC_DECLARATION',1,NULL,'2026-03-07 13:20:15','1','ç³»ç»Ÿç®¡ç†å‘˜','ç³»ç»Ÿé˜¶æ®µåˆå§‹åŒ–',0,'2026-03-07 13:20:15'),('2033504717505662978','2026å±Š','TOPIC_SELECTION',2,'TOPIC_DECLARATION','2026-03-16 19:24:40','1','ç³»ç»Ÿç®¡ç†å‘˜','è¯¾é¢˜å®¡æ ¸å·²ç»ç»“æŸï¼Œå¯ä»¥å¼€å§‹ä¸‹ä¸€é˜¶æ®µ',1,'2026-03-16 19:24:40');
+/*!40000 ALTER TABLE `system_phase_record` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `teacher_assignment`
+--
+
+DROP TABLE IF EXISTS `teacher_assignment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `teacher_assignment` (
+  `assignment_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æŒ‡æ´¾IDï¼ˆé›ªèŠ±IDï¼‰',
+  `student_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å­¦ç”Ÿç”¨æˆ·ID',
+  `topic_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'è¯¾é¢˜ID',
+  `selection_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å…³è”é€‰æŠ¥è®°å½•ID',
+  `assigned_teacher_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æŒ‡æ´¾æ•™å¸ˆIDï¼ˆä¼ä¸šæ•™å¸ˆï¼‰',
+  `assigned_by` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æŒ‡æ´¾äººIDï¼ˆä¼ä¸šè´Ÿè´£äººï¼‰',
+  `assign_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'æŒ‡æ´¾æ—¶é—´',
+  `cancel_time` datetime DEFAULT NULL COMMENT 'å–æ¶ˆæŒ‡æ´¾æ—¶é—´',
+  `assign_status` tinyint DEFAULT '1' COMMENT 'æŒ‡æ´¾çŠ¶æ€ï¼ˆ1-å·²æŒ‡æ´¾ 0-å·²å–æ¶ˆï¼‰',
+  `deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`assignment_id`),
+  KEY `idx_student_id` (`student_id`),
+  KEY `idx_topic_id` (`topic_id`),
+  KEY `idx_selection_id` (`selection_id`),
+  KEY `idx_assigned_teacher` (`assigned_teacher_id`),
+  CONSTRAINT `fk_assign_selection` FOREIGN KEY (`selection_id`) REFERENCES `topic_selection` (`selection_id`),
+  CONSTRAINT `fk_assign_student` FOREIGN KEY (`student_id`) REFERENCES `user_info` (`user_id`),
+  CONSTRAINT `fk_assign_teacher` FOREIGN KEY (`assigned_teacher_id`) REFERENCES `user_info` (`user_id`),
+  CONSTRAINT `fk_assign_topic` FOREIGN KEY (`topic_id`) REFERENCES `topic_info` (`topic_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='æ•™å¸ˆæŒ‡æ´¾è®°å½•è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `teacher_assignment`
+--
+
+LOCK TABLES `teacher_assignment` WRITE;
+/*!40000 ALTER TABLE `teacher_assignment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `teacher_assignment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `teacher_relationship`
+--
+
+DROP TABLE IF EXISTS `teacher_relationship`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `teacher_relationship` (
+  `relation_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¸»é”®',
+  `univ_teacher_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'é«˜æ ¡æ•™å¸ˆ user_id',
+  `enterprise_teacher_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¼ä¸šæ•™å¸ˆ user_id',
+  `enterprise_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¼ä¸šIDï¼ˆå†—ä½™åŠ é€ŸæŸ¥è¯¢ï¼‰',
+  `direction_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'æ‰€å±ä¸“ä¸šæ–¹å‘ï¼ˆè¾…åŠ©æè¿°ï¼Œå¯é€‰ï¼‰',
+  `cohort` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å±Šåˆ«',
+  `relation_type` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT 'DIRECT' COMMENT 'é…å¯¹ç±»å‹ï¼ˆDIRECT-ç›´æ¥é…å¯¹ ASSIST-è¾…åŠ©æ”¯æŒï¼‰',
+  `is_enabled` tinyint DEFAULT '1' COMMENT 'æ˜¯å¦å¯ç”¨ï¼ˆ1-å¯ç”¨ 0-åœç”¨ï¼‰',
+  `remark` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å¤‡æ³¨',
+  `deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`relation_id`),
+  UNIQUE KEY `uk_pair_cohort` (`univ_teacher_id`,`enterprise_teacher_id`,`cohort`),
+  KEY `idx_enterprise_teacher` (`enterprise_teacher_id`),
+  KEY `idx_enterprise` (`enterprise_id`),
+  KEY `idx_cohort` (`cohort`),
+  KEY `idx_univ_teacher` (`univ_teacher_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='é«˜æ ¡æ•™å¸ˆ-ä¼ä¸šæ•™å¸ˆç²¾ç¡®é…å¯¹è¡¨ï¼ˆç»†ç²’åº¦ï¼‰';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `teacher_relationship`
+--
+
+LOCK TABLES `teacher_relationship` WRITE;
+/*!40000 ALTER TABLE `teacher_relationship` DISABLE KEYS */;
+INSERT INTO `teacher_relationship` VALUES ('2030493422825005058','TEST_UT_001','2024759015287861249','E001','2028057741800542209','2026å±Š','DIRECT',1,'',0,'2026-03-08 11:58:51','2026-03-08 11:58:51');
+/*!40000 ALTER TABLE `teacher_relationship` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `topic_batch_review`
+--
+
+DROP TABLE IF EXISTS `topic_batch_review`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `topic_batch_review` (
+  `batch_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ‰¹æ¬¡ID',
+  `reviewer_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å®¡æŸ¥äººID',
+  `reviewer_role` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å®¡æŸ¥äººè§’è‰²ä»£ç ',
+  `review_stage` tinyint NOT NULL COMMENT 'å®¡æŸ¥é˜¶æ®µï¼ˆ1-é¢„å®¡ 2-åˆå®¡ 3-ç»ˆå®¡ï¼‰',
+  `review_result` tinyint NOT NULL COMMENT 'å®¡æŸ¥ç»“æœï¼ˆ1-é€šè¿‡ 2-éœ€ä¿®æ”¹ 3-ä¸é€šè¿‡ï¼‰',
+  `review_opinion` text COLLATE utf8mb4_unicode_ci COMMENT 'æ‰¹é‡å®¡æŸ¥æ„è§',
+  `topic_count` int DEFAULT '0' COMMENT 'å®¡æŸ¥è¯¾é¢˜æ•°é‡',
+  `deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`batch_id`),
+  KEY `idx_reviewer_id` (`reviewer_id`),
+  KEY `idx_review_stage` (`review_stage`),
+  KEY `idx_create_time` (`create_time`),
+  CONSTRAINT `fk_batch_reviewer` FOREIGN KEY (`reviewer_id`) REFERENCES `user_info` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='æ‰¹é‡å®¡æŸ¥æ‰¹æ¬¡è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `topic_batch_review`
+--
+
+LOCK TABLES `topic_batch_review` WRITE;
+/*!40000 ALTER TABLE `topic_batch_review` DISABLE KEYS */;
+/*!40000 ALTER TABLE `topic_batch_review` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `topic_general_opinion`
+--
+
+DROP TABLE IF EXISTS `topic_general_opinion`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `topic_general_opinion` (
+  `opinion_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ„è§ID',
+  `reviewer_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æäº¤äººID',
+  `reviewer_role` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æäº¤äººè§’è‰²ä»£ç ',
+  `reviewer_name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'æäº¤äººå§“å',
+  `review_stage` tinyint NOT NULL COMMENT 'å®¡æŸ¥é˜¶æ®µï¼ˆ1-é¢„å®¡ 2-åˆå®¡ 3-ç»ˆå®¡ï¼‰',
+  `guidance_direction` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'é€‚ç”¨ä¸“ä¸šæ–¹å‘',
+  `opinion_content` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ç»¼åˆæ„è§å†…å®¹ï¼ˆâ‰¤200å­—ï¼‰',
+  `target_scope` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'DIRECTION' COMMENT 'å¯è§èŒƒå›´ï¼ˆDIRECTION-æœ¬ä¸“ä¸šæ–¹å‘ï¼‰',
+  `deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`opinion_id`),
+  KEY `idx_reviewer_id` (`reviewer_id`),
+  KEY `idx_review_stage` (`review_stage`),
+  KEY `idx_guidance_direction` (`guidance_direction`),
+  KEY `idx_create_time` (`create_time`),
+  CONSTRAINT `fk_opinion_reviewer` FOREIGN KEY (`reviewer_id`) REFERENCES `user_info` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ç»¼åˆå®¡æŸ¥æ„è§è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `topic_general_opinion`
+--
+
+LOCK TABLES `topic_general_opinion` WRITE;
+/*!40000 ALTER TABLE `topic_general_opinion` DISABLE KEYS */;
+/*!40000 ALTER TABLE `topic_general_opinion` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `topic_info`
+--
+
+DROP TABLE IF EXISTS `topic_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `topic_info` (
+  `topic_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'è¯¾é¢˜ID',
+  `topic_title` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'è¯¾é¢˜åç§°/é¢˜ç›®ï¼ˆä¸è¶…è¿‡50å­—ç¬¦ï¼Œä¸­æ–‡ç®—2ä¸ªï¼‰',
+  `topic_category` tinyint NOT NULL COMMENT 'è¯¾é¢˜å¤§ç±»ï¼ˆ1-é«˜èŒå‡æœ¬ 2-3+1 3-å®éªŒç­ï¼‰',
+  `topic_type` tinyint NOT NULL COMMENT 'è¯¾é¢˜ç±»å‹ï¼ˆ1-è®¾è®¡ 2-è®ºæ–‡ï¼‰',
+  `topic_source` tinyint NOT NULL COMMENT 'è¯¾é¢˜æ¥æºï¼ˆ1-æ ¡å†… 2-æ ¡å¤–ååŒå¼€å‘ï¼‰',
+  `applicable_school` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'é€‚ç”¨å­¦æ ¡ï¼ˆ3+1/å®éªŒç­å¿…å¡«ï¼‰',
+  `enterprise_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å½’å±ä¼ä¸šIDï¼ˆé«˜èŒå‡æœ¬è¯¾é¢˜ä½¿ç”¨ï¼‰',
+  `school_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å…³è”å­¦æ ¡IDï¼ˆ3+1/å®éªŒç­è¯¾é¢˜ä½¿ç”¨ï¼‰',
+  `guidance_direction` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'æŒ‡å¯¼æ–¹å‘/ä¸“ä¸š',
+  `direction_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¸“ä¸šæ–¹å‘ID',
+  `major_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¸“ä¸šID',
+  `background_significance` text COLLATE utf8mb4_unicode_ci COMMENT 'é€‰é¢˜èƒŒæ™¯ä¸æ„ä¹‰ï¼ˆâ‰¥150å­—ï¼‰',
+  `content_summary` text COLLATE utf8mb4_unicode_ci COMMENT 'è¯¾é¢˜å†…å®¹ç®€è¿°ï¼ˆâ‰¥150å­—ï¼‰',
+  `professional_training` text COLLATE utf8mb4_unicode_ci COMMENT 'ä¸“ä¸šçŸ¥è¯†ç»¼åˆè®­ç»ƒæƒ…å†µï¼ˆâ‰¥100å­—ï¼‰',
+  `development_environment` json DEFAULT NULL COMMENT 'å¼€å‘ç¯å¢ƒ(å·¥å…·)ï¼ŒJSONæ ¼å¼',
+  `workload_weeks` int DEFAULT '17' COMMENT 'å·¥ä½œé‡æ€»å‘¨æ•°',
+  `workload_detail` json DEFAULT NULL COMMENT 'å·¥ä½œé‡æ˜ç»†ï¼ŒJSONæ ¼å¼',
+  `schedule_requirements` json DEFAULT NULL COMMENT 'ä»»åŠ¡ä¸è¿›åº¦è¦æ±‚ï¼ŒJSONæ ¼å¼',
+  `topic_references` json DEFAULT NULL COMMENT 'ä¸»è¦å‚è€ƒæ–‡çŒ®ï¼ŒJSONæ ¼å¼',
+  `start_date` date DEFAULT NULL COMMENT 'èµ·æ­¢æ—¥æœŸ-å¼€å§‹',
+  `end_date` date DEFAULT NULL COMMENT 'èµ·æ­¢æ—¥æœŸ-ç»“æŸ',
+  `remark` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å¤‡æ³¨',
+  `creator_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'åˆ›å»ºäºº(ä¼ä¸šæ•™å¸ˆID)',
+  `college_leader_sign` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å­¦é™¢è´Ÿè´£äººç­¾åï¼ˆå›¾ç‰‡URLï¼‰',
+  `college_leader_sign_time` datetime DEFAULT NULL COMMENT 'å­¦é™¢è´Ÿè´£äººç­¾åæ—¶é—´',
+  `enterprise_leader_sign` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¼ä¸šè´Ÿè´£äººç­¾åï¼ˆå›¾ç‰‡URLï¼‰',
+  `enterprise_leader_sign_time` datetime DEFAULT NULL COMMENT 'ä¼ä¸šè´Ÿè´£äººç­¾åæ—¶é—´',
+  `enterprise_teacher_sign` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¼ä¸šæŒ‡å¯¼æ•™å¸ˆç­¾åï¼ˆå›¾ç‰‡URLï¼‰',
+  `enterprise_teacher_sign_time` datetime DEFAULT NULL COMMENT 'ä¼ä¸šæŒ‡å¯¼æ•™å¸ˆç­¾åæ—¶é—´',
+  `review_status` tinyint DEFAULT '0' COMMENT 'å®¡æŸ¥çŠ¶æ€ï¼ˆ0-è‰ç¨¿ 1-å¾…é¢„å®¡ 2-é¢„å®¡é€šè¿‡ 3-é¢„å®¡éœ€ä¿®æ”¹ 4-åˆå®¡é€šè¿‡ 5-åˆå®¡éœ€ä¿®æ”¹ 6-ç»ˆå®¡é€šè¿‡ 7-ç»ˆå®¡ä¸é€šè¿‡ï¼‰',
+  `is_submitted` tinyint DEFAULT '0' COMMENT 'æ˜¯å¦å·²æäº¤ï¼ˆ0-æœªæäº¤ 1-å·²æäº¤ï¼‰',
+  `deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`topic_id`),
+  UNIQUE KEY `uk_topic_title` (`topic_title`),
+  KEY `idx_topic_category` (`topic_category`),
+  KEY `idx_topic_type` (`topic_type`),
+  KEY `idx_enterprise_id` (`enterprise_id`),
+  KEY `idx_creator_id` (`creator_id`),
+  KEY `idx_review_status` (`review_status`),
+  KEY `idx_is_submitted` (`is_submitted`),
+  KEY `idx_school_id` (`school_id`),
+  KEY `idx_direction_id` (`direction_id`),
+  KEY `idx_major_id` (`major_id`),
+  CONSTRAINT `fk_topic_creator` FOREIGN KEY (`creator_id`) REFERENCES `user_info` (`user_id`),
+  CONSTRAINT `fk_topic_enterprise` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise_info` (`enterprise_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='è¯¾é¢˜ä¿¡æ¯è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `topic_info`
+--
+
+LOCK TABLES `topic_info` WRITE;
+/*!40000 ALTER TABLE `topic_info` DISABLE KEYS */;
+INSERT INTO `topic_info` VALUES ('2025733423934504962','åŸºäºSpring Bootä¸Vueçš„æ¯•è®¾è¿‡ç¨‹ç®¡ç†ä¸è´¨é‡ç›‘æ§ç³»ç»Ÿçš„è®¾è®¡ä¸å®ç°',1,1,1,'','E002',NULL,'',NULL,NULL,'éšç€æˆ‘å›½é«˜ç­‰æ•™è‚²è§„æ¨¡çš„ä¸æ–­æ‰©å¤§ä¸æ•™å­¦æ”¹é©çš„æŒç»­æ·±åŒ–ï¼Œæœ¬ç§‘æ¯•ä¸šè®¾è®¡ï¼ˆè®ºæ–‡ï¼‰ä½œä¸ºè¡¡é‡å­¦ç”Ÿç»¼åˆç´ è´¨ä¸å®è·µåˆ›æ–°èƒ½åŠ›çš„å…³é”®ç¯èŠ‚ï¼Œå…¶ç®¡ç†å·¥ä½œçš„å¤æ‚æ€§ä¸é‡è¦æ€§æ—¥ç›Šå‡¸æ˜¾ã€‚ç„¶è€Œï¼Œç›®å‰ç°æœ‰æ¯•è®¾ç³»ç»Ÿç¼ºå°‘ç»´æŠ¤ä¸æ›´æ–°ï¼Œå¯¼è‡´å…¼å®¹æ€§ä¸ç”¨æˆ·ä½“éªŒä¸ä½³ï¼›å¹¶ä¸”è¿‡ç¨‹ç›‘ç®¡è–„å¼±ï¼Œè´¨é‡éš¾ä»¥æ§åˆ¶ï¼Œè¿˜æœ‰å­¦ç”Ÿã€æ•™å¸ˆã€å­¦é™¢ç®¡ç†å‘˜ä¹‹é—´çš„ä¿¡æ¯ä¸å¯¹ç§°é—®é¢˜çªå‡ºã€‚å­¦ç”Ÿéš¾ä»¥å…¨é¢äº†è§£è¯¾é¢˜ä¿¡æ¯ã€é€‰æ‹©å¿ƒä»ªçš„å¯¼å¸ˆï¼›æ•™å¸ˆæ— æ³•é«˜æ•ˆåœ°ç®¡ç†æ‰€æŒ‡å¯¼çš„å¤šåå­¦ç”Ÿï¼›å­¦é™¢å±‚é¢åˆ™éš¾ä»¥å®è§‚æŠŠæ§å…¨é™¢æ¯•è®¾å·¥ä½œçš„æ•´ä½“è¿›åº¦ä¸è´¨é‡åˆ†å¸ƒã€‚æœ¬è¯¾é¢˜æ—¨åœ¨è®¾è®¡å¹¶å®ç°ä¸€ä¸ªåŸºäºSpring Bootåç«¯ä¸Vueå‰ç«¯çš„å‰åç«¯åˆ†ç¦»çš„â€œæ¯•è®¾è¿‡ç¨‹ç®¡ç†ä¸è´¨é‡ç›‘æ§ç³»ç»Ÿâ€ï¼Œå…¶æ„ä¹‰ä¸»è¦ä½“ç°åœ¨ï¼šå¼ºåŒ–è¿‡ç¨‹ç›‘æ§ï¼Œä¿éšœæ•™å­¦è´¨é‡ï¼Œæé«˜ç³»ç»Ÿæ€§èƒ½ï¼Œå¹¶å¯¹ç³»ç»Ÿè¿›è¡Œä¼˜åŒ–å’Œæ‰©å±•ã€‚','æœ¬ç³»ç»Ÿæ—¨åœ¨é€šè¿‡æ¨¡å—åŒ–è®¾è®¡ï¼Œå®ç°å¯¹æ¯•ä¸šè®¾è®¡å…¨ç”Ÿå‘½å‘¨æœŸçš„ç²¾ç»†åŒ–ç®¡ç†å’Œæœ‰æ•ˆè´¨é‡ç›‘æ§ã€‚ç³»ç»Ÿé‡‡ç”¨å‰åç«¯åˆ†ç¦»æ¶æ„ï¼Œåç«¯ä½¿ç”¨Spring Bootï¼Œå‰ç«¯é‡‡ç”¨Vueæ„å»ºåŠ¨æ€ã€å“åº”å¼çš„ç”¨æˆ·ç•Œé¢ï¼Œæ•°æ®åº“é€‰ç”¨MySQLã€‚å›´ç»•å­¦ç”Ÿã€æŒ‡å¯¼æ•™å¸ˆã€é«˜æ ¡å¯¼å¸ˆå’Œç³»ç»Ÿç®¡ç†å‘˜å››ç±»æ ¸å¿ƒç”¨æˆ·ï¼Œç³»ç»Ÿä¸»è¦åˆ’åˆ†ä¸ºä»¥ä¸‹åŠŸèƒ½æ¨¡å—:\n(1)æµç¨‹é©±åŠ¨ä¸ä»»åŠ¡ç®¡ç†å­æ¨¡å—:ç³»ç»Ÿå¼ºåˆ¶é©±åŠ¨æ¯•è®¾å…³é”®æµç¨‹ã€‚æ•™å¸ˆåœ¨çº¿ä¸‹è¾¾ã€Šä»»åŠ¡ä¹¦ã€‹ï¼Œå­¦ç”Ÿæäº¤ã€Šå¼€é¢˜æŠ¥å‘Šã€‹åï¼Œç³»ç»ŸçŠ¶æ€æ›´æ–°ä¸ºâ€œè¿›è¡Œä¸­â€ã€‚ç³»ç»Ÿä¸ºå­¦ç”Ÿå’Œæ•™å¸ˆç”Ÿæˆæ¸…æ™°çš„ä»»åŠ¡æ—¶é—´çº¿ï¼ˆTimelineï¼‰ï¼Œæ˜ç¡®æ˜¾ç¤ºå„é˜¶æ®µï¼ˆå¼€é¢˜ã€ä¸­æœŸã€åˆç¨¿ã€ç»ˆç¨¿ï¼‰çš„èµ·æ­¢æ—¥æœŸå’Œå®ŒæˆçŠ¶æ€ã€‚\n(2)è¿‡ç¨‹æ–‡æ¡£åœ¨çº¿ç®¡ç†å­æ¨¡å—:å­¦ç”Ÿéœ€å®šæœŸï¼ˆå¦‚æ¯å‘¨/æ¯åŒå‘¨ï¼‰åœ¨çº¿æäº¤ã€Šå·¥ä½œå‘¨å¿—ã€‹ï¼Œæ±‡æŠ¥è¿›å±•ã€é‡åˆ°çš„é—®é¢˜å’Œä¸‹ä¸€æ­¥è®¡åˆ’ã€‚åœ¨ä¸­æœŸå’ŒåæœŸï¼Œåœ¨çº¿æäº¤ã€Šä¸­æœŸæ£€æŸ¥æŠ¥å‘Šã€‹å’Œã€Šè®ºæ–‡åˆç¨¿ã€‹ã€‚\n(3)è¿›åº¦å¯è§†åŒ–ç›‘æ§å­æ¨¡å—:ä»¥å¡ç‰‡æˆ–åˆ—è¡¨å½¢å¼å±•ç¤ºæ‰€æŒ‡å¯¼çš„æ¯ä½å­¦ç”Ÿçš„å½“å‰è¿›åº¦çŠ¶æ€ï¼ˆå¦‚é€‰é¢˜é˜¶æ®µã€å¼€é¢˜ç­”è¾©ã€ä¸­æœŸç­”è¾©ã€æœ€ç»ˆç­”è¾©ç­‰ï¼‰ã€‚\n(4)ç›‘æ§é¢„è­¦ä¸å¹²é¢„æ¨¡å—:ç³»ç»Ÿå¯è‡ªåŠ¨å‘è¯¥ç”Ÿå‘é€æé†’æ¶ˆæ¯ï¼Œå¹¶æé†’æŒ‡å¯¼æ•™å¸ˆè¿›è¡Œä¸»åŠ¨å¹²é¢„ã€‚é€šè¿‡ä»¥ä¸Šæ¨¡å—çš„ååŒå·¥ä½œï¼Œå°†å®ç°å¯¹æ¯•è®¾è¿‡ç¨‹ä»å¾®è§‚ä¸ªä½“åˆ°å®è§‚æ•´ä½“çš„å…¨æ–¹ä½ã€æ•°æ®é©±åŠ¨çš„ç®¡ç†ä¸ç›‘æ§ï¼Œä»æ ¹æœ¬ä¸Šæå‡æ¯•ä¸šè®¾è®¡çš„è´¨é‡ä¸ç®¡ç†æ°´å¹³ã€‚','é€šè¿‡å¯¹è½¯ä»¶å·¥ç¨‹ç”Ÿå‘½å‘¨æœŸï¼ˆéœ€æ±‚åˆ†æã€ç³»ç»Ÿè®¾è®¡ã€æŠ€æœ¯é€‰å‹ã€ç¼–ç å®ç°ã€æµ‹è¯•éƒ¨ç½²ï¼‰ã€åç«¯å¼€å‘ä¸­Javaè¯­è¨€ã€MySQLæ•°æ®åº“ã€Spring Bootæ¡†æ¶çš„ç»¼åˆåº”ç”¨ä¸å¼ºåŒ–ï¼Œä»¥åŠå‰ç«¯å¼€å‘ä¸­Vueæ¡†æ¶ã€Ant Designç»„ä»¶åº“çš„ä½¿ç”¨å’Œå‰åç«¯äº’é€šä¸è®¾è®¡ç­‰ä¸“ä¸šçŸ¥è¯†çš„è®­ç»ƒï¼Œè¾¾åˆ°å…¨é¢ç³»ç»Ÿåœ°ç»¼åˆåº”ç”¨ä¸“ä¸šçŸ¥è¯†ã€å¿«é€Ÿå¯åŠ¨å‰ç«¯é¡¹ç›®ã€å¿«é€Ÿè®¾è®¡ä¸æ„å»ºé¡µé¢ã€å®ç°å‰åç«¯æœ‰æ•ˆäº’é€šä¸è®¾è®¡çš„èƒ½åŠ›ã€‚','{\"content\": \"å·¥å…·ï¼šIntellij IDEAã€VSCode\\næ¡†æ¶ï¼šåç«¯ï¼šSpring Bootã€MyBatis-Plus\\nå‰ç«¯:Vue Ant Designç»„ä»¶åº“\\næ•°æ®åº“ï¼šMySQL,Redis\\nç‰ˆæœ¬ç®¡ç†å·¥å…·ï¼šGit\"}',16,'[{\"content\": \"ï¼ˆ1ï¼‰åˆ†ææ˜ç¡®éœ€æ±‚ï¼Œç†æ¸…ä¸šåŠ¡æµç¨‹ï¼Œ2å‘¨\\nï¼ˆ2ï¼‰å‰åç«¯ç³»ç»Ÿåˆæ­¥è®¾è®¡ï¼Œ2å‘¨\\nï¼ˆ3ï¼‰æ•°æ®åº“åˆæ­¥è®¾è®¡ï¼Œ1å‘¨\\nï¼ˆ4ï¼‰å‰åç«¯ç³»ç»Ÿå¼€å‘ï¼Œ4å‘¨\\nï¼ˆ5ï¼‰æµ‹è¯•ç³»ç»Ÿæ¥å£ï¼Œ1å‘¨\\nï¼ˆ6ï¼‰å‰åç«¯äº’é€šä¸è¿è°ƒ ï¼Œ2å‘¨\\nï¼ˆ7ï¼‰ç³»ç»Ÿä¼˜åŒ–ï¼Œ2å‘¨\\nï¼ˆ8ï¼‰ç³»ç»Ÿæ•´åˆè°ƒè¯•ï¼Œä¿®å¤bug,ç³»ç»Ÿè¿è¡Œæµç•…ï¼Œ1å‘¨\\nåˆè®¡ï¼š15å‘¨\"}]','[{\"content\": \"2025.12.22â€”â€”2026.01.04æœç´¢èµ„æ–™ï¼Œæ’°å†™å¼€é¢˜æŠ¥å‘Š\\n2021.01.05â€”â€”2026.01.11å¼€é¢˜ç­”è¾©\\n2025.01.12â€”â€”2026.03.22 é¡¹ç›®è®¾è®¡ã€å¼€å‘\\n2026.03.23â€”â€”2026.03.29ä¸­æœŸæ£€æŸ¥ï¼Œè®ºæ–‡åˆç¨¿æäº¤\\n2026.04.27â€”â€”2026.05.03è®ºæ–‡ä¿®è®¢\\n2026.05.04â€”â€”2026.05.17è¿”æ ¡ã€å®Œå–„è®ºæ–‡ã€å‡†å¤‡ç­”è¾©\\n2026.05.18â€”â€”2026.05.24 æœ€ç»ˆç­”è¾©\"}]','[{\"content\": \"[1] å¼ æ˜, ç‹ä¸½, æå»ºå›½. åŸºäºSpring Bootå’ŒVue.jsçš„æ¯•ä¸šè®¾è®¡ç®¡ç†ç³»ç»Ÿçš„è®¾è®¡ä¸å®ç°[J]. ç°ä»£è®¡ç®—æœº(ä¸“ä¸šç‰ˆ), 2022, (29): 99-103.\\n[2] åˆ˜ä¼Ÿ, èµµé™. åŸºäºå¾®æœåŠ¡æ¶æ„çš„æ¯•ä¸šè®¾è®¡è¿‡ç¨‹è´¨é‡ç›‘æ§ç³»ç»Ÿç ”ç©¶[J]. ä¿¡æ¯æŠ€æœ¯ä¸ä¿¡æ¯åŒ–, 2023, (04): 52-55.\\n[3] é™ˆå¿—å¼º, å‘¨é¢–. åŸºäºSpring Boot+Vueçš„æœ¬ç§‘ç”Ÿæ¯•ä¸šè®¾è®¡å…¨è¿‡ç¨‹ç®¡ç†å¹³å°æ„å»º[J]. è½¯ä»¶å¯¼åˆŠ, 2021, 20(11): 148-152.\\n[4] æä»ç’, æ±¤ç¾½å¼º. è½»é‡çº§Java EEä¼ä¸šåº”ç”¨å®æˆ˜: Spring Boot+Spring Cloud+Vue.js[J]. åŒ—äº¬: ç”µå­å·¥ä¸šå‡ºç‰ˆç¤¾, 2023.\\n[5] é™ˆæ™“å³°, ç‹ç’. åŸºäºå‰åç«¯åˆ†ç¦»çš„æ¯•ä¸šè®¾è®¡è´¨é‡ç›‘æ§ä½“ç³»ç ”ç©¶ä¸åº”ç”¨[J]. ç°ä»£ç”µå­æŠ€æœ¯, 2022, 45(14): 105-109.\\n[6] åˆ˜æ´‹, æé™, å¼ è¶…. åŸºäºSpring Boot+Vue.jsçš„æ¯•ä¸šè®¾è®¡è¿‡ç¨‹ç®¡ç†ç³»ç»Ÿçš„è®¾è®¡ä¸å®ç°[J]. è½¯ä»¶å·¥ç¨‹, 2023, 26(8): 28-32.\\n[7] èµµä¸€é¸£, å­™æ‚¦. æ™ºèƒ½åŒ–æ¯•ä¸šè®¾è®¡ç®¡ç†å¹³å°çš„ç ”ç©¶ä¸æ„å»ºâ€”â€”ä»¥Spring Bootå’ŒVue.jsä¸ºæ ¸å¿ƒ[J]. ä¿¡æ¯æŠ€æœ¯ä¸ä¿¡æ¯åŒ–, 2023, (05): 60-63.\\n[8] é«˜å¤©å“, é»„æ™“ç‡•. åŸºäºå¾®æœåŠ¡ä¸å‰åç«¯åˆ†ç¦»çš„æ•™å­¦è¿‡ç¨‹ç®¡ç†ç³»ç»Ÿ[J]. è®¡ç®—æœºç³»ç»Ÿåº”ç”¨, 2020, 29(07): 85-90.\\n[9] èƒ¡æ³¢, æ¨å°ç‡•. åŸºäºB/Sæ¶æ„çš„å®è·µæ•™å­¦è´¨é‡ç®¡ç†ä¿¡æ¯ç³»ç»Ÿè®¾è®¡[J]. å®éªŒæŠ€æœ¯ä¸ç®¡ç†, 2021, 38(04): 255-259.\\n[10] ç‹ä»å–œ, é‡‘æ³¢. åŸºäºSpring Bootä¸Vueçš„å‰åç«¯åˆ†ç¦»åº”ç”¨å®‰å…¨æ¶æ„è®¾è®¡[J]. è®¡ç®—æœºåº”ç”¨ä¸è½¯ä»¶, 2022, 39(11): 32-37.\"}]',NULL,NULL,'','1',NULL,NULL,NULL,NULL,NULL,NULL,6,1,0,'2026-02-23 08:44:19','2026-02-28 23:46:14'),('2030185910938710018','åŸºäºSpring Bootä¸Vueçš„æ¸¸æ³³é¦†ç®¡ç†ç³»ç»Ÿ',1,1,1,'','E001',NULL,'è½¯ä»¶å·¥ç¨‹',NULL,NULL,'éšç€å…¨æ°‘å¥èº«ç†å¿µçš„æ™®åŠï¼Œæ¸¸æ³³é¦†æˆä¸ºå¤§ä¼—ä¼‘é—²å¥èº«çš„é‡è¦åœºæ‰€ï¼Œä¼ ç»Ÿæ¸¸æ³³é¦†çš„äººå·¥ç®¡ç†æ¨¡å¼å­˜åœ¨æ•ˆç‡ä½ä¸‹ã€ä¿¡æ¯ç»Ÿè®¡ä¸åŠæ—¶ã€æœåŠ¡æµç¨‹ä¸è§„èŒƒç­‰é—®é¢˜ï¼Œå¦‚ä¼šå‘˜ä¿¡æ¯äººå·¥ç™»è®°ã€é—¨ç¥¨å”®å–çº¿ä¸‹æ“ä½œã€åœºé¦†é¢„çº¦æ— ç³»ç»ŸåŒ–ç®¡ç†ã€æ°´è´¨ä¸è®¾å¤‡ç»´æŠ¤è®°å½•é›¶æ•£ç­‰ï¼Œä¸ä»…å¢åŠ äº†ç®¡ç†äººå‘˜çš„å·¥ä½œè´Ÿæ‹…ï¼Œä¹Ÿé™ä½äº†ç”¨æˆ·çš„æ¶ˆè´¹ä½“éªŒï¼ŒåŒæ—¶éš¾ä»¥å®ç°åœºé¦†è¿è¥æ•°æ®çš„ç²¾ç»†åŒ–åˆ†æä¸ç®¡ç†ã€‚æœ¬è¯¾é¢˜æ—¨åœ¨è®¾è®¡å¹¶å®ç°ä¸€ä¸ªåŸºäº Spring Boot åç«¯ã€Vue å‰ç«¯çš„å‰åç«¯åˆ†ç¦»å¼æ¸¸æ³³é¦†ç®¡ç†ç³»ç»Ÿï¼Œé€šè¿‡ç³»ç»ŸåŒ–ã€æ•°å­—åŒ–çš„ç®¡ç†æ–¹å¼ï¼Œè§£å†³ä¼ ç»Ÿç®¡ç†çš„ç—›ç‚¹ï¼Œå®ç°æ¸¸æ³³é¦†ä¼šå‘˜ã€ç¥¨åŠ¡ã€åœºé¦†ã€è®¾å¤‡ã€æ°´è´¨ã€æ¶ˆè´¹ç­‰å…¨æµç¨‹çš„æ™ºèƒ½åŒ–ç®¡ç†ï¼Œæå‡åœºé¦†è¿è¥æ•ˆç‡ä¸æœåŠ¡è´¨é‡ï¼Œä¸ºæ¸¸æ³³é¦†è¿è¥æ–¹æä¾›æ•°æ®åŒ–çš„ç®¡ç†å†³ç­–ä¾æ®ã€‚\næœ¬ç³»ç»Ÿé‡‡ç”¨å‰åç«¯åˆ†ç¦»æ¶æ„ï¼Œåç«¯ä½¿ç”¨ Spring Boot æ­å»ºé«˜æ•ˆã€ç¨³å®šçš„æœåŠ¡æ¥å£ï¼Œå‰ç«¯é‡‡ç”¨ Vue æ„å»ºåŠ¨æ€ã€å“åº”å¼çš„ç”¨æˆ·æ“ä½œç•Œé¢ï¼Œæ•°æ®åº“é€‰ç”¨ MySQL å­˜å‚¨ä¸šåŠ¡æ•°æ®ï¼ŒRedis æå‡ç³»ç»Ÿç¼“å­˜ä¸è®¿é—®æ€§èƒ½ã€‚å›´ç»•æ™®é€šç”¨æˆ·ã€ä¼šå‘˜ç”¨æˆ·ã€æ¸¸æ³³é¦†ç®¡ç†å‘˜ã€ç³»ç»Ÿè¶…çº§ç®¡ç†å‘˜å››ç±»æ ¸å¿ƒç”¨æˆ·ï¼Œé€šè¿‡æ¨¡å—åŒ–è®¾è®¡å®ç°æ¸¸æ³³é¦†æ—¥å¸¸è¿è¥çš„å…¨æµç¨‹ç®¡ç†ï¼Œæ‰“é€ æ“ä½œä¾¿æ·ã€åŠŸèƒ½å®Œå–„ã€æ•°æ®å¯è§†åŒ–çš„æ¸¸æ³³é¦†ç®¡ç†å¹³å°ã€‚','ç³»ç»Ÿå›´ç»•æ¸¸æ³³é¦†è¿è¥ç®¡ç†çš„æ ¸å¿ƒä¸šåŠ¡ï¼Œåˆ’åˆ†å…­å¤§æ ¸å¿ƒåŠŸèƒ½æ¨¡å—ï¼Œå„æ¨¡å—åŠŸèƒ½å¦‚ä¸‹ï¼š\n(1) ä¼šå‘˜ä¸ç”¨æˆ·ç®¡ç†å­æ¨¡å—ï¼šå®ç°æ™®é€šç”¨æˆ·æ³¨å†Œç™»å½•ã€ä¼šå‘˜ç­‰çº§å¼€é€šä¸ç»­è´¹ã€ä¼šå‘˜ä¿¡æ¯æ¡£æ¡ˆç®¡ç†ï¼ˆå«æ¶ˆè´¹è®°å½•ã€ä¸ªäººä¿¡æ¯ï¼‰ã€ä¼šå‘˜æƒç›ŠæŸ¥è¯¢ï¼Œæ”¯æŒç®¡ç†å‘˜å¯¹ç”¨æˆ·ä¸ä¼šå‘˜ä¿¡æ¯çš„å¢åˆ æ”¹æŸ¥ã€æƒé™åˆ†é…åŠä¿¡æ¯å®¡æ ¸ã€‚\n(2) ç¥¨åŠ¡ä¸é¢„çº¦ç®¡ç†å­æ¨¡å—ï¼šæä¾›çº¿ä¸Šé—¨ç¥¨è´­ä¹°ã€åœºé¦†æ—¶æ®µé¢„çº¦ï¼ˆæ³³æ± ã€æ›´è¡£å®¤ã€åŸ¹è®­åœºåœ°ï¼‰ã€é¢„çº¦ä¿¡æ¯ä¿®æ”¹ä¸å–æ¶ˆåŠŸèƒ½ï¼Œç®¡ç†å‘˜å¯è®¾ç½®é—¨ç¥¨ç±»å‹ä¸ä»·æ ¼ã€ç®¡æ§åœºé¦†é¢„çº¦æ—¶æ®µä¸å®¹é‡ï¼Œç³»ç»Ÿè‡ªåŠ¨ç»Ÿè®¡ç¥¨åŠ¡é”€å”®ä¸åœºé¦†é¢„çº¦æ•°æ®ã€‚\n(3) åœºé¦†ä¸è®¾å¤‡ç®¡ç†å­æ¨¡å—ï¼šå¯¹æ¸¸æ³³é¦†å„åŠŸèƒ½åŒºåŸŸï¼ˆæ³³æ± åŒºã€åŸ¹è®­åŒºã€ä¼‘é—²åŒºï¼‰è¿›è¡ŒçŠ¶æ€ç®¡ç†ï¼Œå®ç°è®¾å¤‡ï¼ˆè¿‡æ»¤ç³»ç»Ÿã€æ¶ˆæ¯’è®¾å¤‡ã€æ•‘ç”Ÿè®¾å¤‡ï¼‰çš„æ¡£æ¡ˆå½•å…¥ã€ç»´æŠ¤è®°å½•æäº¤ã€æ•…éšœæŠ¥ä¿®ä¸å¤„ç†è·Ÿè¸ªï¼Œç³»ç»Ÿç”Ÿæˆè®¾å¤‡ç»´æŠ¤æ—¶é—´çº¿ï¼Œæé†’ç®¡ç†å‘˜å®šæœŸç»´æŠ¤ã€‚\n(4) æ°´è´¨ç›‘æµ‹ä¸ç®¡ç†å­æ¨¡å—ï¼šç®¡ç†äººå‘˜å®šæœŸåœ¨çº¿æäº¤æ³³æ± æ°´è´¨æ£€æµ‹æ•°æ®ï¼ˆPH å€¼ã€ä½™æ°¯å«é‡ã€æ°´æ¸©ç­‰ï¼‰ï¼Œç³»ç»Ÿç”Ÿæˆæ°´è´¨ç›‘æµ‹æŠ¥è¡¨ä¸è¶‹åŠ¿å›¾ï¼Œå½“æ°´è´¨æŒ‡æ ‡è¶…æ ‡æ—¶ï¼Œè‡ªåŠ¨å‘é€é¢„è­¦æé†’ï¼ŒåŒæ—¶è®°å½•æ°´è´¨è°ƒèŠ‚ä¸æ¶ˆæ¯’æ“ä½œæ—¥å¿—ã€‚\n(5) æ¶ˆè´¹ä¸è´¢åŠ¡ç®¡ç†å­æ¨¡å—ï¼šæ•´åˆçº¿ä¸Šçº¿ä¸‹æ¶ˆè´¹è®°å½•ï¼ˆé—¨ç¥¨ã€ä¼šå‘˜ã€åŸ¹è®­ã€å•†å“æ¶ˆè´¹ï¼‰ï¼Œå®ç°æ¶ˆè´¹æ˜ç»†æŸ¥è¯¢ã€è´¢åŠ¡æŠ¥è¡¨è‡ªåŠ¨ç”Ÿæˆï¼ˆæ—¥ / æœˆ / å¹´è¥æ”¶ï¼‰ï¼Œæ”¯æŒç®¡ç†å‘˜å¯¹æ¶ˆè´¹æ•°æ®çš„ç»Ÿè®¡ã€å¯¼å‡ºä¸åˆ†æï¼Œç²¾å‡†æŠŠæ§åœºé¦†è¿è¥æ”¶ç›Šã€‚\n(6) æ•°æ®å¯è§†åŒ–ä¸é¢„è­¦å­æ¨¡å—ï¼šä»¥å›¾è¡¨ï¼ˆæŸ±çŠ¶å›¾ã€æŠ˜çº¿å›¾ã€é¥¼å›¾ï¼‰å½¢å¼å±•ç¤ºåœºé¦†è¿è¥æ ¸å¿ƒæ•°æ®ï¼ˆè¥æ”¶ã€ä¼šå‘˜å¢é•¿ã€åœºé¦†ä½¿ç”¨ç‡ã€æ°´è´¨åˆæ ¼ç‡ï¼‰ï¼Œé’ˆå¯¹è®¾å¤‡ç»´æŠ¤åˆ°æœŸã€æ°´è´¨è¶…æ ‡ã€é¢„çº¦æ»¡é¢ç­‰æƒ…å†µï¼Œç³»ç»Ÿè‡ªåŠ¨å‘ç›¸å…³ç®¡ç†äººå‘˜å‘é€æé†’æ¶ˆæ¯ï¼Œå®ç°è¿è¥é£é™©çš„æå‰å¹²é¢„ã€‚\né€šè¿‡å„æ¨¡å—çš„ååŒå·¥ä½œï¼Œå®ç°æ¸¸æ³³é¦†ä»ç”¨æˆ·æœåŠ¡åˆ°è¿è¥ç®¡ç†çš„å…¨æ–¹ä½ã€æ•°æ®é©±åŠ¨çš„æ™ºèƒ½åŒ–ç®¡æ§ï¼Œå½»åº•è§£å†³ä¼ ç»Ÿäººå·¥ç®¡ç†çš„å¼Šç«¯ï¼Œæå‡åœºé¦†è¿è¥æ•ˆç‡ä¸æœåŠ¡ä½“éªŒã€‚','è¯¥è¯¾é¢˜è¦†ç›–è½¯ä»¶å·¥ç¨‹ä»éœ€æ±‚åˆ†æã€ç³»ç»Ÿè®¾è®¡ã€æŠ€æœ¯é€‰å‹ã€ç¼–ç å®ç°åˆ°æµ‹è¯•éƒ¨ç½²çš„å®Œæ•´ç”Ÿå‘½å‘¨æœŸï¼Œæ˜¯å¯¹è½¯ä»¶å·¥ç¨‹ä¸“ä¸šæ‰€å­¦çŸ¥è¯†çš„å…¨é¢ã€ç³»ç»Ÿçš„ç»¼åˆè®­ç»ƒä¸å®è·µã€‚\nåç«¯å¼€å‘ä¸­ï¼Œç»¼åˆåº”ç”¨ Java ç¼–ç¨‹è¯­è¨€ã€MySQL æ•°æ®åº“è®¾è®¡ä¸ä¼˜åŒ–ã€Spring Boot æ¡†æ¶æ­å»ºæœåŠ¡ã€MyBatis-Plus å®ç°æ•°æ®æŒä¹…åŒ–ã€Redis åšç¼“å­˜ä¼˜åŒ–ï¼Œå¼ºåŒ–åç«¯æ¥å£å¼€å‘ã€æƒé™æ§åˆ¶ã€ä¸šåŠ¡é€»è¾‘å®ç°çš„ä¸“ä¸šèƒ½åŠ›ï¼›\nå‰ç«¯å¼€å‘ä¸­ï¼Œä½¿ç”¨ Vue æ¡†æ¶æ„å»ºå‰ç«¯é¡¹ç›®ï¼Œç»“åˆ Ant Design ç»„ä»¶åº“å®ç°é¡µé¢å¿«é€Ÿè®¾è®¡ä¸äº¤äº’å¼€å‘ï¼ŒæŒæ¡å‰ç«¯è·¯ç”±ã€ç»„ä»¶å°è£…ã€å‰åç«¯æ•°æ®äº¤äº’çš„æ ¸å¿ƒæŠ€æœ¯ï¼›\nåŒæ—¶èåˆè½¯ä»¶è®¾è®¡æ¨¡å¼ã€æ•°æ®åº“å»ºæ¨¡ã€å‰åç«¯åˆ†ç¦»æ¶æ„è®¾è®¡ã€ç³»ç»Ÿæµ‹è¯•ä¸ä¼˜åŒ–ç­‰ä¸“ä¸šçŸ¥è¯†ï¼Œå®ç°å‰åç«¯çš„æ— ç¼äº’é€šä¸ç³»ç»Ÿæ•´ä½“è®¾è®¡ï¼Œæ˜¯å¯¹å­¦ç”Ÿä¸“ä¸šç¼–ç¨‹èƒ½åŠ›ã€ç³»ç»Ÿè®¾è®¡èƒ½åŠ›ã€é—®é¢˜è§£å†³èƒ½åŠ›çš„æå…·ä»·å€¼çš„ç»¼åˆè®­ç»ƒä¸å…¨é¢è€ƒæ ¸ã€‚','{\"content\": \"å·¥å…·ï¼šIDEAã€VS Code\\næ¡†æ¶ï¼šåç«¯ Spring Bootã€MyBatis-Plusï¼›å‰ç«¯ Vueã€Ant Design ç»„ä»¶åº“\\næ•°æ®åº“ï¼šMySQLã€Redis\\nç‰ˆæœ¬ç®¡ç†å·¥å…·ï¼šGit\"}',16,'[{\"content\": \"(1) éœ€æ±‚åˆ†æä¸ä¸šåŠ¡æµç¨‹æ¢³ç†ï¼Œ2 å‘¨\\n(2) å‰åç«¯ç³»ç»Ÿæ•´ä½“æ¶æ„è®¾è®¡ï¼Œ2 å‘¨\\n(3) æ•°æ®åº“è¡¨ç»“æ„è®¾è®¡ä¸å»ºæ¨¡ï¼Œ1 å‘¨\\n(4) å‰åç«¯å„åŠŸèƒ½æ¨¡å—å¼€å‘ï¼Œ6 å‘¨\\n(5) ç³»ç»Ÿæ¥å£æµ‹è¯•ã€å‰åç«¯è”è°ƒï¼Œ1 å‘¨\\n(6) ç³»ç»ŸåŠŸèƒ½ä¼˜åŒ–ä¸æ€§èƒ½è°ƒä¼˜ï¼Œ2 å‘¨\\n(7) ç³»ç»Ÿæ•´ä½“æ•´åˆè°ƒè¯•ã€Bug ä¿®å¤ä¸ä¸Šçº¿å‡†å¤‡ï¼Œ1 å‘¨\\nåˆè®¡ï¼š15 å‘¨\"}]','[{\"content\": \"2025.12.22--2026.01.04 æœç´¢èµ„æ–™ï¼Œæ’°å†™å¼€é¢˜æŠ¥å‘Š\\n2026.01.05--2026.01.11 å¼€é¢˜ç­”è¾©\\n2026.01.12--2026.03.22 é¡¹ç›®è®¾è®¡ã€å¼€å‘\\n2026.03.23--2026.03.29 ä¸­æœŸæ£€æŸ¥ï¼Œè®ºæ–‡åˆç¨¿æäº¤\\n2026.03.30--2026.04.30 ç³»ç»Ÿä¼˜åŒ–ã€è®ºæ–‡ä¿®æ”¹å®Œå–„\\n2026.05.01--2026.05.09 è®ºæ–‡å®šç¨¿ã€ç­”è¾©å‡†å¤‡\"}]','[{\"content\": \"[1] å¼ æ˜ï¼Œç‹ä¸½ï¼Œæå»ºå›½ã€‚åŸºäº Spring Boot å’Œ Vue.js çš„ç®¡ç†ç³»ç»Ÿçš„è®¾è®¡ä¸å®ç° [J]. ç°ä»£è®¡ç®—æœº (ä¸“ä¸šç‰ˆ), 2022, (29): 99-103.\\n[2] åˆ˜ä¼Ÿï¼Œèµµé™ã€‚åŸºäºå¾®æœåŠ¡æ¶æ„çš„åœºé¦†è¿è¥ç®¡ç†ç³»ç»Ÿç ”ç©¶ [J]. ä¿¡æ¯æŠ€æœ¯ä¸ä¿¡æ¯åŒ–ï¼Œ2023, (04): 52-55.\\n[3] é™ˆå¿—å¼ºï¼Œå‘¨é¢–ã€‚åŸºäº Spring Boot+Vue çš„çº¿ä¸‹æœåŠ¡åœºæ‰€å…¨è¿‡ç¨‹ç®¡ç†å¹³å°æ„å»º [J]. è½¯ä»¶å¯¼åˆŠï¼Œ2021, 20 (11): 148-152.\\n[4] æä»ç’ï¼Œæ±¤ç¾½å¼ºã€‚è½»é‡çº§ Java EE ä¼ä¸šåº”ç”¨å®æˆ˜ Spring Boot+Spring Cloud+Vue.js [M]. åŒ—äº¬ï¼šç”µå­å·¥ä¸šå‡ºç‰ˆç¤¾ï¼Œ2023.\\n[5] é™ˆæ™“å³°ï¼Œç‹ç’ã€‚åŸºäºå‰åç«¯åˆ†ç¦»çš„åœºé¦†è¿è¥è´¨é‡ç›‘æ§ä½“ç³»ç ”ç©¶ä¸åº”ç”¨ [J]. ç°ä»£ç”µå­æŠ€æœ¯ï¼Œ2022, 45 (14):105-109.\\n[6] åˆ˜æ´‹ï¼Œæé™ï¼Œå¼ è¶…ã€‚åŸºäº Spring Boot+Vue.js çš„çº¿ä¸‹æ¶ˆè´¹åœºæ™¯ç®¡ç†ç³»ç»Ÿçš„è®¾è®¡ä¸å®ç° [J]. è½¯ä»¶å·¥ç¨‹ï¼Œ2023, 26 (8): 28-32.\\n[7] èµµä¸€é¸£ï¼Œå­™æ‚¦ã€‚æ™ºèƒ½åŒ–åœºé¦†ç®¡ç†å¹³å°çš„ç ”ç©¶ä¸æ„å»º â€”â€” ä»¥ Spring Boot å’Œ Vue.js ä¸ºæ ¸å¿ƒ [J]. ä¿¡æ¯æŠ€æœ¯ä¸ä¿¡æ¯åŒ–ï¼Œ2023,(05):60-63.\\n[8] é«˜å¤©å“ï¼Œé»„æ™“ç‡•ã€‚åŸºäºå¾®æœåŠ¡ä¸å‰åç«¯åˆ†ç¦»çš„æœåŠ¡è¡Œä¸šç®¡ç†ç³»ç»Ÿ [J]. è®¡ç®—æœºç³»ç»Ÿåº”ç”¨ï¼Œ2020, 29 (07): 85-90.\\n[9] èƒ¡æ³¢ï¼Œæ¨å°ç‡•ã€‚åŸºäº B/S æ¶æ„çš„ä½“è‚²åœºé¦†è´¨é‡ç®¡ç†ä¿¡æ¯ç³»ç»Ÿè®¾è®¡ [J]. å®éªŒæŠ€æœ¯ä¸ç®¡ç†ï¼Œ2021, 38 (04): 255-259.\\n[10] ç‹ä»å–œï¼Œé‡‘æ³¢ã€‚åŸºäº Spring Boot ä¸ Vue çš„å‰åç«¯åˆ†ç¦»åº”ç”¨å®‰å…¨æ¶æ„è®¾è®¡ [J]. è®¡ç®—æœºåº”ç”¨ä¸è½¯ä»¶ï¼Œ2022, 39 (11):32-37.\"}]',NULL,NULL,'','2024759015287861249',NULL,NULL,NULL,NULL,NULL,NULL,6,1,0,'2026-03-07 15:36:55','2026-03-07 15:36:55'),('2032774353497653250','åŸºäºSpring Bootä¸Vueçš„æ¯•è®¾ç³»ç»Ÿ',1,1,1,'','E001',NULL,'Javaåç«¯',NULL,'2028060890951094273','éšç€æˆ‘å›½é«˜ç­‰æ•™è‚²è§„æ¨¡çš„ä¸æ–­æ‰©å¤§ä¸æ•™å­¦æ”¹é©çš„æŒç»­æ·±åŒ–ï¼Œæœ¬ç§‘æ¯•ä¸šè®¾è®¡ï¼ˆè®ºæ–‡ï¼‰ä½œä¸ºè¡¡é‡å­¦ç”Ÿç»¼åˆç´ è´¨ä¸å®è·µåˆ›æ–°èƒ½åŠ›çš„å…³é”®ç¯èŠ‚ï¼Œå…¶ç®¡ç†å·¥ä½œçš„å¤æ‚æ€§ä¸é‡è¦æ€§æ—¥ç›Šå‡¸æ˜¾ã€‚ç„¶è€Œï¼Œç›®å‰ç°æœ‰æ¯•è®¾ç³»ç»Ÿç¼ºå°‘ç»´æŠ¤ä¸æ›´æ–°ï¼Œå¯¼è‡´å…¼å®¹æ€§ä¸ç”¨æˆ·ä½“éªŒä¸ä½³ï¼›å¹¶ä¸”è¿‡ç¨‹ç›‘ç®¡è–„å¼±ï¼Œè´¨é‡éš¾ä»¥æ§åˆ¶ï¼Œè¿˜æœ‰å­¦ç”Ÿã€æ•™å¸ˆã€å­¦é™¢ç®¡ç†å‘˜ä¹‹é—´çš„ä¿¡æ¯ä¸å¯¹ç§°é—®é¢˜çªå‡ºã€‚å­¦ç”Ÿéš¾ä»¥å…¨é¢äº†è§£è¯¾é¢˜ä¿¡æ¯ã€é€‰æ‹©å¿ƒä»ªçš„å¯¼å¸ˆï¼›æ•™å¸ˆæ— æ³•é«˜æ•ˆåœ°ç®¡ç†æ‰€æŒ‡å¯¼çš„å¤šåå­¦ç”Ÿï¼›å­¦é™¢å±‚é¢åˆ™éš¾ä»¥å®è§‚æŠŠæ§å…¨é™¢æ¯•è®¾å·¥ä½œçš„æ•´ä½“è¿›åº¦ä¸è´¨é‡åˆ†å¸ƒã€‚æœ¬è¯¾é¢˜æ—¨åœ¨è®¾è®¡å¹¶å®ç°ä¸€ä¸ªåŸºäºSpring Bootåç«¯ä¸Vueå‰ç«¯çš„å‰åç«¯åˆ†ç¦»çš„â€œæ¯•è®¾è¿‡ç¨‹ç®¡ç†ä¸è´¨é‡ç›‘æ§ç³»ç»Ÿâ€ï¼Œå…¶æ„ä¹‰ä¸»è¦ä½“ç°åœ¨ï¼šå¼ºåŒ–è¿‡ç¨‹ç›‘æ§ï¼Œä¿éšœæ•™å­¦è´¨é‡ï¼Œæé«˜ç³»ç»Ÿæ€§èƒ½ï¼Œå¹¶å¯¹ç³»ç»Ÿè¿›è¡Œä¼˜åŒ–å’Œæ‰©å±•ã€‚','æœ¬ç³»ç»Ÿæ—¨åœ¨é€šè¿‡æ¨¡å—åŒ–è®¾è®¡ï¼Œå®ç°å¯¹æ¯•ä¸šè®¾è®¡å…¨ç”Ÿå‘½å‘¨æœŸçš„ç²¾ç»†åŒ–ç®¡ç†å’Œæœ‰æ•ˆè´¨é‡ç›‘æ§ã€‚ç³»ç»Ÿé‡‡ç”¨å‰åç«¯åˆ†ç¦»æ¶æ„ï¼Œåç«¯ä½¿ç”¨Spring Bootï¼Œå‰ç«¯é‡‡ç”¨Vueæ„å»ºåŠ¨æ€ã€å“åº”å¼çš„ç”¨æˆ·ç•Œé¢ï¼Œæ•°æ®åº“é€‰ç”¨MySQLã€‚å›´ç»•å­¦ç”Ÿã€æŒ‡å¯¼æ•™å¸ˆã€é«˜æ ¡å¯¼å¸ˆå’Œç³»ç»Ÿç®¡ç†å‘˜å››ç±»æ ¸å¿ƒç”¨æˆ·ï¼Œç³»ç»Ÿä¸»è¦åˆ’åˆ†ä¸ºä»¥ä¸‹åŠŸèƒ½æ¨¡å—:\n(1)æµç¨‹é©±åŠ¨ä¸ä»»åŠ¡ç®¡ç†å­æ¨¡å—:ç³»ç»Ÿå¼ºåˆ¶é©±åŠ¨æ¯•è®¾å…³é”®æµç¨‹ã€‚æ•™å¸ˆåœ¨çº¿ä¸‹è¾¾ã€Šä»»åŠ¡ä¹¦ã€‹ï¼Œå­¦ç”Ÿæäº¤ã€Šå¼€é¢˜æŠ¥å‘Šã€‹åï¼Œç³»ç»ŸçŠ¶æ€æ›´æ–°ä¸ºâ€œè¿›è¡Œä¸­â€ã€‚ç³»ç»Ÿä¸ºå­¦ç”Ÿå’Œæ•™å¸ˆç”Ÿæˆæ¸…æ™°çš„ä»»åŠ¡æ—¶é—´çº¿ï¼ˆTimelineï¼‰ï¼Œæ˜ç¡®æ˜¾ç¤ºå„é˜¶æ®µï¼ˆå¼€é¢˜ã€ä¸­æœŸã€åˆç¨¿ã€ç»ˆç¨¿ï¼‰çš„èµ·æ­¢æ—¥æœŸå’Œå®ŒæˆçŠ¶æ€ã€‚\n(2)è¿‡ç¨‹æ–‡æ¡£åœ¨çº¿ç®¡ç†å­æ¨¡å—:å­¦ç”Ÿéœ€å®šæœŸï¼ˆå¦‚æ¯å‘¨/æ¯åŒå‘¨ï¼‰åœ¨çº¿æäº¤ã€Šå·¥ä½œå‘¨å¿—ã€‹ï¼Œæ±‡æŠ¥è¿›å±•ã€é‡åˆ°çš„é—®é¢˜å’Œä¸‹ä¸€æ­¥è®¡åˆ’ã€‚åœ¨ä¸­æœŸå’ŒåæœŸï¼Œåœ¨çº¿æäº¤ã€Šä¸­æœŸæ£€æŸ¥æŠ¥å‘Šã€‹å’Œã€Šè®ºæ–‡åˆç¨¿ã€‹ã€‚\n(3)è¿›åº¦å¯è§†åŒ–ç›‘æ§å­æ¨¡å—:ä»¥å¡ç‰‡æˆ–åˆ—è¡¨å½¢å¼å±•ç¤ºæ‰€æŒ‡å¯¼çš„æ¯ä½å­¦ç”Ÿçš„å½“å‰è¿›åº¦çŠ¶æ€ï¼ˆå¦‚é€‰é¢˜é˜¶æ®µã€å¼€é¢˜ç­”è¾©ã€ä¸­æœŸç­”è¾©ã€æœ€ç»ˆç­”è¾©ç­‰ï¼‰ã€‚\n(4)ç›‘æ§é¢„è­¦ä¸å¹²é¢„æ¨¡å—:ç³»ç»Ÿå¯è‡ªåŠ¨å‘è¯¥ç”Ÿå‘é€æé†’æ¶ˆæ¯ï¼Œå¹¶æé†’æŒ‡å¯¼æ•™å¸ˆè¿›è¡Œä¸»åŠ¨å¹²é¢„ã€‚é€šè¿‡ä»¥ä¸Šæ¨¡å—çš„ååŒå·¥ä½œï¼Œå°†å®ç°å¯¹æ¯•è®¾è¿‡ç¨‹ä»å¾®è§‚ä¸ªä½“åˆ°å®è§‚æ•´ä½“çš„å…¨æ–¹ä½ã€æ•°æ®é©±åŠ¨çš„ç®¡ç†ä¸ç›‘æ§ï¼Œä»æ ¹æœ¬ä¸Šæå‡æ¯•ä¸šè®¾è®¡çš„è´¨é‡ä¸ç®¡ç†æ°´å¹³ã€‚','é€šè¿‡å¯¹è½¯ä»¶å·¥ç¨‹ç”Ÿå‘½å‘¨æœŸï¼ˆéœ€æ±‚åˆ†æã€ç³»ç»Ÿè®¾è®¡ã€æŠ€æœ¯é€‰å‹ã€ç¼–ç å®ç°ã€æµ‹è¯•éƒ¨ç½²ï¼‰ã€åç«¯å¼€å‘ä¸­Javaè¯­è¨€ã€MySQLæ•°æ®åº“ã€Spring Bootæ¡†æ¶çš„ç»¼åˆåº”ç”¨ä¸å¼ºåŒ–ï¼Œä»¥åŠå‰ç«¯å¼€å‘ä¸­Vueæ¡†æ¶ã€Ant Designç»„ä»¶åº“çš„ä½¿ç”¨å’Œå‰åç«¯äº’é€šä¸è®¾è®¡ç­‰ä¸“ä¸šçŸ¥è¯†çš„è®­ç»ƒï¼Œè¾¾åˆ°å…¨é¢ç³»ç»Ÿåœ°ç»¼åˆåº”ç”¨ä¸“ä¸šçŸ¥è¯†ã€å¿«é€Ÿå¯åŠ¨å‰ç«¯é¡¹ç›®ã€å¿«é€Ÿè®¾è®¡ä¸æ„å»ºé¡µé¢ã€å®ç°å‰åç«¯æœ‰æ•ˆäº’é€šä¸è®¾è®¡çš„èƒ½åŠ›ã€‚','{\"content\": \"å·¥å…·ï¼šIntellij IDEAã€VSCode\\næ¡†æ¶ï¼šåç«¯ï¼šSpring Bootã€MyBatis-Plus\\nå‰ç«¯:Vue Ant Designç»„ä»¶åº“\\næ•°æ®åº“ï¼šMySQL,Redis\\nç‰ˆæœ¬ç®¡ç†å·¥å…·ï¼šGit\"}',16,'[{\"content\": \"ï¼ˆ1ï¼‰åˆ†ææ˜ç¡®éœ€æ±‚ï¼Œç†æ¸…ä¸šåŠ¡æµç¨‹ï¼Œ2å‘¨\\nï¼ˆ2ï¼‰å‰åç«¯ç³»ç»Ÿåˆæ­¥è®¾è®¡ï¼Œ2å‘¨\\nï¼ˆ3ï¼‰æ•°æ®åº“åˆæ­¥è®¾è®¡ï¼Œ1å‘¨\\nï¼ˆ4ï¼‰å‰åç«¯ç³»ç»Ÿå¼€å‘ï¼Œ4å‘¨\\nï¼ˆ5ï¼‰æµ‹è¯•ç³»ç»Ÿæ¥å£ï¼Œ1å‘¨\\nï¼ˆ6ï¼‰å‰åç«¯äº’é€šä¸è¿è°ƒ ï¼Œ2å‘¨\\nï¼ˆ7ï¼‰ç³»ç»Ÿä¼˜åŒ–ï¼Œ2å‘¨\\nï¼ˆ8ï¼‰ç³»ç»Ÿæ•´åˆè°ƒè¯•ï¼Œä¿®å¤bug,ç³»ç»Ÿè¿è¡Œæµç•…ï¼Œ1å‘¨\"}]','[{\"content\": \"2025.12.22â€”â€”2026.01.04æœç´¢èµ„æ–™ï¼Œæ’°å†™å¼€é¢˜æŠ¥å‘Š\\n2021.01.05â€”â€”2026.01.11å¼€é¢˜ç­”è¾©\\n2025.01.12â€”â€”2026.03.22 é¡¹ç›®è®¾è®¡ã€å¼€å‘\\n2026.03.23â€”â€”2026.03.29ä¸­æœŸæ£€æŸ¥ï¼Œè®ºæ–‡åˆç¨¿æäº¤\\n2026.04.27â€”â€”2026.05.03è®ºæ–‡ä¿®è®¢\\n2026.05.04â€”â€”2026.05.17è¿”æ ¡ã€å®Œå–„è®ºæ–‡ã€å‡†å¤‡ç­”è¾©\\n2026.05.18â€”â€”2026.05.24 æœ€ç»ˆç­”è¾©\"}]','[{\"content\": \"1] å¼ æ˜, ç‹ä¸½, æå»ºå›½. åŸºäºSpring Bootå’ŒVue.jsçš„æ¯•ä¸šè®¾è®¡ç®¡ç†ç³»ç»Ÿçš„è®¾è®¡ä¸å®ç°[J]. ç°ä»£è®¡ç®—æœº(ä¸“ä¸šç‰ˆ), 2022, (29): 99-103.\\n[2] åˆ˜ä¼Ÿ, èµµé™. åŸºäºå¾®æœåŠ¡æ¶æ„çš„æ¯•ä¸šè®¾è®¡è¿‡ç¨‹è´¨é‡ç›‘æ§ç³»ç»Ÿç ”ç©¶[J]. ä¿¡æ¯æŠ€æœ¯ä¸ä¿¡æ¯åŒ–, 2023, (04): 52-55.\\n[3] é™ˆå¿—å¼º, å‘¨é¢–. åŸºäºSpring Boot+Vueçš„æœ¬ç§‘ç”Ÿæ¯•ä¸šè®¾è®¡å…¨è¿‡ç¨‹ç®¡ç†å¹³å°æ„å»º[J]. è½¯ä»¶å¯¼åˆŠ, 2021, 20(11): 148-152.\\n[4] æä»ç’, æ±¤ç¾½å¼º. è½»é‡çº§Java EEä¼ä¸šåº”ç”¨å®æˆ˜: Spring Boot+Spring Cloud+Vue.js[J]. åŒ—äº¬: ç”µå­å·¥ä¸šå‡ºç‰ˆç¤¾, 2023.\\n[5] é™ˆæ™“å³°, ç‹ç’. åŸºäºå‰åç«¯åˆ†ç¦»çš„æ¯•ä¸šè®¾è®¡è´¨é‡ç›‘æ§ä½“ç³»ç ”ç©¶ä¸åº”ç”¨[J]. ç°ä»£ç”µå­æŠ€æœ¯, 2022, 45(14): 105-109.\\n[6] åˆ˜æ´‹, æé™, å¼ è¶…. åŸºäºSpring Boot+Vue.jsçš„æ¯•ä¸šè®¾è®¡è¿‡ç¨‹ç®¡ç†ç³»ç»Ÿçš„è®¾è®¡ä¸å®ç°[J]. è½¯ä»¶å·¥ç¨‹, 2023, 26(8): 28-32.\\n[7] èµµä¸€é¸£, å­™æ‚¦. æ™ºèƒ½åŒ–æ¯•ä¸šè®¾è®¡ç®¡ç†å¹³å°çš„ç ”ç©¶ä¸æ„å»ºâ€”â€”ä»¥Spring Bootå’ŒVue.jsä¸ºæ ¸å¿ƒ[J]. ä¿¡æ¯æŠ€æœ¯ä¸ä¿¡æ¯åŒ–, 2023, (05): 60-63.\"}]',NULL,NULL,'','2024759015287861249',NULL,NULL,NULL,NULL,NULL,NULL,6,1,0,'2026-03-14 19:02:28','2026-03-14 19:02:28'),('2033123215995334657','åŸºäºSpring Bootä¸Vueçš„å¤–å–ç®¡ç†ç³»ç»Ÿ',1,1,1,'','E002',NULL,'Javaåç«¯',NULL,'2034244832406282241','éšç€æˆ‘å›½é«˜ç­‰æ•™è‚²è§„æ¨¡çš„ä¸æ–­æ‰©å¤§ä¸æ•™å­¦æ”¹é©çš„æŒç»­æ·±åŒ–ï¼Œæœ¬ç§‘æ¯•ä¸šè®¾è®¡ï¼ˆè®ºæ–‡ï¼‰ä½œä¸ºè¡¡é‡å­¦ç”Ÿç»¼åˆç´ è´¨ä¸å®è·µåˆ›æ–°èƒ½åŠ›çš„å…³é”®ç¯èŠ‚ï¼Œå…¶ç®¡ç†å·¥ä½œçš„å¤æ‚æ€§ä¸é‡è¦æ€§æ—¥ç›Šå‡¸æ˜¾ã€‚ç„¶è€Œï¼Œç›®å‰ç°æœ‰æ¯•è®¾ç³»ç»Ÿç¼ºå°‘ç»´æŠ¤ä¸æ›´æ–°ï¼Œå¯¼è‡´å…¼å®¹æ€§ä¸ç”¨æˆ·ä½“éªŒä¸ä½³ï¼›å¹¶ä¸”è¿‡ç¨‹ç›‘ç®¡è–„å¼±ï¼Œè´¨é‡éš¾ä»¥æ§åˆ¶ï¼Œè¿˜æœ‰å­¦ç”Ÿã€æ•™å¸ˆã€å­¦é™¢ç®¡ç†å‘˜ä¹‹é—´çš„ä¿¡æ¯ä¸å¯¹ç§°é—®é¢˜çªå‡ºã€‚å­¦ç”Ÿéš¾ä»¥å…¨é¢äº†è§£è¯¾é¢˜ä¿¡æ¯ã€é€‰æ‹©å¿ƒä»ªçš„å¯¼å¸ˆï¼›æ•™å¸ˆæ— æ³•é«˜æ•ˆåœ°ç®¡ç†æ‰€æŒ‡å¯¼çš„å¤šåå­¦ç”Ÿï¼›å­¦é™¢å±‚é¢åˆ™éš¾ä»¥å®è§‚æŠŠæ§å…¨é™¢æ¯•è®¾å·¥ä½œçš„æ•´ä½“è¿›åº¦ä¸è´¨é‡åˆ†å¸ƒã€‚æœ¬è¯¾é¢˜æ—¨åœ¨è®¾è®¡å¹¶å®ç°ä¸€ä¸ªåŸºäºSpring Bootåç«¯ä¸Vueå‰ç«¯çš„å‰åç«¯åˆ†ç¦»çš„â€œæ¯•è®¾è¿‡ç¨‹ç®¡ç†ä¸è´¨é‡ç›‘æ§ç³»ç»Ÿâ€ï¼Œå…¶æ„ä¹‰ä¸»è¦ä½“ç°åœ¨ï¼šå¼ºåŒ–è¿‡ç¨‹ç›‘æ§ï¼Œä¿éšœæ•™å­¦è´¨é‡ï¼Œæé«˜ç³»ç»Ÿæ€§èƒ½ï¼Œå¹¶å¯¹ç³»ç»Ÿè¿›è¡Œä¼˜åŒ–å’Œæ‰©å±•ã€‚','æœ¬ç³»ç»Ÿæ—¨åœ¨é€šè¿‡æ¨¡å—åŒ–è®¾è®¡ï¼Œå®ç°å¯¹æ¯•ä¸šè®¾è®¡å…¨ç”Ÿå‘½å‘¨æœŸçš„ç²¾ç»†åŒ–ç®¡ç†å’Œæœ‰æ•ˆè´¨é‡ç›‘æ§ã€‚ç³»ç»Ÿé‡‡ç”¨å‰åç«¯åˆ†ç¦»æ¶æ„ï¼Œåç«¯ä½¿ç”¨Spring Bootï¼Œå‰ç«¯é‡‡ç”¨Vueæ„å»ºåŠ¨æ€ã€å“åº”å¼çš„ç”¨æˆ·ç•Œé¢ï¼Œæ•°æ®åº“é€‰ç”¨MySQLã€‚å›´ç»•å­¦ç”Ÿã€æŒ‡å¯¼æ•™å¸ˆã€é«˜æ ¡å¯¼å¸ˆå’Œç³»ç»Ÿç®¡ç†å‘˜å››ç±»æ ¸å¿ƒç”¨æˆ·ï¼Œç³»ç»Ÿä¸»è¦åˆ’åˆ†ä¸ºä»¥ä¸‹åŠŸèƒ½æ¨¡å—:\n(1)æµç¨‹é©±åŠ¨ä¸ä»»åŠ¡ç®¡ç†å­æ¨¡å—:ç³»ç»Ÿå¼ºåˆ¶é©±åŠ¨æ¯•è®¾å…³é”®æµç¨‹ã€‚æ•™å¸ˆåœ¨çº¿ä¸‹è¾¾ã€Šä»»åŠ¡ä¹¦ã€‹ï¼Œå­¦ç”Ÿæäº¤ã€Šå¼€é¢˜æŠ¥å‘Šã€‹åï¼Œç³»ç»ŸçŠ¶æ€æ›´æ–°ä¸ºâ€œè¿›è¡Œä¸­â€ã€‚ç³»ç»Ÿä¸ºå­¦ç”Ÿå’Œæ•™å¸ˆç”Ÿæˆæ¸…æ™°çš„ä»»åŠ¡æ—¶é—´çº¿ï¼ˆTimelineï¼‰ï¼Œæ˜ç¡®æ˜¾ç¤ºå„é˜¶æ®µï¼ˆå¼€é¢˜ã€ä¸­æœŸã€åˆç¨¿ã€ç»ˆç¨¿ï¼‰çš„èµ·æ­¢æ—¥æœŸå’Œå®ŒæˆçŠ¶æ€ã€‚\n(2)è¿‡ç¨‹æ–‡æ¡£åœ¨çº¿ç®¡ç†å­æ¨¡å—:å­¦ç”Ÿéœ€å®šæœŸï¼ˆå¦‚æ¯å‘¨/æ¯åŒå‘¨ï¼‰åœ¨çº¿æäº¤ã€Šå·¥ä½œå‘¨å¿—ã€‹ï¼Œæ±‡æŠ¥è¿›å±•ã€é‡åˆ°çš„é—®é¢˜å’Œä¸‹ä¸€æ­¥è®¡åˆ’ã€‚åœ¨ä¸­æœŸå’ŒåæœŸï¼Œåœ¨çº¿æäº¤ã€Šä¸­æœŸæ£€æŸ¥æŠ¥å‘Šã€‹å’Œã€Šè®ºæ–‡åˆç¨¿ã€‹ã€‚\n(3)è¿›åº¦å¯è§†åŒ–ç›‘æ§å­æ¨¡å—:ä»¥å¡ç‰‡æˆ–åˆ—è¡¨å½¢å¼å±•ç¤ºæ‰€æŒ‡å¯¼çš„æ¯ä½å­¦ç”Ÿçš„å½“å‰è¿›åº¦çŠ¶æ€ï¼ˆå¦‚é€‰é¢˜é˜¶æ®µã€å¼€é¢˜ç­”è¾©ã€ä¸­æœŸç­”è¾©ã€æœ€ç»ˆç­”è¾©ç­‰ï¼‰ã€‚','é€šè¿‡å¯¹è½¯ä»¶å·¥ç¨‹ç”Ÿå‘½å‘¨æœŸï¼ˆéœ€æ±‚åˆ†æã€ç³»ç»Ÿè®¾è®¡ã€æŠ€æœ¯é€‰å‹ã€ç¼–ç å®ç°ã€æµ‹è¯•éƒ¨ç½²ï¼‰ã€åç«¯å¼€å‘ä¸­Javaè¯­è¨€ã€MySQLæ•°æ®åº“ã€Spring Bootæ¡†æ¶çš„ç»¼åˆåº”ç”¨ä¸å¼ºåŒ–ï¼Œä»¥åŠå‰ç«¯å¼€å‘ä¸­Vueæ¡†æ¶ã€Ant Designç»„ä»¶åº“çš„ä½¿ç”¨å’Œå‰åç«¯äº’é€šä¸è®¾è®¡ç­‰ä¸“ä¸šçŸ¥è¯†çš„è®­ç»ƒï¼Œè¾¾åˆ°å…¨é¢ç³»ç»Ÿåœ°ç»¼åˆåº”ç”¨ä¸“ä¸šçŸ¥è¯†ã€å¿«é€Ÿå¯åŠ¨å‰ç«¯é¡¹ç›®ã€å¿«é€Ÿè®¾è®¡ä¸æ„å»ºé¡µé¢ã€å®ç°å‰åç«¯æœ‰æ•ˆäº’é€šä¸è®¾è®¡çš„èƒ½åŠ›ã€‚','{\"content\": \"å·¥å…·ï¼šIntellij IDEAã€VSCode\\næ¡†æ¶ï¼šåç«¯ï¼šSpring Bootã€MyBatis-Plus\\nå‰ç«¯:Vue Ant Designç»„ä»¶åº“\\næ•°æ®åº“ï¼šMySQL,Redis\\nç‰ˆæœ¬ç®¡ç†å·¥å…·ï¼šGit\"}',16,'[{\"content\": \"ï¼ˆ1ï¼‰åˆ†ææ˜ç¡®éœ€æ±‚ï¼Œç†æ¸…ä¸šåŠ¡æµç¨‹ï¼Œ2å‘¨\\nï¼ˆ2ï¼‰å‰åç«¯ç³»ç»Ÿåˆæ­¥è®¾è®¡ï¼Œ2å‘¨\\nï¼ˆ3ï¼‰æ•°æ®åº“åˆæ­¥è®¾è®¡ï¼Œ1å‘¨\\nï¼ˆ4ï¼‰å‰åç«¯ç³»ç»Ÿå¼€å‘ï¼Œ4å‘¨\\nï¼ˆ5ï¼‰æµ‹è¯•ç³»ç»Ÿæ¥å£ï¼Œ1å‘¨\\nï¼ˆ6ï¼‰å‰åç«¯äº’é€šä¸è¿è°ƒ ï¼Œ2å‘¨\\nï¼ˆ7ï¼‰ç³»ç»Ÿä¼˜åŒ–ï¼Œ2å‘¨\\nï¼ˆ8ï¼‰ç³»ç»Ÿæ•´åˆè°ƒè¯•ï¼Œä¿®å¤bug,ç³»ç»Ÿè¿è¡Œæµç•…ï¼Œ1å‘¨\"}]','[{\"content\": \"2025.12.22â€”â€”2026.01.04æœç´¢èµ„æ–™ï¼Œæ’°å†™å¼€é¢˜æŠ¥å‘Š\\n2021.01.05â€”â€”2026.01.11å¼€é¢˜ç­”è¾©\\n2025.01.12â€”â€”2026.03.22 é¡¹ç›®è®¾è®¡ã€å¼€å‘\\n2026.03.23â€”â€”2026.03.29ä¸­æœŸæ£€æŸ¥ï¼Œè®ºæ–‡åˆç¨¿æäº¤\\n2026.04.27â€”â€”2026.05.03è®ºæ–‡ä¿®è®¢\\n2026.05.04â€”â€”2026.05.17è¿”æ ¡ã€å®Œå–„è®ºæ–‡ã€å‡†å¤‡ç­”è¾©\\n2026.05.18â€”â€”2026.05.24 æœ€ç»ˆç­”è¾©\"}]','[{\"content\": \"1] å¼ æ˜, ç‹ä¸½, æå»ºå›½. åŸºäºSpring Bootå’ŒVue.jsçš„æ¯•ä¸šè®¾è®¡ç®¡ç†ç³»ç»Ÿçš„è®¾è®¡ä¸å®ç°[J]. ç°ä»£è®¡ç®—æœº(ä¸“ä¸šç‰ˆ), 2022, (29): 99-103.\\n[2] åˆ˜ä¼Ÿ, èµµé™. åŸºäºå¾®æœåŠ¡æ¶æ„çš„æ¯•ä¸šè®¾è®¡è¿‡ç¨‹è´¨é‡ç›‘æ§ç³»ç»Ÿç ”ç©¶[J]. ä¿¡æ¯æŠ€æœ¯ä¸ä¿¡æ¯åŒ–, 2023, (04): 52-55.\\n[3] é™ˆå¿—å¼º, å‘¨é¢–. åŸºäºSpring Boot+Vueçš„æœ¬ç§‘ç”Ÿæ¯•ä¸šè®¾è®¡å…¨è¿‡ç¨‹ç®¡ç†å¹³å°æ„å»º[J]. è½¯ä»¶å¯¼åˆŠ, 2021, 20(11): 148-152.\\n[4] æä»ç’, æ±¤ç¾½å¼º. è½»é‡çº§Java EEä¼ä¸šåº”ç”¨å®æˆ˜: Spring Boot+Spring Cloud+Vue.js[J]. åŒ—äº¬: ç”µå­å·¥ä¸šå‡ºç‰ˆç¤¾, 2023.\\n[5] é™ˆæ™“å³°, ç‹ç’. åŸºäºå‰åç«¯åˆ†ç¦»çš„æ¯•ä¸šè®¾è®¡è´¨é‡ç›‘æ§ä½“ç³»ç ”ç©¶ä¸åº”ç”¨[J]. ç°ä»£ç”µå­æŠ€æœ¯, 2022, 45(14): 105-109.\\n[6] åˆ˜æ´‹, æé™, å¼ è¶…. åŸºäºSpring Boot+Vue.jsçš„æ¯•ä¸šè®¾è®¡è¿‡ç¨‹ç®¡ç†ç³»ç»Ÿçš„è®¾è®¡ä¸å®ç°[J]. è½¯ä»¶å·¥ç¨‹, 2023, 26(8): 28-32.\"}]',NULL,NULL,'','TEST_ET_001',NULL,NULL,NULL,NULL,NULL,NULL,6,1,0,'2026-03-15 18:08:43','2026-03-18 20:58:59');
+/*!40000 ALTER TABLE `topic_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `topic_process_instance`
+--
+
+DROP TABLE IF EXISTS `topic_process_instance`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `topic_process_instance` (
+  `id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¸»é”®ï¼ˆé›ªèŠ±IDï¼‰',
+  `topic_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'è¯¾é¢˜IDï¼Œå…³è” topic_info.topic_id',
+  `process_instance_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Flowable æµç¨‹å®ä¾‹IDï¼ˆACT_RU_EXECUTION.PROC_INST_ID_ï¼‰',
+  `process_def_key` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'topic_review' COMMENT 'æµç¨‹å®šä¹‰Key',
+  `topic_category` tinyint NOT NULL DEFAULT '1' COMMENT 'è¯¾é¢˜å¤§ç±»ï¼ˆ1-é«˜èŒå‡æœ¬ 2-3+1 3-å®éªŒç­ï¼‰ï¼Œç”¨äºåˆ¤æ–­å®¡æŸ¥è·¯å¾„',
+  `process_status` tinyint NOT NULL DEFAULT '0' COMMENT 'æµç¨‹çŠ¶æ€ï¼ˆ0-è¿è¡Œä¸­ 1-å·²å®Œæˆ 2-å·²ç»ˆæ­¢ï¼‰',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  `deleted` tinyint NOT NULL DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_topic_id` (`topic_id`),
+  KEY `idx_process_instance_id` (`process_instance_id`),
+  KEY `idx_process_status` (`process_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='è¯¾é¢˜æµç¨‹å®ä¾‹æ˜ å°„è¡¨ï¼ˆtopic_info â†” Flowable ACT_* è¡¨çš„æ¡¥æ¥ï¼‰';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `topic_process_instance`
+--
+
+LOCK TABLES `topic_process_instance` WRITE;
+/*!40000 ALTER TABLE `topic_process_instance` DISABLE KEYS */;
+INSERT INTO `topic_process_instance` VALUES ('2033123217907937282','2033123215995334657','f27e84ed-2056-11f1-8906-00ff4626f3bf','topic_review',1,1,'2026-03-15 18:08:43','2026-03-15 18:19:25',0);
+/*!40000 ALTER TABLE `topic_process_instance` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `topic_review_record`
+--
+
+DROP TABLE IF EXISTS `topic_review_record`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `topic_review_record` (
+  `review_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å®¡æŸ¥è®°å½•ID',
+  `topic_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'è¯¾é¢˜ID',
+  `review_stage` tinyint NOT NULL COMMENT 'å®¡æŸ¥é˜¶æ®µï¼ˆ1-é¢„å®¡ 2-åˆå®¡ 3-ç»ˆå®¡ï¼‰',
+  `reviewer_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å®¡æŸ¥äººID',
+  `reviewer_role` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å®¡æŸ¥äººè§’è‰²ä»£ç ',
+  `reviewer_name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å®¡æŸ¥äººå§“å',
+  `review_result` tinyint NOT NULL COMMENT 'å®¡æŸ¥ç»“æœï¼ˆ1-é€šè¿‡ 2-éœ€ä¿®æ”¹ 3-ä¸é€šè¿‡ï¼‰',
+  `review_opinion` text COLLATE utf8mb4_unicode_ci COMMENT 'å®¡æŸ¥æ„è§ï¼ˆé’ˆå¯¹å•ä¸ªè¯¾é¢˜ï¼‰',
+  `is_batch_review` tinyint DEFAULT '0' COMMENT 'æ˜¯å¦æ‰¹é‡å®¡æŸ¥ï¼ˆ0-å¦ 1-æ˜¯ï¼‰',
+  `batch_review_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'æ‰¹é‡å®¡æŸ¥æ‰¹æ¬¡ID',
+  `previous_status` tinyint DEFAULT NULL COMMENT 'å®¡æŸ¥å‰è¯¾é¢˜çŠ¶æ€',
+  `new_status` tinyint DEFAULT NULL COMMENT 'å®¡æŸ¥åè¯¾é¢˜çŠ¶æ€',
+  `is_modified` tinyint DEFAULT '0' COMMENT 'æ˜¯å¦è¢«ä¿®æ”¹è¿‡ï¼ˆ0-å¦ 1-æ˜¯ï¼‰',
+  `modified_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¿®æ”¹äººID',
+  `modified_time` datetime DEFAULT NULL COMMENT 'ä¿®æ”¹æ—¶é—´',
+  `deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'å®¡æŸ¥æ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`review_id`),
+  KEY `idx_topic_id` (`topic_id`),
+  KEY `idx_reviewer_id` (`reviewer_id`),
+  KEY `idx_review_stage` (`review_stage`),
+  KEY `idx_review_result` (`review_result`),
+  KEY `idx_batch_review_id` (`batch_review_id`),
+  KEY `idx_create_time` (`create_time`),
+  CONSTRAINT `fk_review_reviewer` FOREIGN KEY (`reviewer_id`) REFERENCES `user_info` (`user_id`),
+  CONSTRAINT `fk_review_topic` FOREIGN KEY (`topic_id`) REFERENCES `topic_info` (`topic_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='è¯¾é¢˜å®¡æŸ¥è®°å½•è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `topic_review_record`
+--
+
+LOCK TABLES `topic_review_record` WRITE;
+/*!40000 ALTER TABLE `topic_review_record` DISABLE KEYS */;
+INSERT INTO `topic_review_record` VALUES ('2027944294588887042','2025733423934504962',1,'TEST_UT_001','UNIVERSITY_TEACHER','å¼ é«˜æ ¡æ•™å¸ˆ',1,'è¯¥è¯¾é¢˜æœ‰æ„ä¹‰',0,NULL,1,2,0,NULL,NULL,0,'2026-03-01 11:09:32','2026-03-01 11:09:32'),('2027952972201209857','2025733423934504962',2,'TEST_MD_001','MAJOR_DIRECTOR','åˆ˜ä¸“ä¸šä¸»ç®¡',1,'å¾ˆå¥½',0,NULL,2,4,0,NULL,NULL,0,'2026-03-01 11:44:01','2026-03-01 11:44:01'),('2030186459973103618','2030185910938710018',1,'TEST_UT_001','UNIVERSITY_TEACHER','å¼ é«˜æ ¡æ•™å¸ˆ',1,'å†™çš„éå¸¸å¥½ï¼Œå¾ˆè¯¦ç»†',0,NULL,1,2,0,NULL,NULL,0,'2026-03-07 15:39:06','2026-03-07 15:39:06'),('2030186778526298114','2030185910938710018',2,'TEST_MD_001','MAJOR_DIRECTOR','åˆ˜ä¸“ä¸šä¸»ç®¡',1,'å¾ˆå¥½',0,NULL,2,4,0,NULL,NULL,0,'2026-03-07 15:40:22','2026-03-07 15:40:22'),('2030186979676729346','2025733423934504962',3,'TEST_ST_002','SUPERVISOR_TEACHER','é™ˆç£å¯¼æ•™å¸ˆ',1,'',0,NULL,4,6,0,NULL,NULL,0,'2026-03-07 15:41:10','2026-03-07 15:41:10'),('2030186995300511745','2030185910938710018',3,'TEST_ST_002','SUPERVISOR_TEACHER','é™ˆç£å¯¼æ•™å¸ˆ',1,'',0,NULL,4,6,0,NULL,NULL,0,'2026-03-07 15:41:13','2026-03-07 15:41:13'),('2032774690379956226','2032774353497653250',1,'TEST_UT_001','UNIVERSITY_TEACHER','å¼ é«˜æ ¡æ•™å¸ˆ',1,'',0,NULL,1,2,0,NULL,NULL,0,'2026-03-14 19:03:48','2026-03-14 19:03:48'),('2032774890586669057','2032774353497653250',2,'TEST_MD_001','MAJOR_DIRECTOR','åˆ˜ä¸“ä¸šä¸»ç®¡',1,'',0,NULL,2,4,0,NULL,NULL,0,'2026-03-14 19:04:36','2026-03-14 19:04:36'),('2032775237694685186','2032774353497653250',3,'TEST_ST_002','SUPERVISOR_TEACHER','é™ˆç£å¯¼æ•™å¸ˆ',1,'',0,NULL,4,6,0,NULL,NULL,0,'2026-03-14 19:05:58','2026-03-14 19:05:58'),('2033123831987597313','2033123215995334657',1,'TEST_UT_001','UNIVERSITY_TEACHER','å¼ é«˜æ ¡æ•™å¸ˆ',1,'',0,NULL,1,2,0,NULL,NULL,0,'2026-03-15 18:11:10','2026-03-15 18:11:10'),('2033125698486431745','2033123215995334657',2,'TEST_MD_001','MAJOR_DIRECTOR','åˆ˜ä¸“ä¸šä¸»ç®¡',1,'',0,NULL,2,4,0,NULL,NULL,0,'2026-03-15 18:18:35','2026-03-15 18:18:35'),('2033125909191487489','2033123215995334657',3,'TEST_ST_002','SUPERVISOR_TEACHER','é™ˆç£å¯¼æ•™å¸ˆ',1,'',0,NULL,4,6,0,NULL,NULL,0,'2026-03-15 18:19:25','2026-03-15 18:19:25');
+/*!40000 ALTER TABLE `topic_review_record` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `topic_selection`
+--
+
+DROP TABLE IF EXISTS `topic_selection`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `topic_selection` (
+  `selection_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'é€‰æŠ¥IDï¼ˆé›ªèŠ±IDï¼‰',
+  `student_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å­¦ç”Ÿç”¨æˆ·ID',
+  `topic_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'è¯¾é¢˜ID',
+  `selection_reason` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'é€‰æŠ¥ç†ç”±ï¼ˆå¿…å¡«ï¼‰',
+  `selection_status` tinyint DEFAULT '0' COMMENT 'é€‰æŠ¥çŠ¶æ€ï¼ˆ0-å¾…ç¡®è®¤ 1-ä¸­é€‰ 2-è½é€‰ï¼‰',
+  `apply_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'é€‰æŠ¥æ—¶é—´',
+  `confirm_time` datetime DEFAULT NULL COMMENT 'ç¡®è®¤æ—¶é—´ï¼ˆä¼ä¸šæ•™å¸ˆç¡®è®¤ï¼‰',
+  `confirmed_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ç¡®è®¤äººIDï¼ˆä¼ä¸šæ•™å¸ˆï¼‰',
+  `deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`selection_id`),
+  KEY `idx_student_id` (`student_id`),
+  KEY `idx_topic_id` (`topic_id`),
+  KEY `idx_selection_status` (`selection_status`),
+  CONSTRAINT `fk_sel_student` FOREIGN KEY (`student_id`) REFERENCES `user_info` (`user_id`),
+  CONSTRAINT `fk_sel_topic` FOREIGN KEY (`topic_id`) REFERENCES `topic_info` (`topic_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='è¯¾é¢˜é€‰æŠ¥è®°å½•è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `topic_selection`
+--
+
+LOCK TABLES `topic_selection` WRITE;
+/*!40000 ALTER TABLE `topic_selection` DISABLE KEYS */;
+INSERT INTO `topic_selection` VALUES ('2033505501727264770','TEST_ST_001','2033123215995334657','æœ¬è¯¾é¢˜é€‰æ‹©åŸºäº Spring Boot ä¸ Vue çš„å¤–å–ç®¡ç†ç³»ç»Ÿï¼Œè´´åˆå½“å‰é¤é¥®è¡Œä¸šæ•°å­—åŒ–å‘å±•è¶‹åŠ¿ï¼Œå…·æœ‰è¾ƒå¼ºçš„å®ç”¨ä»·å€¼ä¸ç°å®æ„ä¹‰ã€‚æŠ€æœ¯ä¸Šï¼ŒSpring Boot ä½œä¸ºä¸»æµåç«¯æ¡†æ¶ï¼Œå¯å¿«é€Ÿæ„å»ºç¨³å®šé«˜æ•ˆçš„æœåŠ¡ï¼›Vue å‰ç«¯æ¡†æ¶èƒ½å®ç°å‹å¥½ã€å“åº”å¼çš„ç®¡ç†ç•Œé¢ï¼Œå‰åç«¯åˆ†ç¦»æ¶æ„ä¾¿äºå¼€å‘ä¸ç»´æŠ¤ï¼Œæ˜¯ä¼ä¸šçº§é¡¹ç›®çš„å¸¸ç”¨æŠ€æœ¯æ ˆã€‚\né€šè¿‡æœ¬è¯¾é¢˜ï¼Œæˆ‘èƒ½ç³»ç»ŸæŒæ¡åç«¯æ¥å£å¼€å‘ã€æ•°æ®åº“è®¾è®¡ã€æƒé™ç®¡ç†ã€å‰åç«¯è”è°ƒç­‰æ ¸å¿ƒæŠ€èƒ½ï¼Œå°†ç†è®ºçŸ¥è¯†è½¬åŒ–ä¸ºå·¥ç¨‹å®è·µã€‚åŒæ—¶ï¼Œå¤–å–ç³»ç»Ÿæ¶µç›–ç”¨æˆ·ã€å•†å®¶ã€è®¢å•ã€èœå“ã€é…é€ç­‰å®Œæ•´ä¸šåŠ¡ï¼Œå¯é”»ç‚¼éœ€æ±‚åˆ†æã€æ¨¡å—è®¾è®¡ä¸é—®é¢˜è§£å†³èƒ½åŠ›ã€‚è¯¥è¯¾é¢˜éš¾åº¦é€‚ä¸­ã€ä¸šåŠ¡æ¸…æ™°ï¼Œæ—¢èƒ½æ»¡è¶³æ¯•ä¸šè®¾è®¡è¦æ±‚ï¼Œåˆèƒ½æå‡ä¸ªäººå·¥ç¨‹å¼€å‘ä¸é¡¹ç›®å®æˆ˜èƒ½åŠ›ï¼Œä¸ºåç»­å°±ä¸šä¸æ·±å…¥å­¦ä¹ æ‰“ä¸‹åšå®åŸºç¡€ã€‚',1,'2026-03-16 19:27:47','2026-03-16 19:30:26','2024759015287861249',1,'2026-03-16 19:27:46','2026-03-18 21:05:54'),('2033505589555990529','TEST_ST_001','2032774353497653250','æœ¬è¯¾é¢˜é€‰æ‹©åŸºäº Spring Boot ä¸ Vue çš„å¤–å–ç®¡ç†ç³»ç»Ÿï¼Œè´´åˆå½“å‰é¤é¥®è¡Œä¸šæ•°å­—åŒ–å‘å±•è¶‹åŠ¿ï¼Œå…·æœ‰è¾ƒå¼ºçš„å®ç”¨ä»·å€¼ä¸ç°å®æ„ä¹‰ã€‚æŠ€æœ¯ä¸Šï¼ŒSpring Boot ä½œä¸ºä¸»æµåç«¯æ¡†æ¶ï¼Œå¯å¿«é€Ÿæ„å»ºç¨³å®šé«˜æ•ˆçš„æœåŠ¡ï¼›Vue å‰ç«¯æ¡†æ¶èƒ½å®ç°å‹å¥½ã€å“åº”å¼çš„ç®¡ç†ç•Œé¢ï¼Œå‰åç«¯åˆ†ç¦»æ¶æ„ä¾¿äºå¼€å‘ä¸ç»´æŠ¤ï¼Œæ˜¯ä¼ä¸šçº§é¡¹ç›®çš„å¸¸ç”¨æŠ€æœ¯æ ˆã€‚\né€šè¿‡æœ¬è¯¾é¢˜ï¼Œæˆ‘èƒ½ç³»ç»ŸæŒæ¡åç«¯æ¥å£å¼€å‘ã€æ•°æ®åº“è®¾è®¡ã€æƒé™ç®¡ç†ã€å‰åç«¯è”è°ƒç­‰æ ¸å¿ƒæŠ€èƒ½ï¼Œå°†ç†è®ºçŸ¥è¯†è½¬åŒ–ä¸ºå·¥ç¨‹å®è·µã€‚åŒæ—¶ï¼Œå¤–å–ç³»ç»Ÿæ¶µç›–ç”¨æˆ·ã€å•†å®¶ã€è®¢å•ã€èœå“ã€é…é€ç­‰å®Œæ•´ä¸šåŠ¡ï¼Œå¯é”»ç‚¼éœ€æ±‚åˆ†æã€æ¨¡å—è®¾è®¡ä¸é—®é¢˜è§£å†³èƒ½åŠ›ã€‚è¯¥è¯¾é¢˜éš¾åº¦é€‚ä¸­ã€ä¸šåŠ¡æ¸…æ™°ï¼Œæ—¢èƒ½æ»¡è¶³æ¯•ä¸šè®¾è®¡è¦æ±‚ï¼Œåˆèƒ½æå‡ä¸ªäººå·¥ç¨‹å¼€å‘ä¸é¡¹ç›®å®æˆ˜èƒ½åŠ›ï¼Œä¸ºåç»­å°±ä¸šä¸æ·±å…¥å­¦ä¹ æ‰“ä¸‹åšå®åŸºç¡€ã€‚',2,'2026-03-16 19:28:08',NULL,NULL,0,'2026-03-16 19:28:07','2026-03-16 19:30:25'),('2034250852817993730','2025136732306944001','2033123215995334657','ä½›å®‰å¾½å“¦å¹¿ä¸œå¹´ç³•ï¼›ç•™å…šå¯Ÿçœ‹å“ªå¼„è¿è§„å“¦é‚£æ—®å››å¹´å‘åŠ¨å¿«é€Ÿä½ ä¸å¯èƒ½æµç¨‹åŠç†æŠ¥åˆ°äº¬ä¸œèƒ½å¤Ÿæ¯”æ‹Ÿçš„å‘ç”Ÿå£è§’äº†å›å¤ä¸å¼„å®Œç»™ä¸èƒ½çœ‹ä¼¯çº³å¾·ä¸Šè¯¾äº†ä¸è¿‡é›¶å¹´å»ºæˆé‚£è¾¹vå¡çŸ­æ—¶é—´å†…å…­å¹´çš„æ—¶å…‰åŠ æ‹‰é‡‘é¢æå°•çœ‹ç»™ç»™',1,'2026-03-18 20:49:33','2026-03-18 21:09:40','TEST_ET_001',0,'2026-03-18 20:49:32','2026-03-18 21:09:40'),('2034605521398472706','TEST_ST_001','2030185910938710018','æˆ‘æƒ³é€‰è¿™ä¸ª',1,'2026-03-19 20:18:52','2026-03-19 20:23:58','2024759015287861249',0,'2026-03-19 20:18:52','2026-03-19 20:23:57'),('2034605565602242562','TEST_ST_001','2032774353497653250','æˆ‘æƒ³é€‰',2,'2026-03-19 20:19:03',NULL,NULL,0,'2026-03-19 20:19:02','2026-03-19 20:23:57');
+/*!40000 ALTER TABLE `topic_selection` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `university_teacher_major`
+--
+
+DROP TABLE IF EXISTS `university_teacher_major`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `university_teacher_major` (
+  `id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¸»é”®',
+  `univ_teacher_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'é«˜æ ¡æ•™å¸ˆ user_id',
+  `direction_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¸“ä¸šæ–¹å‘ID (major_direction_info)',
+  `enterprise_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æ‰€å±ä¼ä¸šIDï¼ˆå†—ä½™åŠ é€ŸæŸ¥è¯¢ï¼‰',
+  `cohort` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'å±Šåˆ«ï¼ˆå¦‚ 2026å±Šï¼‰ï¼Œæ¥è‡ª system_phase_record',
+  `is_enabled` tinyint DEFAULT '1' COMMENT 'æ˜¯å¦å¯ç”¨ï¼ˆ1-å¯ç”¨ 0-åœç”¨ï¼‰',
+  `remark` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å¤‡æ³¨',
+  `deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_teacher_dir_cohort` (`univ_teacher_id`,`direction_id`,`cohort`),
+  KEY `idx_direction` (`direction_id`),
+  KEY `idx_enterprise` (`enterprise_id`),
+  KEY `idx_cohort` (`cohort`),
+  KEY `idx_univ_teacher` (`univ_teacher_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='é«˜æ ¡æ•™å¸ˆ-ä¸“ä¸šæ–¹å‘åˆ†é…è¡¨ï¼ˆç²—ç²’åº¦ï¼‰';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `university_teacher_major`
+--
+
+LOCK TABLES `university_teacher_major` WRITE;
+/*!40000 ALTER TABLE `university_teacher_major` DISABLE KEYS */;
+/*!40000 ALTER TABLE `university_teacher_major` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_info`
+--
+
+DROP TABLE IF EXISTS `user_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user_info` (
+  `user_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ç”¨æˆ·ID',
+  `username` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ç™»å½•è´¦å·',
+  `password` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ç™»å½•å¯†ç ï¼ˆBCryptåŠ å¯†ï¼‰',
+  `real_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'çœŸå®å§“å',
+  `user_email` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ç”¨æˆ·é‚®ç®±',
+  `user_phone` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'æ‰‹æœºå·ç ',
+  `avatar` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å¤´åƒåœ°å€',
+  `gender` tinyint DEFAULT '0' COMMENT 'æ€§åˆ«ï¼ˆ1-ç”· 0-å¥³ï¼‰',
+  `department` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'æ‰€å±é™¢ç³»/ä¼ä¸š',
+  `major` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ä¸“ä¸šæ–¹å‘',
+  `direction_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'æ‰€å±/æŒ‡å¯¼ä¸“ä¸šæ–¹å‘ID',
+  `major_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'æ‰€åœ¨ä¸“ä¸šIDï¼ˆå­¦ç”Ÿç²¾ç¡®ä¸“ä¸šå…³è”ï¼‰',
+  `enterprise_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'æ‰€å±ä¼ä¸šID',
+  `student_no` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å­¦å·ï¼ˆå­¦ç”Ÿè§’è‰²ï¼‰',
+  `employee_no` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å·¥å·ï¼ˆæ•™å¸ˆè§’è‰²ï¼‰',
+  `title` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'èŒç§°ï¼ˆæ•™å¸ˆè§’è‰²ï¼‰',
+  `user_status` tinyint DEFAULT '1' COMMENT 'è´¦å·çŠ¶æ€ï¼ˆ0-ç¦ç”¨ 1-æ­£å¸¸ 2-é”å®šï¼‰',
+  `last_login_time` datetime DEFAULT NULL COMMENT 'æœ€åç™»å½•æ—¶é—´',
+  `last_login_ip` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'æœ€åç™»å½•IP',
+  `remark` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'å¤‡æ³¨',
+  `deleted` tinyint DEFAULT '0' COMMENT 'é€»è¾‘åˆ é™¤ï¼ˆ0-æœªåˆ é™¤ 1-å·²åˆ é™¤ï¼‰',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_username` (`username`),
+  KEY `idx_real_name` (`real_name`),
+  KEY `idx_user_status` (`user_status`),
+  KEY `idx_department` (`department`),
+  KEY `idx_direction_id` (`direction_id`),
+  KEY `idx_user_enterprise` (`enterprise_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ç”¨æˆ·ä¿¡æ¯è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_info`
+--
+
+LOCK TABLES `user_info` WRITE;
+/*!40000 ALTER TABLE `user_info` DISABLE KEYS */;
+INSERT INTO `user_info` VALUES ('1','admin','$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi','ç³»ç»Ÿç®¡ç†å‘˜','admin@example.com',NULL,'avatar/1/bf0d9f31-d07b-46fd-8951-051c4ade6b01.png',0,NULL,NULL,NULL,NULL,NULL,NULL,'admin',NULL,1,'2026-03-21 23:02:12','127.0.0.1',NULL,0,'2026-02-20 15:58:49','2026-03-21 23:02:12'),('2024759015287861249','ä¼ä¸šæ•™å¸ˆ','$2a$10$3Jbpz3uVT7znfO8WoBgSY.zLbspIDipDzbljj2/X13CHtDb7JJY2q','ç‹ä¸‰æ³‰','wangsanquan@example.com','13895214798',NULL,1,'','',NULL,NULL,'E001',NULL,'2450710000',NULL,1,'2026-03-21 23:59:44','127.0.0.1',NULL,0,'2026-02-20 16:12:22','2026-03-21 23:59:44'),('2025136732306944001','é±¼ä¸¸æ¶›','$2a$10$/y3L2VpPr5UvaN1ktpItTudG6xw82.0/v91xbyxLyc62iLaI.5X6e','ç¦¹æ¶›','3039155855@qq.com','16602687434',NULL,1,'è½¯ä»¶å·¥ç¨‹','Javaåç«¯',NULL,'2034244832406282241','E002','2450712526',NULL,NULL,1,'2026-03-19 19:43:51','127.0.0.1',NULL,0,'2026-02-21 17:13:17','2026-03-19 19:43:51'),('TEST_EL_001','20002','$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi','æä¼ä¸šè´Ÿè´£äºº','enterprise.leader@example.com','13800138002',NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,'20002',NULL,1,'2026-03-15 09:03:35','127.0.0.1',NULL,0,'2026-02-22 18:57:31','2026-03-15 09:03:35'),('TEST_EL_002','20006','$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi','å¶ä¼ä¸šè´Ÿè´£äºº','enterprise.leader2@example.com','13800138005',NULL,1,'','',NULL,NULL,NULL,NULL,'20006',NULL,1,NULL,NULL,NULL,0,'2026-03-15 08:54:25','2026-03-15 08:54:25'),('TEST_ET_001','20001','$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi','ç‹ä¼ä¸šæ•™å¸ˆ','enterprise.teacher@example.com','13800138001',NULL,0,NULL,NULL,NULL,NULL,'E002',NULL,'20001',NULL,1,'2026-03-18 20:59:26','127.0.0.1',NULL,0,'2026-02-22 18:57:31','2026-03-18 20:59:26'),('TEST_MD_001','20004','$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi','åˆ˜ä¸“ä¸šä¸»ç®¡','major.director@example.com','13800138004',NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,'20004','ä¸“ä¸šæ–¹å‘ä¸»ç®¡',1,'2026-03-15 18:13:05','127.0.0.1',NULL,0,'2026-03-01 11:22:11','2026-03-15 18:13:05'),('TEST_ST_001','2024001','$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi','èµµå­¦ç”Ÿ','student@example.com','13800138004',NULL,1,'','',NULL,'2028060890951094273','E001','2024001',NULL,NULL,1,'2026-03-21 23:59:24','127.0.0.1',NULL,0,'2026-02-22 18:57:31','2026-03-21 23:59:24'),('TEST_ST_002','20005','$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi','é™ˆç£å¯¼æ•™å¸ˆ','supervisor.teacher@example.com','13800138005',NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,'20005','ç£å¯¼æ•™å¸ˆ',1,'2026-03-15 18:18:54','127.0.0.1',NULL,0,'2026-03-01 11:22:11','2026-03-15 18:18:54'),('TEST_UT_001','20003','$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi','å¼ é«˜æ ¡æ•™å¸ˆ','university.teacher@example.com','13800138003',NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,'20003',NULL,1,'2026-03-21 23:06:43','127.0.0.1',NULL,0,'2026-02-22 18:57:31','2026-03-21 23:06:43');
+/*!40000 ALTER TABLE `user_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_role`
+--
+
+DROP TABLE IF EXISTS `user_role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user_role` (
+  `id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ä¸»é”®ID',
+  `user_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ç”¨æˆ·ID',
+  `role_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'è§’è‰²ID',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_role` (`user_id`,`role_id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_role_id` (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ç”¨æˆ·è§’è‰²å…³è”è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_role`
+--
+
+LOCK TABLES `user_role` WRITE;
+/*!40000 ALTER TABLE `user_role` DISABLE KEYS */;
+INSERT INTO `user_role` VALUES ('1','1','1','2026-02-20 15:58:49'),('2025504134660198401','2024759015287861249','4','2026-02-22 17:33:12'),('2025504134660198402','2024759015287861249','6','2026-02-22 17:33:12'),('2030564569809715201','TEST_ST_001','7','2026-03-08 16:41:34'),('2032984373803900929','TEST_EL_002','4','2026-03-15 08:57:00'),('2034247512310755330','2025136732306944001','7','2026-03-18 20:36:16'),('TEST_UR_001','TEST_ET_001','6','2026-02-22 18:57:31'),('TEST_UR_002','TEST_EL_001','4','2026-02-22 18:57:31'),('TEST_UR_003','TEST_UT_001','3','2026-02-22 18:57:31'),('TEST_UR_005','TEST_MD_001','5','2026-03-01 11:22:11'),('TEST_UR_006','TEST_ST_002','2','2026-03-01 11:22:11');
+/*!40000 ALTER TABLE `user_role` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-03-22 22:28:40
