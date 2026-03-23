@@ -106,7 +106,7 @@
 
     <a-row :gutter="8" class="chart-row">
       <a-col :xs="24" :lg="12">
-        <a-card title="选报漏斗图" size="small" :loading="loading">
+        <a-card title="选报结构占比" size="small" :loading="loading">
           <div v-if="selectionStats && selectionStats.totalSelections > 0" ref="funnelChartRef" class="chart-container"></div>
           <a-empty v-else description="暂无选报数据" class="chart-empty" />
         </a-card>
@@ -217,12 +217,13 @@ const renderCharts = () => {
   renderStudentPieChart()
 }
 
-/** 课题状态分布折线图 */
+/** 课题状态趋势折线图 */
 const renderPieChart = () => {
   if (!pieChartRef.value) return
   if (!pieChart) pieChart = echarts.init(pieChartRef.value)
   const xData = topicStatusDist.value.map(item => item.statusName)
   const yData = topicStatusDist.value.map(item => item.count)
+
   pieChart.setOption({
     tooltip: { trigger: 'axis' },
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
@@ -237,7 +238,7 @@ const renderPieChart = () => {
       name: '课题数'
     },
     series: [{
-      name: '课题数',
+      name: '课题状态',
       type: 'line',
       smooth: true,
       symbol: 'circle',
@@ -246,7 +247,11 @@ const renderPieChart = () => {
       lineStyle: { width: 3, color: '#1677ff' },
       itemStyle: { color: '#1677ff' },
       areaStyle: { color: 'rgba(22,119,255,0.15)' },
-      label: { show: true, position: 'top' }
+      label: {
+        show: true,
+        position: 'top'
+      },
+      connectNulls: true
     }]
   })
 }
@@ -271,23 +276,39 @@ const renderBarChart = () => {
   })
 }
 
-/** 选报漏斗图 */
+/** 选报结构玫瑰图 */
 const renderFunnelChart = () => {
   if (!funnelChartRef.value || !selectionStats.value) return
   if (!funnelChart) funnelChart = echarts.init(funnelChartRef.value)
   const s = selectionStats.value
+  const pieData = [
+    { name: '中选', value: s.selectedCount },
+    { name: '待确认', value: s.pendingCount },
+    { name: '落选', value: s.rejectedCount }
+  ].filter(item => item.value > 0)
+
   funnelChart.setOption({
-    tooltip: { trigger: 'item', formatter: '{b}: {c} 条' },
+    tooltip: { trigger: 'item', formatter: '{b}<br/>数量: {c} 条<br/>占比: {d}%' },
+    legend: {
+      bottom: 0,
+      type: 'scroll'
+    },
     series: [{
-      type: 'funnel',
-      left: '10%',
-      width: '80%',
-      label: { formatter: '{b}\n{c} 条' },
-      data: [
-        { name: '总选报', value: s.totalSelections },
-        { name: '待确认', value: s.pendingCount },
-        { name: '中选', value: s.selectedCount }
-      ]
+      name: '选报状态',
+      type: 'pie',
+      roseType: 'radius',
+      radius: ['28%', '68%'],
+      center: ['50%', '44%'],
+      itemStyle: {
+        borderRadius: 6,
+        borderColor: '#fff',
+        borderWidth: 2
+      },
+      label: {
+        show: true,
+        formatter: '{b}: {c}'
+      },
+      data: pieData
     }]
   })
 }

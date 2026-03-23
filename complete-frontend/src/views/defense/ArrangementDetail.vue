@@ -6,26 +6,29 @@
       </div>
 
       <a-result
-        v-else-if="!detail"
-        status="404"
-        title="未找到答辩安排"
-        sub-title="该安排可能已删除，或您无权访问该安排详情。"
+        v-else-if="errorState"
+        :status="errorState.status"
+        :title="errorState.title"
+        :sub-title="errorState.subTitle"
       >
         <template #extra>
-          <a-button type="primary" @click="goBack">返回消息中心</a-button>
+          <a-space>
+            <a-button @click="goBack">返回消息中心</a-button>
+            <a-button type="primary" @click="refresh">重新加载</a-button>
+          </a-space>
         </template>
       </a-result>
 
       <a-descriptions v-else :column="2" bordered size="small">
-        <a-descriptions-item label="答辩类型">{{ detail.defenseTypeName || '-' }}</a-descriptions-item>
-        <a-descriptions-item label="课题类别">{{ detail.topicCategory || '-' }}</a-descriptions-item>
-        <a-descriptions-item label="对应专业">{{ detail.majorName || '-' }}</a-descriptions-item>
-        <a-descriptions-item label="答辩时间">{{ detail.defenseTime || '-' }}</a-descriptions-item>
-        <a-descriptions-item label="答辩地点">{{ detail.defenseLocation || '-' }}</a-descriptions-item>
-        <a-descriptions-item label="创建人">{{ detail.creatorName || '-' }}</a-descriptions-item>
-        <a-descriptions-item label="报告截止时间" :span="2">{{ detail.deadline || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="答辩类型">{{ detail?.defenseTypeName || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="课题类别">{{ detail?.topicCategory || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="对应专业">{{ detail?.majorName || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="答辩时间">{{ detail?.defenseTime || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="答辩地点">{{ detail?.defenseLocation || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="创建人">{{ detail?.creatorName || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="报告截止时间" :span="2">{{ detail?.deadline || '-' }}</a-descriptions-item>
         <a-descriptions-item label="答辩小组" :span="2">{{ panelTeacherText }}</a-descriptions-item>
-        <a-descriptions-item label="备注" :span="2">{{ detail.remark || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="备注" :span="2">{{ detail?.remark || '-' }}</a-descriptions-item>
       </a-descriptions>
 
       <div class="actions" v-if="detail">
@@ -41,7 +44,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { message } from 'ant-design-vue'
 import { defenseApi } from '@/api/defense'
 import type { DefenseArrangementVO } from '@/types/defense'
 
@@ -50,6 +52,7 @@ const router = useRouter()
 
 const loading = ref(false)
 const detail = ref<DefenseArrangementVO | null>(null)
+const errorState = ref<{ status: '404' | '403' | 'error'; title: string; subTitle: string } | null>(null)
 
 const arrangementId = computed(() => String(route.params.arrangementId || ''))
 
@@ -69,19 +72,52 @@ const panelTeacherText = computed(() => {
 const loadDetail = async () => {
   if (!arrangementId.value) {
     detail.value = null
+    errorState.value = {
+      status: '404',
+      title: '答辩安排链接无效',
+      subTitle: '当前链接缺少有效的安排ID，请返回消息中心重新进入。'
+    }
     return
   }
+
+  detail.value = null
+  errorState.value = null
   loading.value = true
+
+  const resolveErrorState = (msg: string) => {
+    if (msg.includes('不存在') || msg.includes('未找到')) {
+      return {
+        status: '404' as const,
+        title: '该答辩安排已不存在',
+        subTitle: '该消息对应的安排可能已删除或已失效，请返回消息中心查看最新通知。'
+      }
+    }
+    if (msg.includes('无权') || msg.includes('权限')) {
+      return {
+        status: '403' as const,
+        title: '暂无查看权限',
+        subTitle: '仅与该安排关联的教师可查看详情，如有疑问请联系企业负责人确认教师配对关系。'
+      }
+    }
+    return {
+      status: 'error' as const,
+      title: '加载详情失败',
+      subTitle: '服务暂时不可用，请稍后重试。'
+    }
+  }
+
   try {
     const res = await defenseApi.getArrangementDetail(arrangementId.value)
     if (res.code === 200) {
       detail.value = res.data
-    } else {
-      detail.value = null
+      return
     }
+
+    const fallbackMsg = res.message || '加载答辩安排详情失败'
+    errorState.value = resolveErrorState(fallbackMsg)
   } catch (error) {
-    detail.value = null
-    message.error('加载答辩安排详情失败')
+    const errorMsg = (error as any)?.response?.data?.message || (error as Error)?.message || '加载答辩安排详情失败'
+    errorState.value = resolveErrorState(errorMsg)
   } finally {
     loading.value = false
   }

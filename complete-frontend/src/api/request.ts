@@ -5,6 +5,10 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { message } from 'ant-design-vue'
 
+interface RequestConfig extends AxiosRequestConfig {
+  silentError?: boolean
+}
+
 // 响应数据结构
 export interface ApiResponse<T = any> {
   code: number
@@ -46,6 +50,7 @@ service.interceptors.response.use(
     }
 
     const res = response.data
+    const silentError = Boolean((response.config as RequestConfig).silentError)
 
     // 根据业务状态码判断
     if (res.code === 200) {
@@ -59,42 +64,61 @@ service.interceptors.response.use(
       return Promise.reject(new Error(res.message || '登录已过期'))
     } else {
       // 其他错误提示
-      message.error(res.message || '请求失败')
+      if (!silentError) {
+        message.error(res.message || '请求失败')
+      }
       return Promise.reject(new Error(res.message || '请求失败'))
     }
   },
   (error) => {
     console.error('响应错误:', error)
+    const silentError = Boolean((error.config as RequestConfig | undefined)?.silentError)
     
     if (error.response) {
       const { status, data } = error.response
       
       switch (status) {
         case 400:
-          message.error(data.message || '请求参数错误')
+          if (!silentError) {
+            message.error(data.message || '请求参数错误')
+          }
           break
         case 401:
-          message.error('未授权，请重新登录')
+          if (!silentError) {
+            message.error('未授权，请重新登录')
+          }
           localStorage.removeItem('access_token')
           localStorage.removeItem('refresh_token')
           window.location.href = '/login'
           break
         case 403:
-          message.error('拒绝访问')
+          if (!silentError) {
+            message.error('拒绝访问')
+          }
           break
         case 404:
-          message.error('请求资源不存在')
+          if (!silentError) {
+            message.error('请求资源不存在')
+          }
           break
         case 500:
-          message.error('服务器内部错误')
+          if (!silentError) {
+            message.error('服务器内部错误')
+          }
           break
         default:
-          message.error(data.message || '请求失败')
+          if (!silentError) {
+            message.error(data.message || '请求失败')
+          }
       }
     } else if (error.request) {
-      message.error('网络错误，请检查网络连接')
+      if (!silentError) {
+        message.error('网络错误，请检查网络连接')
+      }
     } else {
-      message.error('请求配置错误')
+      if (!silentError) {
+        message.error('请求配置错误')
+      }
     }
     
     return Promise.reject(error)
@@ -103,19 +127,19 @@ service.interceptors.response.use(
 
 // 封装请求方法
 class HttpRequest {
-  get<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  get<T = any>(url: string, config?: RequestConfig): Promise<ApiResponse<T>> {
     return service.get(url, config).then(res => res.data)
   }
 
-  post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  post<T = any>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>> {
     return service.post(url, data, config).then(res => res.data)
   }
 
-  put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  put<T = any>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>> {
     return service.put(url, data, config).then(res => res.data)
   }
 
-  delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  delete<T = any>(url: string, config?: RequestConfig): Promise<ApiResponse<T>> {
     return service.delete(url, config).then(res => res.data)
   }
 
@@ -128,7 +152,7 @@ class HttpRequest {
     }).then(res => res.data)
   }
 
-  download(url: string, filename: string, config?: AxiosRequestConfig): Promise<void> {
+  download(url: string, filename: string, config?: RequestConfig): Promise<void> {
     return service
       .get(url, {
         ...config,

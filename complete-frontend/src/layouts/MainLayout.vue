@@ -182,19 +182,19 @@
           <span>我的文档</span>
         </a-menu-item>
 
-        <!-- 教师/管理员：学生文档 -->
-        <a-menu-item v-if="userStore.hasPermission('document:teacher') && userStore.hasAnyRole(['ENTERPRISE_TEACHER', 'UNIVERSITY_TEACHER', 'ENTERPRISE_LEADER', 'SYSTEM_ADMIN'])" key="/document/teacher">
+        <!-- 教师/企业负责人：学生文档 -->
+        <a-menu-item v-if="userStore.hasPermission('document:teacher') && userStore.hasAnyRole(['ENTERPRISE_TEACHER', 'UNIVERSITY_TEACHER', 'ENTERPRISE_LEADER'])" key="/document/teacher">
           <template #icon><FileSearchOutlined /></template>
           <span>学生文档</span>
         </a-menu-item>
 
-        <!-- 过程管理：开题答辩管理 -->
+        <!-- 过程管理：答辩管理 -->
         <a-sub-menu
           v-if="!userStore.hasAnyRole(['SYSTEM_ADMIN']) && (userStore.hasPermission('defense:arrangement:list') || userStore.hasPermission('defense:taskbook:save') || userStore.hasPermission('defense:report:list') || userStore.hasPermission('defense:report:my') || userStore.hasPermission('defense:taskbook:detail'))"
           key="defense"
         >
           <template #icon><CalendarOutlined /></template>
-          <template #title>开题答辩</template>
+          <template #title>答辩管理</template>
           <a-menu-item v-if="userStore.hasPermission('defense:arrangement:list') && userStore.hasAnyRole(['ENTERPRISE_LEADER'])" key="/defense/arrangement">
             答辩安排
           </a-menu-item>
@@ -422,11 +422,11 @@ const updateBreadcrumbs = (path: string) => {
     '/guidance/leader': [{ title: '首页', path: '/' }, { title: '过程管理' }, { title: '指导记录总览' }],
     '/document/student': [{ title: '首页', path: '/' }, { title: '过程管理' }, { title: '我的文档' }],
     '/document/teacher': [{ title: '首页', path: '/' }, { title: '过程管理' }, { title: '学生文档' }],
-    '/defense/arrangement': [{ title: '首页', path: '/' }, { title: '开题答辩' }, { title: '答辩安排' }],
-    '/defense/taskbook': [{ title: '首页', path: '/' }, { title: '开题答辩' }, { title: '任务书管理' }],
-    '/defense/report': [{ title: '首页', path: '/' }, { title: '开题答辩' }, { title: '开题报告审查' }],
-    '/defense/my-report': [{ title: '首页', path: '/' }, { title: '开题答辩' }, { title: '我的开题报告' }],
-    '/defense/my-taskbook': [{ title: '首页', path: '/' }, { title: '开题答辩' }, { title: '我的任务书' }],
+    '/defense/arrangement': [{ title: '首页', path: '/' }, { title: '答辩管理' }, { title: '答辩安排' }],
+    '/defense/taskbook': [{ title: '首页', path: '/' }, { title: '答辩管理' }, { title: '任务书管理' }],
+    '/defense/report': [{ title: '首页', path: '/' }, { title: '答辩管理' }, { title: '开题报告审查' }],
+    '/defense/my-report': [{ title: '首页', path: '/' }, { title: '答辩管理' }, { title: '我的开题报告' }],
+    '/defense/my-taskbook': [{ title: '首页', path: '/' }, { title: '答辩管理' }, { title: '我的任务书' }],
     '/midterm/enterprise': [{ title: '首页', path: '/' }, { title: '中期答辩' }, { title: '中期检查填写' }],
     '/midterm/univ': [{ title: '首页', path: '/' }, { title: '中期答辩' }, { title: '中期检查审查' }],
     '/midterm/student': [{ title: '首页', path: '/' }, { title: '中期答辩' }, { title: '我的中期检查' }],

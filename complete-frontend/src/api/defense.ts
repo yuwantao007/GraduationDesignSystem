@@ -56,7 +56,7 @@ export const defenseApi = {
    * 获取答辩安排详情
    */
   getArrangementDetail(arrangementId: string): Promise<ApiResponse<DefenseArrangementVO>> {
-    return request.get(`/defense/arrangement/${arrangementId}`)
+    return request.get(`/defense/arrangement/${arrangementId}`, { silentError: true })
   },
 
   // ==================== 开题任务书管理 ====================

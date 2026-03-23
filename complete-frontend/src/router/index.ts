@@ -248,7 +248,7 @@ const routes: RouteRecordRaw[] = [
         path: 'defense/arrangement/detail/:arrangementId',
         name: 'DefenseArrangementDetail',
         component: () => import('@/views/defense/ArrangementDetail.vue'),
-        meta: { title: '答辩安排详情', permission: 'defense:arrangement:detail', hideInMenu: true }
+        meta: { title: '答辩安排详情', hideInMenu: true }
       },
       {
         path: 'defense/taskbook',
